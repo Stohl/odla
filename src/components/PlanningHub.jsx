@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import BedManager from './BedManager';
+import YearPlanner from './YearPlanner';
 import GardenPlanner from './GardenPlanner';
 
 const PlanningHub = ({ myPlants }) => {
-  const [activeSubView, setActiveSubView] = useState('beds'); // 'beds' or 'designs'
+  const [activeSubView, setActiveSubView] = useState('beds'); // 'beds', 'plans', or 'designs'
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -20,20 +21,30 @@ const PlanningHub = ({ myPlants }) => {
 
       {/* Underflikar */}
       <div className="bg-white rounded-t-xl shadow-md border-b-2 border-earth-200">
-        <div className="flex gap-1 p-2">
+        <div className="grid grid-cols-3 gap-1 p-2">
           <button
             onClick={() => setActiveSubView('beds')}
-            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`px-4 py-3 rounded-lg font-semibold transition-all ${
               activeSubView === 'beds'
                 ? 'bg-plant-500 text-white shadow-md'
                 : 'text-earth-600 hover:bg-earth-100'
             }`}
           >
-            🌿 Mina odlingsbäddar
+            🌿 Mina bäddar
+          </button>
+          <button
+            onClick={() => setActiveSubView('plans')}
+            className={`px-4 py-3 rounded-lg font-semibold transition-all ${
+              activeSubView === 'plans'
+                ? 'bg-plant-500 text-white shadow-md'
+                : 'text-earth-600 hover:bg-earth-100'
+            }`}
+          >
+            📋 Årsplaner
           </button>
           <button
             onClick={() => setActiveSubView('designs')}
-            className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-all ${
+            className={`px-4 py-3 rounded-lg font-semibold transition-all ${
               activeSubView === 'designs'
                 ? 'bg-plant-500 text-white shadow-md'
                 : 'text-earth-600 hover:bg-earth-100'
@@ -48,6 +59,8 @@ const PlanningHub = ({ myPlants }) => {
       <div className="mt-6">
         {activeSubView === 'beds' ? (
           <BedManager myPlants={myPlants} />
+        ) : activeSubView === 'plans' ? (
+          <YearPlanner myPlants={myPlants} />
         ) : (
           <GardenPlanner />
         )}
