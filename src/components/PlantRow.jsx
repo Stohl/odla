@@ -7,6 +7,16 @@ const MONTHS = [
 
 const PlantRow = ({ plant, isSelected, onToggleSelect, currentMonth }) => {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseEnter = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      x: rect.left,
+      y: rect.bottom + 8
+    });
+    setShowTooltip(true);
+  };
 
   // Create month cells with activity indicators
   const renderMonthCells = () => {
@@ -99,42 +109,12 @@ const PlantRow = ({ plant, isSelected, onToggleSelect, currentMonth }) => {
             {isSelected && '✓'}
           </button>
           <div 
-            className="relative flex-1 cursor-help"
-            onMouseEnter={() => setShowTooltip(true)}
+            className="flex-1 cursor-help"
+            onMouseEnter={handleMouseEnter}
             onMouseLeave={() => setShowTooltip(false)}
           >
             <div className="font-medium text-earth-800">{plant.name}</div>
             <div className="text-xs text-earth-500">{plant.category}</div>
-            
-            {/* Tooltip */}
-            {showTooltip && (
-              <div className="absolute left-0 top-full mt-2 bg-earth-800 text-white p-3 rounded-lg shadow-xl z-20 w-64 text-sm">
-                <div className="font-semibold mb-2">{plant.name}</div>
-                <div className="space-y-1">
-                  {plant.seedling_months?.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 bg-blue-400 rounded"></span>
-                      <span>Förkultivering: {plant.seedling_months.map(m => MONTHS[m-1]).join(', ')}</span>
-                    </div>
-                  )}
-                  {plant.sowing_months?.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 bg-green-400 rounded"></span>
-                      <span>Direktsådd: {plant.sowing_months.map(m => MONTHS[m-1]).join(', ')}</span>
-                    </div>
-                  )}
-                  {plant.harvest_months?.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 bg-yellow-400 rounded"></span>
-                      <span>Skörd: {plant.harvest_months.map(m => MONTHS[m-1]).join(', ')}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="mt-2 pt-2 border-t border-earth-600 text-xs">
-                  Status nu: <span className="font-semibold">{getActivityStatus()}</span>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </td>
