@@ -1,11 +1,43 @@
 import React, { useState } from 'react';
 
+const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+
 const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [sortBy, setSortBy] = useState('name'); // 'name', 'category', 'price'
+
+  // Minimal kalendervy komponent
+  const MiniCalendar = ({ plant }) => {
+    return (
+      <div className="flex gap-0.5">
+        {MONTHS.map((month, index) => {
+          const monthNum = index + 1;
+          const isSeedling = plant.seedling_months?.includes(monthNum);
+          const isSowing = plant.sowing_months?.includes(monthNum);
+          const isHarvest = plant.harvest_months?.includes(monthNum);
+          
+          let bgColor = 'bg-gray-100';
+          if (isSeedling && isSowing && isHarvest) bgColor = 'bg-gradient-to-b from-blue-400 via-green-400 to-yellow-400';
+          else if (isSeedling && isHarvest) bgColor = 'bg-gradient-to-b from-blue-400 to-yellow-400';
+          else if (isSowing && isHarvest) bgColor = 'bg-gradient-to-b from-green-400 to-yellow-400';
+          else if (isSeedling) bgColor = 'bg-blue-400';
+          else if (isSowing) bgColor = 'bg-green-400';
+          else if (isHarvest) bgColor = 'bg-yellow-400';
+          
+          return (
+            <div
+              key={index}
+              className={`w-3 h-6 ${bgColor} rounded-sm`}
+              title={`${month}`}
+            />
+          );
+        })}
+      </div>
+    );
+  };
 
   // Hämta unika kategorier
   const categories = [...new Set(plants.map(p => p.category))].sort();
@@ -153,11 +185,18 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                           >
                             {isInMyList && '✓'}
                           </button>
-                          <div className="flex-1">
-                            <div className="font-semibold text-earth-800">{plant.name}</div>
-                            {plant.latin_name && (
-                              <div className="text-xs text-earth-500 italic">{plant.latin_name}</div>
-                            )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-earth-800">{plant.name}</div>
+                                {plant.latin_name && (
+                                  <div className="text-xs text-earth-500 italic">{plant.latin_name}</div>
+                                )}
+                              </div>
+                              <div className="flex-shrink-0">
+                                <MiniCalendar plant={plant} />
+                              </div>
+                            </div>
                             <div className="flex flex-wrap gap-2 mt-2">
                               <span className="text-xs bg-plant-100 text-plant-700 px-2 py-1 rounded">
                                 {plant.category || 'Övrigt'}

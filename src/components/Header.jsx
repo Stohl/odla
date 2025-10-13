@@ -6,10 +6,10 @@ const Header = () => {
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold mb-2 flex items-center gap-3">
           <span className="text-5xl">🌱</span>
-          Min Odlingskalender
+          Knopp
         </h1>
         <p className="text-plant-100 text-lg">
-          Planera din odlingssäsong - från sådd till skörd
+          Din digitala odlingsassistent - från frö till skörd
         </p>
       </div>
     </header>

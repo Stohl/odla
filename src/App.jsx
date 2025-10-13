@@ -213,7 +213,7 @@ function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-earth-200 mt-16 py-6">
         <div className="max-w-7xl mx-auto px-4 text-center text-earth-600 text-sm">
-          <p>🌱 Min Odlingskalender - Planera din odlingssäsong med enkelhet</p>
+          <p>🌱 Knopp - Din digitala odlingsassistent</p>
         </div>
       </footer>
     </div>
