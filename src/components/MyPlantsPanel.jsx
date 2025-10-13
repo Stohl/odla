@@ -5,7 +5,7 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'
 ];
 
-const MyPlantsPanel = ({ plants, myPlants }) => {
+const MyPlantsPanel = ({ plants, myPlants, onTogglePlant }) => {
   const currentMonth = new Date().getMonth() + 1;
   const selectedPlants = plants.filter(p => myPlants.includes(p.name));
 
@@ -76,10 +76,21 @@ const MyPlantsPanel = ({ plants, myPlants }) => {
 
               {/* Plant Info */}
               <div className="p-4">
-                <h3 className="font-bold text-lg text-earth-800 mb-1">
-                  {plant.name}
-                </h3>
-                <p className="text-sm text-plant-600 mb-3">{plant.category}</p>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-earth-800 mb-1">
+                      {plant.name}
+                    </h3>
+                    <p className="text-sm text-plant-600 mb-3">{plant.category}</p>
+                  </div>
+                  <button
+                    onClick={() => onTogglePlant(plant.name)}
+                    className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors flex items-center justify-center font-bold"
+                    title="Ta bort från mina växter"
+                  >
+                    ×
+                  </button>
+                </div>
                 <p className="text-sm text-earth-600 mb-4">{plant.description}</p>
 
                 {/* Current Status */}

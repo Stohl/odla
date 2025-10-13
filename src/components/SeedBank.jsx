@@ -146,198 +146,193 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
         </div>
       </div>
 
-      {/* Grid och detaljer */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Vänster: Växtlista */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="max-h-[800px] overflow-y-auto">
-              {sortedPlants.length === 0 ? (
-                <div className="p-12 text-center">
-                  <div className="text-6xl mb-4">🔍</div>
-                  <p className="text-earth-600">Inga växter hittades</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-earth-200">
-                  {sortedPlants.map((plant) => {
-                    const isInMyList = myPlants.includes(plant.name);
-                    return (
-                      <div
-                        key={plant.name}
-                        onClick={() => setSelectedPlant(plant.name)}
-                        className={`p-4 cursor-pointer transition-colors ${
-                          selectedPlant === plant.name
-                            ? 'bg-plant-50 border-l-4 border-plant-500'
-                            : 'hover:bg-earth-50'
+      {/* Växtlista med expanderbara rader */}
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        {sortedPlants.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="text-6xl mb-4">🔍</div>
+            <p className="text-earth-600">Inga växter hittades</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-earth-200">
+            {sortedPlants.map((plant) => {
+              const isInMyList = myPlants.includes(plant.name);
+              const isExpanded = selectedPlant === plant.name;
+
+              return (
+                <div key={plant.name}>
+                  {/* Huvudrad */}
+                  <div
+                    onClick={() => setSelectedPlant(isExpanded ? null : plant.name)}
+                    className={`p-4 cursor-pointer transition-colors ${
+                      isExpanded ? 'bg-plant-50' : 'hover:bg-earth-50'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onTogglePlant(plant.name);
+                        }}
+                        className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                          isInMyList
+                            ? 'bg-plant-500 border-plant-500 text-white'
+                            : 'border-earth-300 hover:border-plant-400'
                         }`}
                       >
-                        <div className="flex items-start gap-3">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onTogglePlant(plant.name);
-                            }}
-                            className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
-                              isInMyList
-                                ? 'bg-plant-500 border-plant-500 text-white'
-                                : 'border-earth-300 hover:border-plant-400'
-                            }`}
-                          >
-                            {isInMyList && '✓'}
-                          </button>
+                        {isInMyList && '✓'}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-earth-800">{plant.name}</div>
-                                {plant.latin_name && (
-                                  <div className="text-xs text-earth-500 italic">{plant.latin_name}</div>
-                                )}
-                              </div>
-                              <div className="flex-shrink-0">
-                                <MiniCalendar plant={plant} />
+                            <div className="font-semibold text-earth-800">{plant.name}</div>
+                            {plant.latin_name && (
+                              <div className="text-xs text-earth-500 italic">{plant.latin_name}</div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MiniCalendar plant={plant} />
+                            <span className="text-earth-400">
+                              {isExpanded ? '▼' : '▶'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          <span className="text-xs bg-plant-100 text-plant-700 px-2 py-1 rounded">
+                            {plant.category || 'Övrigt'}
+                          </span>
+                          {plant.price && (
+                            <span className="text-xs bg-earth-100 text-earth-700 px-2 py-1 rounded">
+                              {plant.price}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expanderad detalj */}
+                  {isExpanded && (
+                    <div className="bg-earth-50 border-t border-earth-200">
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {/* Bild */}
+                          {plant.image_url && (
+                            <div className="md:col-span-1">
+                              <div className="h-48 overflow-hidden bg-earth-100 rounded-lg">
+                                <img
+                                  src={plant.image_url}
+                                  alt={plant.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
                               </div>
                             </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              <span className="text-xs bg-plant-100 text-plant-700 px-2 py-1 rounded">
-                                {plant.category || 'Övrigt'}
-                              </span>
-                              {plant.price && (
-                                <span className="text-xs bg-earth-100 text-earth-700 px-2 py-1 rounded">
-                                  {plant.price}
-                                </span>
+                          )}
+
+                          {/* Info */}
+                          <div className={plant.image_url ? 'md:col-span-2' : 'md:col-span-3'}>
+                            {plant.description && (
+                              <div className="mb-4">
+                                <h3 className="text-sm font-semibold text-earth-700 mb-2">Beskrivning</h3>
+                                <p className="text-sm text-earth-600 leading-relaxed">
+                                  {plant.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Odlingsinformation */}
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm mb-4">
+                              {plant.height_cm && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Höjd:</span>
+                                  <span className="font-semibold text-earth-800">{plant.height_cm}</span>
+                                </div>
+                              )}
+                              {plant.color && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Färg:</span>
+                                  <span className="font-semibold text-earth-800">{plant.color}</span>
+                                </div>
+                              )}
+                              {plant.position && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Läge:</span>
+                                  <span className="font-semibold text-earth-800">{plant.position}</span>
+                                </div>
+                              )}
+                              {plant.sowing_time && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Såtid:</span>
+                                  <span className="font-semibold text-earth-800">{plant.sowing_time}</span>
+                                </div>
+                              )}
+                              {plant.harvest_time && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Skördas:</span>
+                                  <span className="font-semibold text-earth-800">{plant.harvest_time}</span>
+                                </div>
+                              )}
+                              {plant.bloom_time && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Blommar:</span>
+                                  <span className="font-semibold text-earth-800">{plant.bloom_time}</span>
+                                </div>
+                              )}
+                              {plant.germination_time && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Grodd:</span>
+                                  <span className="font-semibold text-earth-800">{plant.germination_time}</span>
+                                </div>
+                              )}
+                              {plant.quantity && (
+                                <div className="flex justify-between">
+                                  <span className="text-earth-600">Antal:</span>
+                                  <span className="font-semibold text-earth-800">{plant.quantity}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Knappar */}
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onTogglePlant(plant.name);
+                                }}
+                                className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                                  isInMyList
+                                    ? 'bg-red-500 text-white hover:bg-red-600'
+                                    : 'bg-plant-500 text-white hover:bg-plant-600'
+                                }`}
+                              >
+                                {isInMyList ? '− Ta bort från min lista' : '+ Lägg till i min lista'}
+                              </button>
+
+                              {plant.product_url && (
+                                <a
+                                  href={plant.product_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="px-4 py-2 border-2 border-plant-500 text-plant-700 rounded-lg hover:bg-plant-50 transition-colors font-semibold"
+                                >
+                                  🔗 Produkt
+                                </a>
                               )}
                             </div>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              );
+            })}
           </div>
-        </div>
-
-        {/* Höger: Detaljer */}
-        <div className="lg:col-span-1">
-          {selectedPlantData ? (
-            <div className="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
-              {/* Bild */}
-              {selectedPlantData.image_url && (
-                <div className="h-48 overflow-hidden bg-earth-100">
-                  <img
-                    src={selectedPlantData.image_url}
-                    alt={selectedPlantData.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-earth-800 mb-1">
-                  {selectedPlantData.name}
-                </h2>
-                {selectedPlantData.latin_name && (
-                  <p className="text-sm text-earth-500 italic mb-3">
-                    {selectedPlantData.latin_name}
-                  </p>
-                )}
-
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="text-sm bg-plant-100 text-plant-700 px-3 py-1 rounded-full font-medium">
-                    {selectedPlantData.category || 'Övrigt'}
-                  </span>
-                  {selectedPlantData.price && (
-                    <span className="text-sm bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-medium">
-                      {selectedPlantData.price}
-                    </span>
-                  )}
-                </div>
-
-                {selectedPlantData.description && (
-                  <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-earth-700 mb-2">Beskrivning</h3>
-                    <p className="text-sm text-earth-600 leading-relaxed">
-                      {selectedPlantData.description}
-                    </p>
-                  </div>
-                )}
-
-                {/* Odlingsinformation */}
-                <div className="space-y-3 mb-4 text-sm">
-                  {selectedPlantData.height_cm && (
-                    <div className="flex justify-between">
-                      <span className="text-earth-600">Höjd:</span>
-                      <span className="font-semibold text-earth-800">{selectedPlantData.height_cm}</span>
-                    </div>
-                  )}
-                  {selectedPlantData.color && (
-                    <div className="flex justify-between">
-                      <span className="text-earth-600">Färg:</span>
-                      <span className="font-semibold text-earth-800">{selectedPlantData.color}</span>
-                    </div>
-                  )}
-                  {selectedPlantData.position && (
-                    <div className="flex justify-between">
-                      <span className="text-earth-600">Läge:</span>
-                      <span className="font-semibold text-earth-800">{selectedPlantData.position}</span>
-                    </div>
-                  )}
-                  {selectedPlantData.sowing_time && (
-                    <div className="flex justify-between">
-                      <span className="text-earth-600">Såtid:</span>
-                      <span className="font-semibold text-earth-800">{selectedPlantData.sowing_time}</span>
-                    </div>
-                  )}
-                  {selectedPlantData.harvest_time && (
-                    <div className="flex justify-between">
-                      <span className="text-earth-600">Skördas:</span>
-                      <span className="font-semibold text-earth-800">{selectedPlantData.harvest_time}</span>
-                    </div>
-                  )}
-                  {selectedPlantData.bloom_time && (
-                    <div className="flex justify-between">
-                      <span className="text-earth-600">Blommar:</span>
-                      <span className="font-semibold text-earth-800">{selectedPlantData.bloom_time}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Lägg till/ta bort från min lista */}
-                <button
-                  onClick={() => onTogglePlant(selectedPlantData.name)}
-                  className={`w-full px-4 py-3 rounded-lg font-semibold transition-all ${
-                    myPlants.includes(selectedPlantData.name)
-                      ? 'bg-red-500 text-white hover:bg-red-600'
-                      : 'bg-plant-500 text-white hover:bg-plant-600'
-                  }`}
-                >
-                  {myPlants.includes(selectedPlantData.name) ? '✓ I min lista - Klicka för att ta bort' : '+ Lägg till i min lista'}
-                </button>
-
-                {/* Länk till produkt */}
-                {selectedPlantData.product_url && (
-                  <a
-                    href={selectedPlantData.product_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block mt-3 text-center px-4 py-2 border-2 border-plant-500 text-plant-700 rounded-lg hover:bg-plant-50 transition-colors font-semibold"
-                  >
-                    🔗 Visa produkt
-                  </a>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-xl shadow-md p-12 text-center sticky top-24">
-              <div className="text-4xl mb-4">👈</div>
-              <p className="text-earth-600">Välj en växt för att se detaljer</p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

@@ -98,16 +98,6 @@ const PlantRow = ({ plant, isSelected, onToggleSelect, currentMonth }) => {
       {/* Plant Name Cell */}
       <td className="sticky left-0 bg-white z-10 border-r border-earth-200 shadow-sm">
         <div className="flex items-center gap-3 p-3 min-w-[250px]">
-          <button
-            onClick={() => onToggleSelect(plant.name)}
-            className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
-              isSelected
-                ? 'bg-plant-500 border-plant-500 text-white'
-                : 'border-earth-300 hover:border-plant-400'
-            }`}
-          >
-            {isSelected && '✓'}
-          </button>
           <div 
             className="flex-1 cursor-help"
             onMouseEnter={handleMouseEnter}

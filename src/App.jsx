@@ -202,6 +202,7 @@ function App() {
           <MyPlantsPanel
             plants={plants}
             myPlants={myPlants}
+            onTogglePlant={handleTogglePlant}
           />
         </main>
       ) : activeView === 'beds' ? (
