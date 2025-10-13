@@ -7,6 +7,7 @@ const BedManager = ({ myPlants }) => {
   const [editingBed, setEditingBed] = useState(null);
   const [showPlantSelector, setShowPlantSelector] = useState(false);
   const [selectedPlants, setSelectedPlants] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Formulärdata
   const [formData, setFormData] = useState({
@@ -25,12 +26,15 @@ const BedManager = ({ myPlants }) => {
         console.error('Kunde inte ladda bäddar:', error);
       }
     }
+    setIsLoaded(true);
   }, []);
 
-  // Spara bäddar till localStorage
+  // Spara bäddar till localStorage (endast efter laddning)
   useEffect(() => {
-    localStorage.setItem('myGardenBeds', JSON.stringify(beds));
-  }, [beds]);
+    if (isLoaded) {
+      localStorage.setItem('myGardenBeds', JSON.stringify(beds));
+    }
+  }, [beds, isLoaded]);
 
   // Öppna modal för ny bädd
   const openNewBed = () => {
