@@ -5,9 +5,10 @@ import CalendarView from './components/CalendarView';
 import MyPlantsPanel from './components/MyPlantsPanel';
 import GardenPlanner from './components/GardenPlanner';
 import BedManager from './components/BedManager';
+import SeedBank from './components/SeedBank';
 
 function App() {
-  const [activeView, setActiveView] = useState('calendar'); // 'calendar', 'beds', or 'garden'
+  const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', 'beds', or 'garden'
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -125,6 +126,16 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-2 overflow-x-auto">
             <button
+              onClick={() => setActiveView('seedbank')}
+              className={`px-6 py-4 font-semibold transition-all border-b-4 whitespace-nowrap ${
+                activeView === 'seedbank'
+                  ? 'border-plant-500 text-plant-700 bg-plant-50'
+                  : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
+              }`}
+            >
+              🌱 Fröbank
+            </button>
+            <button
               onClick={() => setActiveView('calendar')}
               className={`px-6 py-4 font-semibold transition-all border-b-4 whitespace-nowrap ${
                 activeView === 'calendar'
@@ -159,7 +170,13 @@ function App() {
       </div>
 
       {/* Main Content */}
-      {activeView === 'calendar' ? (
+      {activeView === 'seedbank' ? (
+        <SeedBank 
+          plants={plants}
+          myPlants={myPlants}
+          onTogglePlant={handleTogglePlant}
+        />
+      ) : activeView === 'calendar' ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Filter Bar */}
           <FilterBar
