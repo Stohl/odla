@@ -58,7 +58,7 @@ const PlanningHub = ({ myPlants }) => {
       {/* Content */}
       <div className="mt-6">
         {activeSubView === 'beds' ? (
-          <BedManager myPlants={myPlants} />
+          <BedManager />
         ) : activeSubView === 'plans' ? (
           <YearPlanner myPlants={myPlants} />
         ) : (
