@@ -1,11 +1,29 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Rect, Text } from 'react-konva';
 
-const GardenDesigner = ({ beds, setBeds, designName }) => {
+const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [selected, setSelected] = useState(null);
+  const [savedBeds, setSavedBeds] = useState([]);
+  const [showBedSelector, setShowBedSelector] = useState(false);
   const stageRef = useRef(null);
 
-  // Skapa ny odlingsbädd
+  // Ladda sparade bäddar från BedManager
+  useEffect(() => {
+    const saved = localStorage.getItem('myGardenBeds');
+    if (saved) {
+      try {
+        setSavedBeds(JSON.parse(saved));
+      } catch (error) {
+        console.error('Kunde inte ladda sparade bäddar:', error);
+      }
+    }
+  }, []);
+
+  // Canvas dimensioner baserat på orientering
+  const canvasWidth = orientation === 'landscape' ? 1100 : 800;
+  const canvasHeight = orientation === 'landscape' ? 800 : 1100;
+
+  // Skapa ny odlingsbädd från scratch
   const createBed = () => {
     const name = prompt('Namn på odlingsbädd:');
     if (!name || !name.trim()) return;
@@ -21,6 +39,23 @@ const GardenDesigner = ({ beds, setBeds, designName }) => {
 
     setBeds([...beds, newBed]);
     setSelected(newBed.id);
+  };
+
+  // Lägg till från sparade bäddar
+  const addFromSaved = (savedBed) => {
+    const newBed = {
+      id: Date.now(),
+      name: savedBed.name,
+      x: 50,
+      y: 50,
+      width: 200,
+      height: 100,
+      savedBedId: savedBed.id, // Referens till sparad bädd
+    };
+
+    setBeds([...beds, newBed]);
+    setSelected(newBed.id);
+    setShowBedSelector(false);
   };
 
   // Flytta bädd
@@ -111,7 +146,14 @@ const GardenDesigner = ({ beds, setBeds, designName }) => {
           onClick={createBed}
           className="px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
         >
-          ➕ Lägg till bädd
+          ➕ Ny bädd
+        </button>
+
+        <button
+          onClick={() => setShowBedSelector(!showBedSelector)}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
+        >
+          📋 Välj från sparade bäddar
         </button>
 
         {selected && (
@@ -172,6 +214,29 @@ const GardenDesigner = ({ beds, setBeds, designName }) => {
         </div>
       )}
 
+      {/* Bädväljare */}
+      {showBedSelector && savedBeds.length > 0 && (
+        <div className="mb-4 p-4 bg-white border-2 border-blue-300 rounded-lg">
+          <h3 className="font-semibold text-earth-800 mb-3">Välj från sparade bäddar:</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {savedBeds.map((bed) => (
+              <button
+                key={bed.id}
+                onClick={() => addFromSaved(bed)}
+                className="p-3 border-2 border-earth-200 rounded-lg hover:border-plant-400 hover:bg-plant-50 transition-colors text-left"
+              >
+                <div className="font-semibold text-earth-800 text-sm">{bed.name}</div>
+                {bed.plants && bed.plants.length > 0 && (
+                  <div className="text-xs text-plant-600 mt-1">
+                    🌱 {bed.plants.length} växter
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Tips */}
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
         <span className="font-semibold">💡 Tips:</span> Klicka på en bädd för att välja den, dra för att flytta. 
@@ -183,8 +248,8 @@ const GardenDesigner = ({ beds, setBeds, designName }) => {
         <div className="shadow-2xl">
           <Stage
             ref={stageRef}
-            width={800}
-            height={1100}
+            width={canvasWidth}
+            height={canvasHeight}
             className="bg-white"
             style={{ border: '2px solid #d6d3d1', borderRadius: '4px' }}
           >

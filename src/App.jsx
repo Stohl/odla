@@ -3,12 +3,11 @@ import Header from './components/Header';
 import FilterBar from './components/FilterBar';
 import CalendarView from './components/CalendarView';
 import MyPlantsPanel from './components/MyPlantsPanel';
-import GardenPlanner from './components/GardenPlanner';
-import BedManager from './components/BedManager';
+import PlanningHub from './components/PlanningHub';
 import SeedBank from './components/SeedBank';
 
 function App() {
-  const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', 'beds', or 'garden'
+  const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', or 'planning'
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -146,24 +145,14 @@ function App() {
               📅 Odlingskalender
             </button>
             <button
-              onClick={() => setActiveView('beds')}
+              onClick={() => setActiveView('planning')}
               className={`px-6 py-4 font-semibold transition-all border-b-4 whitespace-nowrap ${
-                activeView === 'beds'
+                activeView === 'planning'
                   ? 'border-plant-500 text-plant-700 bg-plant-50'
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
               }`}
             >
-              🌿 Odlingsbäddar
-            </button>
-            <button
-              onClick={() => setActiveView('garden')}
-              className={`px-6 py-4 font-semibold transition-all border-b-4 whitespace-nowrap ${
-                activeView === 'garden'
-                  ? 'border-plant-500 text-plant-700 bg-plant-50'
-                  : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
-              }`}
-            >
-              🪴 Trädgårdsdesigner
+              🏡 Trädgårdsplanering
             </button>
           </div>
         </div>
@@ -205,10 +194,8 @@ function App() {
             onTogglePlant={handleTogglePlant}
           />
         </main>
-      ) : activeView === 'beds' ? (
-        <BedManager myPlants={myPlants} />
       ) : (
-        <GardenPlanner />
+        <PlanningHub myPlants={myPlants} />
       )}
 
       {/* Footer */}

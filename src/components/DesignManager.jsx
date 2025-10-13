@@ -18,6 +18,7 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign }) =
 
     const newDesign = {
       beds: [],
+      orientation: 'portrait', // 'portrait' or 'landscape'
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -26,6 +27,20 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign }) =
     setActiveDesign(newDesignName);
     setShowNewModal(false);
     setNewDesignName('');
+  };
+
+  // Växla orientering
+  const toggleOrientation = () => {
+    if (!activeDesign) return;
+
+    setDesigns(prev => ({
+      ...prev,
+      [activeDesign]: {
+        ...prev[activeDesign],
+        orientation: prev[activeDesign].orientation === 'portrait' ? 'landscape' : 'portrait',
+        updatedAt: new Date().toISOString(),
+      }
+    }));
   };
 
   // Spara kopia
@@ -164,6 +179,13 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign }) =
           {activeDesign && (
             <>
               <button
+                onClick={toggleOrientation}
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-semibold whitespace-nowrap"
+              >
+                🔄 {designs[activeDesign].orientation === 'portrait' ? 'Stående ⇅' : 'Liggande ⇆'}
+              </button>
+
+              <button
                 onClick={handleSaveAs}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold whitespace-nowrap"
               >
@@ -202,6 +224,10 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign }) =
       {activeDesign && designs[activeDesign] && (
         <div className="mt-4 pt-4 border-t border-earth-200">
           <div className="flex flex-wrap gap-4 text-sm text-earth-600">
+            <div>
+              <span className="font-semibold">Format:</span>{' '}
+              {designs[activeDesign].orientation === 'portrait' ? 'Stående (800×1100)' : 'Liggande (1100×800)'}
+            </div>
             <div>
               <span className="font-semibold">Bäddar:</span> {designs[activeDesign].beds?.length || 0}
             </div>

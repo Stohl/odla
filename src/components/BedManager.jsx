@@ -11,8 +11,6 @@ const BedManager = ({ myPlants }) => {
   // Formulärdata
   const [formData, setFormData] = useState({
     name: '',
-    width: 120,
-    length: 300,
     description: '',
     plants: [],
   });
@@ -39,8 +37,6 @@ const BedManager = ({ myPlants }) => {
     setEditingBed(null);
     setFormData({
       name: '',
-      width: 120,
-      length: 300,
       description: '',
       plants: [],
     });
@@ -53,8 +49,6 @@ const BedManager = ({ myPlants }) => {
     setEditingBed(bed);
     setFormData({
       name: bed.name,
-      width: bed.width,
-      length: bed.length,
       description: bed.description || '',
       plants: bed.plants || [],
     });
@@ -107,8 +101,6 @@ const BedManager = ({ myPlants }) => {
     setSelectedPlants([]);
     setFormData({
       name: '',
-      width: 120,
-      length: 300,
       description: '',
       plants: [],
     });
@@ -236,11 +228,8 @@ const BedManager = ({ myPlants }) => {
                     }`}
                   >
                     <div className="font-semibold text-earth-800">{bed.name}</div>
-                    <div className="text-sm text-earth-600 mt-1">
-                      {bed.width} × {bed.length} cm
-                    </div>
                     {bed.plants && bed.plants.length > 0 && (
-                      <div className="text-xs text-plant-600 mt-1">
+                      <div className="text-sm text-plant-600 mt-1">
                         🌱 {bed.plants.length} växter
                       </div>
                     )}
@@ -258,18 +247,6 @@ const BedManager = ({ myPlants }) => {
                   <h2 className="text-2xl font-bold text-white">{selectedBedData.name}</h2>
                 </div>
                 <div className="p-6">
-                  {/* Info */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-earth-50 p-4 rounded-lg">
-                      <div className="text-sm text-earth-600 mb-1">Bredd</div>
-                      <div className="text-2xl font-bold text-earth-800">{selectedBedData.width} cm</div>
-                    </div>
-                    <div className="bg-earth-50 p-4 rounded-lg">
-                      <div className="text-sm text-earth-600 mb-1">Längd</div>
-                      <div className="text-2xl font-bold text-earth-800">{selectedBedData.length} cm</div>
-                    </div>
-                  </div>
-
                   {selectedBedData.description && (
                     <div className="mb-6">
                       <h3 className="text-sm font-semibold text-earth-700 mb-2">Beskrivning</h3>
@@ -347,31 +324,6 @@ const BedManager = ({ myPlants }) => {
                   placeholder="T.ex. Tomat-bädd, Rotfrukter..."
                   className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-earth-700 mb-2">
-                    Bredd (cm)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.width}
-                    onChange={(e) => setFormData({ ...formData, width: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-earth-700 mb-2">
-                    Längd (cm)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.length}
-                    onChange={(e) => setFormData({ ...formData, length: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
-                  />
-                </div>
               </div>
 
               <div>

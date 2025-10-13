@@ -77,6 +77,7 @@ const GardenPlanner = () => {
           beds={activeBeds}
           setBeds={setBeds}
           designName={activeDesign}
+          orientation={designs[activeDesign]?.orientation || 'portrait'}
         />
       ) : (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
