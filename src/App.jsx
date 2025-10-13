@@ -3,8 +3,10 @@ import Header from './components/Header';
 import FilterBar from './components/FilterBar';
 import CalendarView from './components/CalendarView';
 import MyPlantsPanel from './components/MyPlantsPanel';
+import GardenPlanner from './components/GardenPlanner';
 
 function App() {
+  const [activeView, setActiveView] = useState('calendar'); // 'calendar' or 'garden'
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -117,33 +119,66 @@ function App() {
     <div className="min-h-screen bg-earth-50">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filter Bar */}
-        <FilterBar
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          showOnlyMyPlants={showOnlyMyPlants}
-          onToggleMyPlants={() => setShowOnlyMyPlants(!showOnlyMyPlants)}
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
-
-        {/* Calendar View */}
-        <div className="mb-8">
-          <CalendarView
-            plants={filteredPlants}
-            myPlants={myPlants}
-            onTogglePlant={handleTogglePlant}
-          />
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-earth-200 shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveView('calendar')}
+              className={`px-6 py-4 font-semibold transition-all border-b-4 ${
+                activeView === 'calendar'
+                  ? 'border-plant-500 text-plant-700 bg-plant-50'
+                  : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
+              }`}
+            >
+              📅 Odlingskalender
+            </button>
+            <button
+              onClick={() => setActiveView('garden')}
+              className={`px-6 py-4 font-semibold transition-all border-b-4 ${
+                activeView === 'garden'
+                  ? 'border-plant-500 text-plant-700 bg-plant-50'
+                  : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
+              }`}
+            >
+              🪴 Trädgårdsplanerare
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* My Plants Panel */}
-        <MyPlantsPanel
-          plants={plants}
-          myPlants={myPlants}
-        />
-      </main>
+      {/* Main Content */}
+      {activeView === 'calendar' ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Filter Bar */}
+          <FilterBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            showOnlyMyPlants={showOnlyMyPlants}
+            onToggleMyPlants={() => setShowOnlyMyPlants(!showOnlyMyPlants)}
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+
+          {/* Calendar View */}
+          <div className="mb-8">
+            <CalendarView
+              plants={filteredPlants}
+              myPlants={myPlants}
+              onTogglePlant={handleTogglePlant}
+            />
+          </div>
+
+          {/* My Plants Panel */}
+          <MyPlantsPanel
+            plants={plants}
+            myPlants={myPlants}
+          />
+        </main>
+      ) : (
+        <GardenPlanner />
+      )}
 
       {/* Footer */}
       <footer className="bg-white border-t border-earth-200 mt-16 py-6">
