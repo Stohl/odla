@@ -1,27 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Stage, Layer, Rect, Text } from 'react-konva';
 
-const GardenDesigner = () => {
-  const [beds, setBeds] = useState([]);
+const GardenDesigner = ({ beds, setBeds, designName }) => {
   const [selected, setSelected] = useState(null);
   const stageRef = useRef(null);
-
-  // Ladda sparade bäddar från localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('gardenDesign');
-    if (saved) {
-      try {
-        setBeds(JSON.parse(saved));
-      } catch (error) {
-        console.error('Kunde inte ladda sparad design:', error);
-      }
-    }
-  }, []);
-
-  // Spara bäddar till localStorage
-  useEffect(() => {
-    localStorage.setItem('gardenDesign', JSON.stringify(beds));
-  }, [beds]);
 
   // Skapa ny odlingsbädd
   const createBed = () => {
@@ -113,7 +95,7 @@ const GardenDesigner = () => {
   const exportAsPNG = () => {
     const uri = stageRef.current.toDataURL();
     const link = document.createElement('a');
-    link.download = `tradgard-design-${new Date().toISOString().split('T')[0]}.png`;
+    link.download = `tradgard-${designName}-${new Date().toISOString().split('T')[0]}.png`;
     link.href = uri;
     link.click();
   };
@@ -297,4 +279,3 @@ const GardenDesigner = () => {
 };
 
 export default GardenDesigner;
-
