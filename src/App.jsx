@@ -4,9 +4,10 @@ import FilterBar from './components/FilterBar';
 import CalendarView from './components/CalendarView';
 import MyPlantsPanel from './components/MyPlantsPanel';
 import GardenPlanner from './components/GardenPlanner';
+import BedManager from './components/BedManager';
 
 function App() {
-  const [activeView, setActiveView] = useState('calendar'); // 'calendar' or 'garden'
+  const [activeView, setActiveView] = useState('calendar'); // 'calendar', 'beds', or 'garden'
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -122,10 +123,10 @@ function App() {
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-earth-200 shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto">
             <button
               onClick={() => setActiveView('calendar')}
-              className={`px-6 py-4 font-semibold transition-all border-b-4 ${
+              className={`px-6 py-4 font-semibold transition-all border-b-4 whitespace-nowrap ${
                 activeView === 'calendar'
                   ? 'border-plant-500 text-plant-700 bg-plant-50'
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
@@ -134,14 +135,24 @@ function App() {
               📅 Odlingskalender
             </button>
             <button
+              onClick={() => setActiveView('beds')}
+              className={`px-6 py-4 font-semibold transition-all border-b-4 whitespace-nowrap ${
+                activeView === 'beds'
+                  ? 'border-plant-500 text-plant-700 bg-plant-50'
+                  : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
+              }`}
+            >
+              🌿 Odlingsbäddar
+            </button>
+            <button
               onClick={() => setActiveView('garden')}
-              className={`px-6 py-4 font-semibold transition-all border-b-4 ${
+              className={`px-6 py-4 font-semibold transition-all border-b-4 whitespace-nowrap ${
                 activeView === 'garden'
                   ? 'border-plant-500 text-plant-700 bg-plant-50'
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
               }`}
             >
-              🪴 Trädgårdsplanerare
+              🪴 Trädgårdsdesigner
             </button>
           </div>
         </div>
@@ -176,6 +187,8 @@ function App() {
             myPlants={myPlants}
           />
         </main>
+      ) : activeView === 'beds' ? (
+        <BedManager />
       ) : (
         <GardenPlanner />
       )}

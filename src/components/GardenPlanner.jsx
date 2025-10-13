@@ -31,17 +31,24 @@ const GardenPlanner = () => {
   }, [designs, activeDesign]);
 
   // Uppdatera bäddar för aktiv design
-  const setBeds = (beds) => {
+  const setBeds = (bedsOrUpdater) => {
     if (!activeDesign) return;
 
-    setDesigns((prev) => ({
-      ...prev,
-      [activeDesign]: {
-        ...prev[activeDesign],
-        beds: beds,
-        updatedAt: new Date().toISOString(),
-      },
-    }));
+    setDesigns((prev) => {
+      const currentBeds = prev[activeDesign]?.beds || [];
+      const newBeds = typeof bedsOrUpdater === 'function' 
+        ? bedsOrUpdater(currentBeds) 
+        : bedsOrUpdater;
+
+      return {
+        ...prev,
+        [activeDesign]: {
+          ...prev[activeDesign],
+          beds: newBeds,
+          updatedAt: new Date().toISOString(),
+        },
+      };
+    });
   };
 
   const activeBeds = activeDesign && designs[activeDesign] ? designs[activeDesign].beds || [] : [];
