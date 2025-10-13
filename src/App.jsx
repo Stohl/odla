@@ -12,7 +12,7 @@ function App() {
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
+  const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(true); // Default visa endast mina växter i kalendern
   const [selectedCategory, setSelectedCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -205,7 +205,7 @@ function App() {
           />
         </main>
       ) : activeView === 'beds' ? (
-        <BedManager />
+        <BedManager myPlants={myPlants} />
       ) : (
         <GardenPlanner />
       )}
@@ -213,7 +213,7 @@ function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-earth-200 mt-16 py-6">
         <div className="max-w-7xl mx-auto px-4 text-center text-earth-600 text-sm">
-          <p>🌱 Knopp - Din digitala odlingsassistent</p>
+          <p>🌱 Knopp - Allt börjar med en knopp.</p>
         </div>
       </footer>
     </div>

@@ -9,7 +9,7 @@ const Header = () => {
           Knopp
         </h1>
         <p className="text-plant-100 text-lg">
-          Din digitala odlingsassistent - från frö till skörd
+          Allt börjar med en knopp.
         </p>
       </div>
     </header>

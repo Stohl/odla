@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-const BedManager = () => {
+const BedManager = ({ myPlants }) => {
   const [beds, setBeds] = useState([]);
   const [selectedBed, setSelectedBed] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingBed, setEditingBed] = useState(null);
+  const [showPlantSelector, setShowPlantSelector] = useState(false);
+  const [selectedPlants, setSelectedPlants] = useState([]);
 
   // Formulärdata
   const [formData, setFormData] = useState({
@@ -12,7 +14,7 @@ const BedManager = () => {
     width: 120,
     length: 300,
     description: '',
-    plants: '',
+    plants: [],
   });
 
   // Ladda bäddar från localStorage
@@ -40,8 +42,9 @@ const BedManager = () => {
       width: 120,
       length: 300,
       description: '',
-      plants: '',
+      plants: [],
     });
+    setSelectedPlants([]);
     setShowModal(true);
   };
 
@@ -53,9 +56,21 @@ const BedManager = () => {
       width: bed.width,
       length: bed.length,
       description: bed.description || '',
-      plants: bed.plants || '',
+      plants: bed.plants || [],
     });
+    setSelectedPlants(bed.plants || []);
     setShowModal(true);
+  };
+
+  // Lägg till/ta bort växt från bädden
+  const togglePlantInBed = (plantName) => {
+    setSelectedPlants(prev => {
+      if (prev.includes(plantName)) {
+        return prev.filter(p => p !== plantName);
+      } else {
+        return [...prev, plantName];
+      }
+    });
   };
 
   // Spara bädd
@@ -65,18 +80,23 @@ const BedManager = () => {
       return;
     }
 
+    const bedData = {
+      ...formData,
+      plants: selectedPlants,
+    };
+
     if (editingBed) {
       // Uppdatera befintlig
       setBeds(beds.map(b => 
         b.id === editingBed.id 
-          ? { ...editingBed, ...formData, updatedAt: new Date().toISOString() }
+          ? { ...editingBed, ...bedData, updatedAt: new Date().toISOString() }
           : b
       ));
     } else {
       // Skapa ny
       const newBed = {
         id: Date.now(),
-        ...formData,
+        ...bedData,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -84,12 +104,13 @@ const BedManager = () => {
     }
 
     setShowModal(false);
+    setSelectedPlants([]);
     setFormData({
       name: '',
       width: 120,
       length: 300,
       description: '',
-      plants: '',
+      plants: [],
     });
   };
 
@@ -218,9 +239,9 @@ const BedManager = () => {
                     <div className="text-sm text-earth-600 mt-1">
                       {bed.width} × {bed.length} cm
                     </div>
-                    {bed.plants && (
+                    {bed.plants && bed.plants.length > 0 && (
                       <div className="text-xs text-plant-600 mt-1">
-                        🌱 {bed.plants}
+                        🌱 {bed.plants.length} växter
                       </div>
                     )}
                   </div>
@@ -256,10 +277,19 @@ const BedManager = () => {
                     </div>
                   )}
 
-                  {selectedBedData.plants && (
+                  {selectedBedData.plants && selectedBedData.plants.length > 0 && (
                     <div className="mb-6">
-                      <h3 className="text-sm font-semibold text-earth-700 mb-2">Växter att plantera</h3>
-                      <p className="text-earth-600">{selectedBedData.plants}</p>
+                      <h3 className="text-sm font-semibold text-earth-700 mb-2">Växter i denna bädd</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedBedData.plants.map((plant) => (
+                          <span
+                            key={plant}
+                            className="text-sm bg-plant-100 text-plant-700 px-3 py-1 rounded-full"
+                          >
+                            🌱 {plant}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
 
@@ -359,15 +389,66 @@ const BedManager = () => {
 
               <div>
                 <label className="block text-sm font-semibold text-earth-700 mb-2">
-                  Växter att plantera
+                  Växter i denna bädd
                 </label>
-                <textarea
-                  value={formData.plants}
-                  onChange={(e) => setFormData({ ...formData, plants: e.target.value })}
-                  placeholder="T.ex. Tomater, Basilika, Paprika..."
-                  rows="2"
-                  className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
-                />
+                
+                {/* Valda växter */}
+                {selectedPlants.length > 0 && (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {selectedPlants.map((plant) => (
+                      <span
+                        key={plant}
+                        className="text-sm bg-plant-100 text-plant-700 px-3 py-1 rounded-full flex items-center gap-2"
+                      >
+                        {plant}
+                        <button
+                          onClick={() => togglePlantInBed(plant)}
+                          className="text-red-600 hover:text-red-800 font-bold"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Knapp för att lägga till växter */}
+                <button
+                  type="button"
+                  onClick={() => setShowPlantSelector(!showPlantSelector)}
+                  className="w-full px-4 py-2 border-2 border-dashed border-plant-300 text-plant-600 rounded-lg hover:bg-plant-50 transition-colors font-semibold"
+                >
+                  {showPlantSelector ? '− Stäng växtval' : '+ Lägg till växter från min lista'}
+                </button>
+
+                {/* Växtväljare */}
+                {showPlantSelector && (
+                  <div className="mt-3 max-h-48 overflow-y-auto border-2 border-earth-200 rounded-lg">
+                    {myPlants.length === 0 ? (
+                      <div className="p-4 text-center text-earth-600 text-sm">
+                        Inga växter i din lista ännu. Gå till Fröbanken för att lägga till växter!
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-earth-200">
+                        {myPlants.map((plant) => (
+                          <button
+                            key={plant}
+                            type="button"
+                            onClick={() => togglePlantInBed(plant)}
+                            className={`w-full p-3 text-left hover:bg-earth-50 transition-colors flex items-center justify-between ${
+                              selectedPlants.includes(plant) ? 'bg-plant-50' : ''
+                            }`}
+                          >
+                            <span className="text-earth-800">{plant}</span>
+                            {selectedPlants.includes(plant) && (
+                              <span className="text-plant-600 font-bold">✓</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
