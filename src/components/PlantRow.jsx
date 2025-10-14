@@ -81,13 +81,13 @@ const PlantRow = ({
         let positionClass = 'justify-center'; // Default center
         
         if (day <= 7) {
-          positionClass = 'justify-start pl-1';
+          positionClass = 'justify-start';
         } else if (day <= 14) {
-          positionClass = 'justify-start pl-6';
+          positionClass = 'justify-start pl-4';
         } else if (day <= 21) {
-          positionClass = 'justify-end pr-6';
+          positionClass = 'justify-end pr-4';
         } else {
-          positionClass = 'justify-end pr-1';
+          positionClass = 'justify-end';
         }
         
         activities.push(
@@ -214,17 +214,12 @@ const PlantRow = ({
                       className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
                     />
                     {plantedDate && (
-                      <>
-                        <span className="text-sm text-earth-600">
-                          Planterad {new Date(plantedDate).toLocaleDateString('sv-SE')}
-                        </span>
-                        <button
-                          onClick={() => onDateChange(plant.name, '')}
-                          className="text-red-600 hover:text-red-800 text-sm font-semibold"
-                        >
-                          Rensa
-                        </button>
-                      </>
+                      <button
+                        onClick={() => onDateChange(plant.name, '')}
+                        className="text-red-600 hover:text-red-800 text-sm font-semibold"
+                      >
+                        Rensa
+                      </button>
                     )}
                   </div>
                   <p className="text-xs text-earth-500 mt-1">
