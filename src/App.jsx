@@ -10,6 +10,7 @@ function App() {
   const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', or 'planning'
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
+  const [myPlantsLoaded, setMyPlantsLoaded] = useState(false); // Flag to prevent overwriting localStorage
   const [yearPlans, setYearPlans] = useState({});
   const [selectedYearPlan, setSelectedYearPlan] = useState('all'); // 'all' or planId
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +50,7 @@ function App() {
       });
   }, []);
 
-  // Load myPlants from localStorage
+  // Load myPlants from localStorage (runs once on mount)
   useEffect(() => {
     const saved = localStorage.getItem('myPlants');
     if (saved) {
@@ -59,12 +60,15 @@ function App() {
         console.error('Kunde inte läsa sparade växter:', e);
       }
     }
+    setMyPlantsLoaded(true); // Mark as loaded
   }, []);
 
-  // Save myPlants to localStorage
+  // Save myPlants to localStorage (only after initial load)
   useEffect(() => {
-    localStorage.setItem('myPlants', JSON.stringify(myPlants));
-  }, [myPlants]);
+    if (myPlantsLoaded) {
+      localStorage.setItem('myPlants', JSON.stringify(myPlants));
+    }
+  }, [myPlants, myPlantsLoaded]);
 
   // Load year plans from localStorage
   useEffect(() => {
