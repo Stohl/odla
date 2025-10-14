@@ -5,25 +5,9 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'
 ];
 
-const MyPlantsPanel = ({ 
-  plants, 
-  myPlants, 
-  onTogglePlant, 
-  selectedYearPlan, 
-  yearPlans, 
-  onToggleYearPlanPlant 
-}) => {
+const MyPlantsPanel = ({ plants, myPlants, onTogglePlant }) => {
   const currentMonth = new Date().getMonth() + 1;
   const selectedPlants = plants.filter(p => myPlants.includes(p.name));
-  
-  // Check if a plant is in the selected year plan
-  const isInYearPlan = (plantName) => {
-    if (selectedYearPlan === 'all' || !yearPlans[selectedYearPlan]) return false;
-    const plan = yearPlans[selectedYearPlan];
-    return plan.unbeddedPlants?.includes(plantName) || false;
-  };
-
-  const hasActiveYearPlan = selectedYearPlan && selectedYearPlan !== 'all';
 
   if (selectedPlants.length === 0) {
     return (
@@ -69,28 +53,14 @@ const MyPlantsPanel = ({
             {selectedPlants.length} st
           </span>
         </h2>
-        {hasActiveYearPlan && (
-          <p className="text-plant-50 text-sm mt-2">
-            💡 Klicka på en växt nedan för att lägga till/ta bort från <span className="font-semibold">{selectedYearPlan}</span>
-          </p>
-        )}
       </div>
 
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {selectedPlants.map((plant) => {
-            const inPlan = isInYearPlan(plant.name);
-            return (
+          {selectedPlants.map((plant) => (
             <div
               key={plant.name}
-              className={`border-2 rounded-xl overflow-hidden hover:shadow-lg transition-all ${
-                hasActiveYearPlan 
-                  ? inPlan 
-                    ? 'border-plant-500 bg-plant-50 cursor-pointer' 
-                    : 'border-earth-200 hover:border-plant-300 cursor-pointer'
-                  : 'border-earth-200'
-              }`}
-              onClick={() => hasActiveYearPlan && onToggleYearPlanPlant && onToggleYearPlanPlant(plant.name)}
+              className="border-2 border-earth-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
             >
               {/* Plant Image */}
               <div className="h-48 overflow-hidden bg-earth-100">
@@ -108,21 +78,13 @@ const MyPlantsPanel = ({
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg text-earth-800 mb-1 flex items-center gap-2">
+                    <h3 className="font-bold text-lg text-earth-800 mb-1">
                       {plant.name}
-                      {hasActiveYearPlan && inPlan && (
-                        <span className="text-xs bg-plant-500 text-white px-2 py-0.5 rounded-full font-semibold">
-                          I plan
-                        </span>
-                      )}
                     </h3>
                     <p className="text-sm text-plant-600 mb-3">{plant.category}</p>
                   </div>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onTogglePlant(plant.name);
-                    }}
+                    onClick={() => onTogglePlant(plant.name)}
                     className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors flex items-center justify-center font-bold"
                     title="Ta bort från mina växter"
                   >
@@ -180,8 +142,7 @@ const MyPlantsPanel = ({
                 </div>
               </div>
             </div>
-          );
-          })}
+          ))}
         </div>
       </div>
     </div>

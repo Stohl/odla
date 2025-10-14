@@ -61,7 +61,6 @@ const YearPlanner = ({ myPlants }) => {
 
     const newPlan = {
       bedPlants: {}, // { bedId: [plantNames] }
-      unbeddedPlants: [], // Plants not assigned to a bed
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -90,7 +89,7 @@ const YearPlanner = ({ myPlants }) => {
 
     const copiedPlan = {
       bedPlants: JSON.parse(JSON.stringify(plans[activePlan].bedPlants)),
-      unbeddedPlants: JSON.parse(JSON.stringify(plans[activePlan].unbeddedPlants || [])),
+      plantDates: JSON.parse(JSON.stringify(plans[activePlan].plantDates || {})),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -134,35 +133,29 @@ const YearPlanner = ({ myPlants }) => {
 
   // Växla växt för en bädd
   const togglePlantInBed = (bedId, plantName) => {
-    const currentPlants = activePlan && plans[activePlan] ? plans[activePlan].bedPlants[bedId] || [] : [];
-    
-    if (currentPlants.includes(plantName)) {
-      updateBedPlants(bedId, currentPlants.filter(p => p !== plantName));
-    } else {
-      updateBedPlants(bedId, [...currentPlants, plantName]);
-    }
-  };
-
-  // Växla växt i unbedded plants
-  const toggleUnbeddedPlant = (plantName) => {
     if (!activePlan) return;
-
+    
     setPlans(prev => {
-      const currentUnbedded = prev[activePlan].unbeddedPlants || [];
-      const newUnbedded = currentUnbedded.includes(plantName)
-        ? currentUnbedded.filter(p => p !== plantName)
-        : [...currentUnbedded, plantName];
-
+      const currentBedPlants = prev[activePlan].bedPlants[bedId] || [];
+      
+      const newBedPlants = currentBedPlants.includes(plantName)
+        ? currentBedPlants.filter(p => p !== plantName)
+        : [...currentBedPlants, plantName];
+      
       return {
         ...prev,
         [activePlan]: {
           ...prev[activePlan],
-          unbeddedPlants: newUnbedded,
+          bedPlants: {
+            ...prev[activePlan].bedPlants,
+            [bedId]: newBedPlants,
+          },
           updatedAt: new Date().toISOString(),
         }
       };
     });
   };
+
 
   // Exportera plan
   const exportPlan = () => {
@@ -288,53 +281,49 @@ const YearPlanner = ({ myPlants }) => {
           </div>
 
           <div className="p-6">
-            {/* Växter i planen - HUVUDSEKTION */}
+            {/* Växter i planen - VISA ALLA MINA VÄXTER */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-earth-800 mb-2 flex items-center gap-2">
                 🌱 Växter i denna plan
               </h2>
               
               <p className="text-sm text-earth-600 mb-4">
-                Välj vilka växter du vill odla i {activePlan}. Du kan fördela dem i bäddar längre ner om du vill.
+                Välj vilka växter som ska odlas i bäddarna nedan. Grön bock ✓ = finns i en bädd.
               </p>
 
-              {/* Plant selector - ALLTID EXPANDERAD */}
-              <div className="bg-plant-50 border-2 border-plant-200 rounded-lg p-4">
+              {/* Alla mina växter med status */}
+              <div className="bg-plant-50 border-2 border-plant-300 rounded-lg p-4">
+                <div className="text-sm font-semibold text-plant-700 mb-3">
+                  Placerade i odlingsbäddar:
+                </div>
                 {myPlants.length === 0 ? (
-                  <p className="text-sm text-earth-600 text-center py-4">
+                  <p className="text-earth-600 text-sm text-center py-4">
                     Inga växter i din lista. Gå till Fröbanken för att lägga till!
                   </p>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {myPlants.map(plant => {
-                      const isSelected = currentPlan.unbeddedPlants?.includes(plant);
                       // Check if plant is in any bed
                       const isInBed = currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
                         bedPlantArray => bedPlantArray.includes(plant)
                       );
                       
                       return (
-                        <button
+                        <div
                           key={plant}
-                          onClick={() => toggleUnbeddedPlant(plant)}
-                          className={`p-3 rounded-lg text-sm transition-all relative ${
-                            isSelected
-                              ? 'bg-plant-500 text-white font-semibold shadow-md'
-                              : 'bg-white border-2 border-plant-200 text-earth-700 hover:border-plant-400'
+                          className={`px-4 py-2 rounded-lg flex items-center gap-2 border-2 ${
+                            isInBed 
+                              ? 'bg-white text-plant-700 border-plant-300'
+                              : 'bg-earth-100 text-earth-600 border-earth-300'
                           }`}
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <span>{isSelected && '✓ '}{plant}</span>
-                            {isInBed && (
-                              <span 
-                                className={`text-xs ${isSelected ? 'text-plant-100' : 'text-earth-500'}`}
-                                title="Placerad i bädd"
-                              >
-                                📦
-                              </span>
-                            )}
-                          </div>
-                        </button>
+                          <span className="font-medium">{plant}</span>
+                          {isInBed && (
+                            <span className="text-green-600 font-bold text-lg" title="Placerad i bädd">
+                              ✓
+                            </span>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -393,38 +382,36 @@ const YearPlanner = ({ myPlants }) => {
                       </div>
                     )}
 
-                    {/* Växtväljare - visa bara växter från planen */}
-                    {currentPlan.unbeddedPlants && currentPlan.unbeddedPlants.length > 0 ? (
-                      <details className="bg-earth-50 rounded-lg">
-                        <summary className="p-3 cursor-pointer text-sm font-semibold text-earth-700 hover:bg-earth-100 rounded-lg transition-colors">
-                          + Lägg till växter från planen
-                        </summary>
-                        <div className="p-3 pt-0">
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
-                            {currentPlan.unbeddedPlants.map(plant => {
-                              const isSelected = bedPlants.includes(plant);
-                              return (
-                                <button
-                                  key={plant}
-                                  onClick={() => togglePlantInBed(bed.id, plant)}
-                                  className={`p-2 rounded-lg text-sm transition-all ${
-                                    isSelected
-                                      ? 'bg-earth-600 text-white font-semibold'
-                                      : 'bg-white border-2 border-earth-200 text-earth-700 hover:border-earth-400'
-                                  }`}
-                                >
-                                  {isSelected && '✓ '}{plant}
-                                </button>
-                              );
-                            })}
-                          </div>
+                    {/* Växtväljare - ALLTID EXPANDERAD, visa ALLA mina växter */}
+                    <div className="bg-earth-50 border-2 border-earth-200 rounded-lg p-3">
+                      <div className="text-xs font-semibold text-earth-700 mb-2">
+                        Välj växter för denna bädd:
+                      </div>
+                      {myPlants.length === 0 ? (
+                        <p className="text-sm text-earth-600 text-center py-4">
+                          Inga växter i din lista. Gå till Fröbanken för att lägga till!
+                        </p>
+                      ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                          {myPlants.map(plant => {
+                            const isSelected = bedPlants.includes(plant);
+                            return (
+                              <button
+                                key={plant}
+                                onClick={() => togglePlantInBed(bed.id, plant)}
+                                className={`p-2 rounded-lg text-sm transition-all ${
+                                  isSelected
+                                    ? 'bg-earth-600 text-white font-semibold'
+                                    : 'bg-white border-2 border-earth-200 text-earth-700 hover:border-earth-400'
+                                }`}
+                              >
+                                {isSelected && '✓ '}{plant}
+                              </button>
+                            );
+                          })}
                         </div>
-                      </details>
-                    ) : (
-                      <p className="text-sm text-earth-500 italic p-3 bg-earth-50 rounded-lg">
-                        Lägg till växter i planen ovan först
-                      </p>
-                    )}
+                      )}
+                    </div>
                   </div>
                 );
               })}

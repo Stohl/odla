@@ -138,36 +138,10 @@ function App() {
     });
   };
 
-  // Toggle plant in year plan (from MyPlantsPanel)
+  // Toggle plant in year plan is now handled through beds only
   const handleToggleYearPlanPlant = (plantName) => {
-    if (selectedYearPlan === 'all') return;
-
-    setYearPlans(prev => {
-      const updatedPlans = { ...prev };
-      if (!updatedPlans[selectedYearPlan]) return prev;
-
-      const currentUnbedded = updatedPlans[selectedYearPlan].unbeddedPlants || [];
-      const newUnbedded = currentUnbedded.includes(plantName)
-        ? currentUnbedded.filter(p => p !== plantName)
-        : [...currentUnbedded, plantName];
-
-      updatedPlans[selectedYearPlan] = {
-        ...updatedPlans[selectedYearPlan],
-        unbeddedPlants: newUnbedded,
-        updatedAt: new Date().toISOString()
-      };
-
-      // Save immediately to localStorage
-      localStorage.setItem('yearPlans', JSON.stringify({
-        plans: updatedPlans,
-        activePlan: selectedYearPlan
-      }));
-
-      // Dispatch event so YearPlanner updates
-      window.dispatchEvent(new CustomEvent('yearPlans-updated'));
-
-      return updatedPlans;
-    });
+    // This function is no longer used - plants are added through beds
+    return;
   };
 
   // Toggle plant selection
@@ -184,26 +158,19 @@ function App() {
   // Get unique categories
   const categories = [...new Set(plants.map(p => p.category))].sort();
 
-  // Get plants from a specific year plan
+  // Get plants from a specific year plan (only from beds)
   const getPlantsFromYearPlan = (planId) => {
     const plan = yearPlans[planId];
-    if (!plan) return [];
+    if (!plan || !plan.bedPlants) return [];
     
     const plantSet = new Set();
     
-    // Add plants from beds (bedPlants structure: { bedId: [plantName1, plantName2, ...] })
-    if (plan.bedPlants) {
-      Object.values(plan.bedPlants).forEach(plantArray => {
-        if (Array.isArray(plantArray)) {
-          plantArray.forEach(plantName => plantSet.add(plantName));
-        }
-      });
-    }
-    
-    // Add unbedded plants
-    if (plan.unbeddedPlants && Array.isArray(plan.unbeddedPlants)) {
-      plan.unbeddedPlants.forEach(plantName => plantSet.add(plantName));
-    }
+    // Get all plants from all beds
+    Object.values(plan.bedPlants).forEach(plantArray => {
+      if (Array.isArray(plantArray)) {
+        plantArray.forEach(plantName => plantSet.add(plantName));
+      }
+    });
     
     return Array.from(plantSet);
   };
@@ -220,6 +187,7 @@ function App() {
     // Year plan filter
     let matchesYearPlan = true;
     if (selectedYearPlan !== 'all') {
+      // Show plants from year plan (even if removed from myPlants)
       const planPlants = getPlantsFromYearPlan(selectedYearPlan);
       matchesYearPlan = planPlants.includes(plant.name);
     } else {
@@ -335,9 +303,6 @@ function App() {
             plants={plants}
             myPlants={myPlants}
             onTogglePlant={handleTogglePlant}
-            selectedYearPlan={selectedYearPlan}
-            yearPlans={yearPlans}
-            onToggleYearPlanPlant={handleToggleYearPlanPlant}
           />
         </main>
       ) : (
