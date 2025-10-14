@@ -72,15 +72,35 @@ function App() {
 
   // Load year plans from localStorage
   useEffect(() => {
-    const savedPlans = localStorage.getItem('yearPlans');
-    if (savedPlans) {
-      try {
-        const data = JSON.parse(savedPlans);
-        setYearPlans(data.plans || {});
-      } catch (e) {
-        console.error('Kunde inte läsa årsplaner:', e);
+    const loadYearPlans = () => {
+      const savedPlans = localStorage.getItem('yearPlans');
+      if (savedPlans) {
+        try {
+          const data = JSON.parse(savedPlans);
+          setYearPlans(data.plans || {});
+        } catch (e) {
+          console.error('Kunde inte läsa årsplaner:', e);
+        }
       }
-    }
+    };
+
+    // Initial load
+    loadYearPlans();
+
+    // Listen for storage changes (when updated from PlanningHub)
+    const handleStorageChange = (e) => {
+      if (e.key === 'yearPlans' || e.type === 'yearPlans-updated') {
+        loadYearPlans();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('yearPlans-updated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('yearPlans-updated', handleStorageChange);
+    };
   }, []);
 
   // Get plant dates for the selected year plan
@@ -135,15 +155,23 @@ function App() {
   // Get plants from a specific year plan
   const getPlantsFromYearPlan = (planId) => {
     const plan = yearPlans[planId];
-    if (!plan || !plan.bedPlants) return [];
+    if (!plan) return [];
     
     const plantSet = new Set();
-    // bedPlants structure: { bedId: [plantName1, plantName2, ...] }
-    Object.values(plan.bedPlants).forEach(plantArray => {
-      if (Array.isArray(plantArray)) {
-        plantArray.forEach(plantName => plantSet.add(plantName));
-      }
-    });
+    
+    // Add plants from beds (bedPlants structure: { bedId: [plantName1, plantName2, ...] })
+    if (plan.bedPlants) {
+      Object.values(plan.bedPlants).forEach(plantArray => {
+        if (Array.isArray(plantArray)) {
+          plantArray.forEach(plantName => plantSet.add(plantName));
+        }
+      });
+    }
+    
+    // Add unbedded plants
+    if (plan.unbeddedPlants && Array.isArray(plan.unbeddedPlants)) {
+      plan.unbeddedPlants.forEach(plantName => plantSet.add(plantName));
+    }
     
     return Array.from(plantSet);
   };

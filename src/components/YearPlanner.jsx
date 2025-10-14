@@ -42,6 +42,8 @@ const YearPlanner = ({ myPlants }) => {
         plans,
         activePlan,
       }));
+      // Notify App.jsx about the change
+      window.dispatchEvent(new CustomEvent('yearPlans-updated'));
     }
   }, [plans, activePlan, isLoaded]);
 
@@ -59,6 +61,7 @@ const YearPlanner = ({ myPlants }) => {
 
     const newPlan = {
       bedPlants: {}, // { bedId: [plantNames] }
+      unbeddedPlants: [], // Plants not assigned to a bed
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -87,6 +90,7 @@ const YearPlanner = ({ myPlants }) => {
 
     const copiedPlan = {
       bedPlants: JSON.parse(JSON.stringify(plans[activePlan].bedPlants)),
+      unbeddedPlants: JSON.parse(JSON.stringify(plans[activePlan].unbeddedPlants || [])),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -137,6 +141,27 @@ const YearPlanner = ({ myPlants }) => {
     } else {
       updateBedPlants(bedId, [...currentPlants, plantName]);
     }
+  };
+
+  // Växla växt i unbedded plants
+  const toggleUnbeddedPlant = (plantName) => {
+    if (!activePlan) return;
+
+    setPlans(prev => {
+      const currentUnbedded = prev[activePlan].unbeddedPlants || [];
+      const newUnbedded = currentUnbedded.includes(plantName)
+        ? currentUnbedded.filter(p => p !== plantName)
+        : [...currentUnbedded, plantName];
+
+      return {
+        ...prev,
+        [activePlan]: {
+          ...prev[activePlan],
+          unbeddedPlants: newUnbedded,
+          updatedAt: new Date().toISOString(),
+        }
+      };
+    });
   };
 
   // Exportera plan
@@ -346,6 +371,76 @@ const YearPlanner = ({ myPlants }) => {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Unbedded Plants Section */}
+            <div className="mt-6 pt-6 border-t-2 border-earth-200">
+              <h2 className="text-xl font-bold text-earth-800 mb-4 flex items-center gap-2">
+                🌱 Mina växter
+                <span className="text-sm font-normal text-earth-500">(utan specifik bädd)</span>
+              </h2>
+              
+              <p className="text-sm text-earth-600 mb-4">
+                Lägg till växter du planerar att odla, men som du inte har bestämt vilken bädd de ska i än.
+              </p>
+
+              {/* Valda unbedded plants */}
+              {currentPlan.unbeddedPlants && currentPlan.unbeddedPlants.length > 0 && (
+                <div className="mb-4">
+                  <div className="text-sm font-semibold text-earth-700 mb-2">
+                    Mina växter i denna plan:
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {currentPlan.unbeddedPlants.map(plant => (
+                      <span
+                        key={plant}
+                        className="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full flex items-center gap-2"
+                      >
+                        🌱 {plant}
+                        <button
+                          onClick={() => toggleUnbeddedPlant(plant)}
+                          className="text-red-600 hover:text-red-800 font-bold text-lg leading-none"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Plant selector for unbedded */}
+              <details className="bg-blue-50 border-2 border-blue-200 rounded-lg">
+                <summary className="p-3 cursor-pointer text-sm font-semibold text-blue-700 hover:bg-blue-100 rounded-lg transition-colors">
+                  + Lägg till växter från min lista
+                </summary>
+                <div className="p-3 pt-0">
+                  {myPlants.length === 0 ? (
+                    <p className="text-sm text-earth-600 text-center py-4">
+                      Inga växter i din lista. Gå till Fröbanken för att lägga till!
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
+                      {myPlants.map(plant => {
+                        const isSelected = currentPlan.unbeddedPlants?.includes(plant);
+                        return (
+                          <button
+                            key={plant}
+                            onClick={() => toggleUnbeddedPlant(plant)}
+                            className={`p-2 rounded-lg text-sm transition-all ${
+                              isSelected
+                                ? 'bg-blue-500 text-white font-semibold'
+                                : 'bg-white border-2 border-blue-200 text-earth-700 hover:border-blue-400'
+                            }`}
+                          >
+                            {isSelected && '✓ '}{plant}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </details>
             </div>
           </div>
         </div>
