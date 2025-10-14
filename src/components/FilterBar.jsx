@@ -25,62 +25,60 @@ const FilterBar = ({
   const [showPlanSelector, setShowPlanSelector] = React.useState(false);
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+    <div className="bg-white rounded-xl shadow-md mb-6">
       <div className="p-6">
-        {/* Årsplan som tydlig dropdown */}
-        <div className="mb-6">
+        {/* Årsplan som diskret menyval */}
+        <div className="mb-6 relative">
           <label className="block text-sm font-semibold text-earth-700 mb-2">
             Visa växter från:
           </label>
-          <div className="relative">
-            <button
-              onClick={() => setShowPlanSelector(!showPlanSelector)}
-              className="w-full px-6 py-4 bg-plant-500 hover:bg-plant-600 text-white rounded-lg transition-colors font-bold text-xl flex items-center justify-between shadow-md"
-            >
-              <span>
-                {selectedYearPlan === 'all' ? '🌱 Alla mina sparade växter' : `📋 ${selectedYearPlan}`}
-              </span>
-              <span className="text-2xl">{showPlanSelector ? '▲' : '▼'}</span>
-            </button>
-            
-            {showPlanSelector && (
-              <>
-                <div 
-                  className="fixed inset-0 z-40" 
-                  onClick={() => setShowPlanSelector(false)}
-                />
-                <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-xl border-2 border-plant-300 z-50 max-h-64 overflow-y-auto">
+          <button
+            onClick={() => setShowPlanSelector(!showPlanSelector)}
+            className="w-full px-5 py-3 bg-earth-100 hover:bg-earth-200 text-earth-800 rounded-lg transition-colors font-semibold text-lg flex items-center justify-between border-2 border-earth-300"
+          >
+            <span>
+              {selectedYearPlan === 'all' ? '🌱 Alla mina sparade växter' : `📋 ${selectedYearPlan}`}
+            </span>
+            <span className="text-xl">{showPlanSelector ? '▲' : '▼'}</span>
+          </button>
+          
+          {showPlanSelector && (
+            <>
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowPlanSelector(false)}
+              />
+              <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-xl border-2 border-earth-300 z-50 max-h-64 overflow-y-auto">
+                <button
+                  onClick={() => {
+                    onYearPlanChange('all');
+                    setShowPlanSelector(false);
+                  }}
+                  className={`w-full px-5 py-3 text-left hover:bg-earth-50 transition-colors border-b border-earth-100 font-semibold ${
+                    selectedYearPlan === 'all' ? 'bg-earth-50 text-plant-700' : 'text-earth-700'
+                  }`}
+                >
+                  🌱 Alla mina växter
+                  {selectedYearPlan === 'all' && <span className="float-right text-plant-600">✓</span>}
+                </button>
+                {plansList.length > 0 && plansList.map(plan => (
                   <button
+                    key={plan.id}
                     onClick={() => {
-                      onYearPlanChange('all');
+                      onYearPlanChange(plan.id);
                       setShowPlanSelector(false);
                     }}
-                    className={`w-full px-6 py-4 text-left hover:bg-plant-50 transition-colors border-b border-earth-100 font-semibold ${
-                      selectedYearPlan === 'all' ? 'bg-plant-50 text-plant-700' : 'text-earth-700'
+                    className={`w-full px-5 py-3 text-left hover:bg-earth-50 transition-colors border-b border-earth-100 last:border-0 font-semibold ${
+                      selectedYearPlan === plan.id ? 'bg-earth-50 text-plant-700' : 'text-earth-700'
                     }`}
                   >
-                    🌱 Alla mina växter
-                    {selectedYearPlan === 'all' && <span className="float-right text-plant-600">✓</span>}
+                    📋 {plan.name}
+                    {selectedYearPlan === plan.id && <span className="float-right text-plant-600">✓</span>}
                   </button>
-                  {plansList.length > 0 && plansList.map(plan => (
-                    <button
-                      key={plan.id}
-                      onClick={() => {
-                        onYearPlanChange(plan.id);
-                        setShowPlanSelector(false);
-                      }}
-                      className={`w-full px-6 py-4 text-left hover:bg-plant-50 transition-colors border-b border-earth-100 last:border-0 font-semibold ${
-                        selectedYearPlan === plan.id ? 'bg-plant-50 text-plant-700' : 'text-earth-700'
-                      }`}
-                    >
-                      📋 {plan.name}
-                      {selectedYearPlan === plan.id && <span className="float-right text-plant-600">✓</span>}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Gruppering - TYDLIGA KNAPPAR */}
