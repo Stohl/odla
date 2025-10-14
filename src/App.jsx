@@ -16,6 +16,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(true); // Default visa endast mina växter i kalendern
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [groupBy, setGroupBy] = useState('none'); // 'none', 'category', or 'bed'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -111,6 +112,14 @@ function App() {
     return yearPlans[selectedYearPlan].plantDates || {};
   };
 
+  // Get harvested dates for the selected year plan
+  const getCurrentHarvestedDates = () => {
+    if (selectedYearPlan === 'all' || !yearPlans[selectedYearPlan]) {
+      return {};
+    }
+    return yearPlans[selectedYearPlan].harvestedDates || {};
+  };
+
   // Update plant date for the selected year plan
   const handleDateChange = (plantName, date) => {
     if (selectedYearPlan === 'all') return;
@@ -123,6 +132,33 @@ function App() {
         ...updatedPlans[selectedYearPlan],
         plantDates: {
           ...(updatedPlans[selectedYearPlan].plantDates || {}),
+          [plantName]: date
+        },
+        updatedAt: new Date().toISOString()
+      };
+
+      // Save immediately to localStorage
+      localStorage.setItem('yearPlans', JSON.stringify({
+        plans: updatedPlans,
+        activePlan: selectedYearPlan
+      }));
+
+      return updatedPlans;
+    });
+  };
+
+  // Update harvested date for the selected year plan
+  const handleHarvestedChange = (plantName, date) => {
+    if (selectedYearPlan === 'all') return;
+
+    setYearPlans(prev => {
+      const updatedPlans = { ...prev };
+      if (!updatedPlans[selectedYearPlan]) return prev;
+
+      updatedPlans[selectedYearPlan] = {
+        ...updatedPlans[selectedYearPlan],
+        harvestedDates: {
+          ...(updatedPlans[selectedYearPlan].harvestedDates || {}),
           [plantName]: date
         },
         updatedAt: new Date().toISOString()
@@ -284,6 +320,8 @@ function App() {
             yearPlans={yearPlans}
             selectedYearPlan={selectedYearPlan}
             onYearPlanChange={setSelectedYearPlan}
+            groupBy={groupBy}
+            onGroupByChange={setGroupBy}
           />
 
           {/* Calendar View */}
@@ -294,7 +332,11 @@ function App() {
               onTogglePlant={handleTogglePlant}
               selectedYearPlan={selectedYearPlan}
               plantDates={getCurrentPlantDates()}
+              harvestedDates={getCurrentHarvestedDates()}
               onDateChange={handleDateChange}
+              onHarvestedChange={handleHarvestedChange}
+              groupBy={groupBy}
+              yearPlans={yearPlans}
             />
           </div>
 

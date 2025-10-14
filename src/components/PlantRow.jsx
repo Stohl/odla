@@ -11,7 +11,9 @@ const PlantRow = ({
   onToggleSelect, 
   currentMonth, 
   plantedDate, 
+  harvestedDate,
   onDateChange,
+  onHarvestedChange,
   canEditDate 
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -200,30 +202,60 @@ const PlantRow = ({
                 </div>
               </div>
 
-              {/* Planting Date */}
+              {/* Planting Date & Harvested */}
               {canEditDate && (
                 <div className="pt-4 border-t border-earth-200">
-                  <label className="block text-sm font-semibold text-earth-700 mb-2">
-                    📅 Planteringsdatum (frivilligt)
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="date"
-                      value={plantedDate || ''}
-                      onChange={(e) => onDateChange(plant.name, e.target.value)}
-                      className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
-                    />
-                    {plantedDate && (
-                      <button
-                        onClick={() => onDateChange(plant.name, '')}
-                        className="text-red-600 hover:text-red-800 text-sm font-semibold"
-                      >
-                        Rensa
-                      </button>
-                    )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Planting Date */}
+                    <div>
+                      <label className="block text-sm font-semibold text-earth-700 mb-2">
+                        📅 Planteringsdatum
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="date"
+                          value={plantedDate || ''}
+                          onChange={(e) => onDateChange(plant.name, e.target.value)}
+                          className="flex-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
+                        />
+                        {plantedDate && (
+                          <button
+                            onClick={() => onDateChange(plant.name, '')}
+                            className="text-red-600 hover:text-red-800 text-sm font-semibold"
+                            title="Rensa datum"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Harvested Date */}
+                    <div>
+                      <label className="block text-sm font-semibold text-earth-700 mb-2">
+                        🌾 Skördad
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="date"
+                          value={harvestedDate || ''}
+                          onChange={(e) => onHarvestedChange(plant.name, e.target.value)}
+                          className="flex-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
+                        />
+                        {harvestedDate && (
+                          <button
+                            onClick={() => onHarvestedChange(plant.name, '')}
+                            className="text-red-600 hover:text-red-800 text-sm font-semibold"
+                            title="Rensa datum"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xs text-earth-500 mt-1">
-                    Markera när du har planterat denna växt för att hålla koll på din odling
+                  <p className="text-xs text-earth-500 mt-2">
+                    Håll koll på när du planterade och skördade dina växter
                   </p>
                 </div>
               )}

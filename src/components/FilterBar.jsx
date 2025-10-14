@@ -10,13 +10,17 @@ const FilterBar = ({
   onCategoryChange,
   yearPlans,
   selectedYearPlan,
-  onYearPlanChange
+  onYearPlanChange,
+  groupBy,
+  onGroupByChange
 }) => {
   // Convert plans object to array with names as keys
   const plansList = Object.keys(yearPlans || {}).map(planName => ({
     id: planName,
     name: planName
   }));
+
+  const hasYearPlan = selectedYearPlan !== 'all';
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 mb-6">
@@ -87,6 +91,19 @@ const FilterBar = ({
               {showOnlyMyPlants ? '✓ Mina växter' : 'Alla växter'}
             </button>
           )}
+
+          {/* Gruppering */}
+          <div className="w-full md:w-auto">
+            <select
+              value={groupBy}
+              onChange={(e) => onGroupByChange(e.target.value)}
+              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors bg-white cursor-pointer"
+            >
+              <option value="none">Ingen gruppering</option>
+              <option value="category">Gruppera efter kategori</option>
+              {hasYearPlan && <option value="bed">Gruppera efter odlingsbädd</option>}
+            </select>
+          </div>
         </div>
       </div>
     </div>
