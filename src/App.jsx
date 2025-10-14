@@ -135,12 +135,13 @@ function App() {
   // Get plants from a specific year plan
   const getPlantsFromYearPlan = (planId) => {
     const plan = yearPlans[planId];
-    if (!plan || !plan.beds) return [];
+    if (!plan || !plan.bedPlants) return [];
     
     const plantSet = new Set();
-    Object.values(plan.beds).forEach(bed => {
-      if (bed.plants && Array.isArray(bed.plants)) {
-        bed.plants.forEach(plant => plantSet.add(plant));
+    // bedPlants structure: { bedId: [plantName1, plantName2, ...] }
+    Object.values(plan.bedPlants).forEach(plantArray => {
+      if (Array.isArray(plantArray)) {
+        plantArray.forEach(plantName => plantSet.add(plantName));
       }
     });
     
