@@ -22,89 +22,154 @@ const FilterBar = ({
 
   const hasYearPlan = selectedYearPlan !== 'all';
 
+  const [showPlanSelector, setShowPlanSelector] = React.useState(false);
+
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-      <div className="flex flex-col gap-4">
-        {/* Första raden: Årsplan */}
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-semibold text-earth-700 whitespace-nowrap">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+      <div className="p-6">
+        {/* Årsplan som tydlig dropdown */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-earth-700 mb-2">
             Visa växter från:
           </label>
-          <div className="flex-1">
-            <select
-              value={selectedYearPlan}
-              onChange={(e) => onYearPlanChange(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-plant-300 rounded-lg focus:outline-none focus:border-plant-500 transition-colors bg-white cursor-pointer font-semibold text-plant-700"
+          <div className="relative">
+            <button
+              onClick={() => setShowPlanSelector(!showPlanSelector)}
+              className="w-full px-6 py-4 bg-plant-500 hover:bg-plant-600 text-white rounded-lg transition-colors font-bold text-xl flex items-center justify-between shadow-md"
             >
-              <option value="all">🌱 Alla mina sparade växter</option>
-              {plansList.length > 0 && (
-                <>
-                  <option disabled>──────────</option>
-                  {plansList.map(plan => (
-                    <option key={plan.id} value={plan.id}>
+              <span>
+                {selectedYearPlan === 'all' ? '🌱 Alla mina sparade växter' : `📋 ${selectedYearPlan}`}
+              </span>
+              <span className="text-2xl">{showPlanSelector ? '▲' : '▼'}</span>
+            </button>
+            
+            {showPlanSelector && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowPlanSelector(false)}
+                />
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-lg shadow-xl border-2 border-plant-300 z-50 max-h-64 overflow-y-auto">
+                  <button
+                    onClick={() => {
+                      onYearPlanChange('all');
+                      setShowPlanSelector(false);
+                    }}
+                    className={`w-full px-6 py-4 text-left hover:bg-plant-50 transition-colors border-b border-earth-100 font-semibold ${
+                      selectedYearPlan === 'all' ? 'bg-plant-50 text-plant-700' : 'text-earth-700'
+                    }`}
+                  >
+                    🌱 Alla mina växter
+                    {selectedYearPlan === 'all' && <span className="float-right text-plant-600">✓</span>}
+                  </button>
+                  {plansList.length > 0 && plansList.map(plan => (
+                    <button
+                      key={plan.id}
+                      onClick={() => {
+                        onYearPlanChange(plan.id);
+                        setShowPlanSelector(false);
+                      }}
+                      className={`w-full px-6 py-4 text-left hover:bg-plant-50 transition-colors border-b border-earth-100 last:border-0 font-semibold ${
+                        selectedYearPlan === plan.id ? 'bg-plant-50 text-plant-700' : 'text-earth-700'
+                      }`}
+                    >
                       📋 {plan.name}
-                    </option>
+                      {selectedYearPlan === plan.id && <span className="float-right text-plant-600">✓</span>}
+                    </button>
                   ))}
-                </>
-              )}
-            </select>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Andra raden: Sök, kategori och toggle */}
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          {/* Search Input */}
-          <div className="flex-1 w-full md:w-auto">
-            <input
-              type="text"
-              placeholder="Sök växt..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <div className="w-full md:w-auto">
-            <select
-              value={selectedCategory}
-              onChange={(e) => onCategoryChange(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors bg-white cursor-pointer"
-            >
-              <option value="">Alla kategorier</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Toggle My Plants - endast när "alla" är vald */}
-          {selectedYearPlan === 'all' && (
+        {/* Gruppering - TYDLIGA KNAPPAR */}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-earth-700 mb-2">
+            Gruppera efter:
+          </label>
+          <div className="flex gap-2">
             <button
-              onClick={onToggleMyPlants}
-              className={`px-6 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
-                showOnlyMyPlants
-                  ? 'bg-plant-500 text-white shadow-lg hover:bg-plant-600'
-                  : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+              onClick={() => onGroupByChange('category')}
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                groupBy === 'category'
+                  ? 'bg-plant-500 text-white shadow-md'
+                  : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
               }`}
             >
-              {showOnlyMyPlants ? '✓ Mina växter' : 'Alla växter'}
+              Kategori
             </button>
-          )}
-
-          {/* Gruppering */}
-          <div className="w-full md:w-auto">
-            <select
-              value={groupBy}
-              onChange={(e) => onGroupByChange(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors bg-white cursor-pointer"
+            {hasYearPlan && (
+              <button
+                onClick={() => onGroupByChange('bed')}
+                className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                  groupBy === 'bed'
+                    ? 'bg-plant-500 text-white shadow-md'
+                    : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
+                }`}
+              >
+                Odlingsbädd
+              </button>
+            )}
+            <button
+              onClick={() => onGroupByChange('none')}
+              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                groupBy === 'none'
+                  ? 'bg-plant-500 text-white shadow-md'
+                  : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
+              }`}
             >
-              <option value="none">Ingen gruppering</option>
-              <option value="category">Gruppera efter kategori</option>
-              {hasYearPlan && <option value="bed">Gruppera efter odlingsbädd</option>}
-            </select>
+              Ingen
+            </button>
           </div>
         </div>
+
+        {/* Expanderbar sökning */}
+        <details className="mb-4">
+          <summary className="cursor-pointer text-sm font-semibold text-earth-700 hover:text-plant-600 transition-colors">
+            🔍 Sök och filtrera...
+          </summary>
+          <div className="mt-3 flex flex-col md:flex-row gap-3">
+            {/* Search Input */}
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Sök växt..."
+                value={searchTerm}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="w-full md:w-auto">
+              <select
+                value={selectedCategory}
+                onChange={(e) => onCategoryChange(e.target.value)}
+                className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors bg-white cursor-pointer"
+              >
+                <option value="">Alla kategorier</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Toggle My Plants - endast när "alla" är vald */}
+            {selectedYearPlan === 'all' && (
+              <button
+                onClick={onToggleMyPlants}
+                className={`px-6 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                  showOnlyMyPlants
+                    ? 'bg-plant-500 text-white shadow-lg hover:bg-plant-600'
+                    : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                }`}
+              >
+                {showOnlyMyPlants ? '✓ Mina växter' : 'Alla växter'}
+              </button>
+            )}
+          </div>
+        </details>
       </div>
     </div>
   );
