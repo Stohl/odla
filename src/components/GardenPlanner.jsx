@@ -5,6 +5,7 @@ import GardenDesigner from './GardenDesigner';
 const GardenPlanner = () => {
   const [designs, setDesigns] = useState({});
   const [activeDesign, setActiveDesign] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Ladda från localStorage
   useEffect(() => {
@@ -18,17 +19,18 @@ const GardenPlanner = () => {
         console.error('Kunde inte ladda designs:', error);
       }
     }
+    setIsLoaded(true);
   }, []);
 
-  // Spara till localStorage
+  // Spara till localStorage (endast efter initial load)
   useEffect(() => {
-    if (Object.keys(designs).length > 0 || activeDesign) {
+    if (isLoaded) {
       localStorage.setItem('gardenDesigns', JSON.stringify({
         designs,
         activeDesign,
       }));
     }
-  }, [designs, activeDesign]);
+  }, [designs, activeDesign, isLoaded]);
 
   // Uppdatera bäddar för aktiv design
   const setBeds = (bedsOrUpdater) => {
