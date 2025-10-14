@@ -279,14 +279,6 @@ const YearPlanner = ({ myPlants }) => {
             ➕ Skapa första planen
           </button>
         </div>
-      ) : beds.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-12 text-center">
-          <div className="text-6xl mb-4">🌱</div>
-          <h2 className="text-2xl font-bold text-earth-800 mb-2">Inga odlingsbäddar</h2>
-          <p className="text-earth-600">
-            Gå till "Mina odlingsbäddar" för att skapa dina bäddar först
-          </p>
-        </div>
       ) : (
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="bg-gradient-to-r from-plant-500 to-plant-400 p-6">
@@ -296,8 +288,85 @@ const YearPlanner = ({ myPlants }) => {
           </div>
 
           <div className="p-6">
-            <div className="space-y-4">
-              {beds.map((bed) => {
+            {/* Växter i planen - HUVUDSEKTION */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-earth-800 mb-2 flex items-center gap-2">
+                🌱 Växter i denna plan
+              </h2>
+              
+              <p className="text-sm text-earth-600 mb-4">
+                Välj vilka växter du vill odla i {activePlan}. Du kan fördela dem i bäddar längre ner om du vill.
+              </p>
+
+              {/* Valda växter */}
+              {currentPlan.unbeddedPlants && currentPlan.unbeddedPlants.length > 0 && (
+                <div className="mb-4">
+                  <div className="flex flex-wrap gap-2">
+                    {currentPlan.unbeddedPlants.map(plant => (
+                      <span
+                        key={plant}
+                        className="text-sm bg-plant-100 text-plant-700 px-3 py-1.5 rounded-full flex items-center gap-2 font-medium"
+                      >
+                        🌱 {plant}
+                        <button
+                          onClick={() => toggleUnbeddedPlant(plant)}
+                          className="text-red-600 hover:text-red-800 font-bold text-lg leading-none"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Plant selector */}
+              <details className="bg-plant-50 border-2 border-plant-200 rounded-lg">
+                <summary className="p-3 cursor-pointer text-sm font-semibold text-plant-700 hover:bg-plant-100 rounded-lg transition-colors">
+                  + Lägg till växter från mina växter
+                </summary>
+                <div className="p-3 pt-0">
+                  {myPlants.length === 0 ? (
+                    <p className="text-sm text-earth-600 text-center py-4">
+                      Inga växter i din lista. Gå till Fröbanken för att lägga till!
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
+                      {myPlants.map(plant => {
+                        const isSelected = currentPlan.unbeddedPlants?.includes(plant);
+                        return (
+                          <button
+                            key={plant}
+                            onClick={() => toggleUnbeddedPlant(plant)}
+                            className={`p-2 rounded-lg text-sm transition-all ${
+                              isSelected
+                                ? 'bg-plant-500 text-white font-semibold'
+                                : 'bg-white border-2 border-plant-200 text-earth-700 hover:border-plant-400'
+                            }`}
+                          >
+                            {isSelected && '✓ '}{plant}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </details>
+            </div>
+
+            {/* Bäddfördelning - SEKUNDÄR SEKTION */}
+            {beds.length > 0 && (
+              <div className="pt-6 border-t-2 border-earth-200">
+                <h2 className="text-xl font-bold text-earth-700 mb-2 flex items-center gap-2">
+                  📦 Fördelning i odlingsbäddar
+                  <span className="text-sm font-normal text-earth-500">(frivilligt)</span>
+                </h2>
+                <p className="text-sm text-earth-600 mb-4">
+                  Fördela växterna i dina bäddar för att planera växtföljd mellan år.
+                </p>
+
+                <div className="space-y-4">
+                  {beds.map((bed) => {
                 const bedPlants = currentPlan.bedPlants[bed.id] || [];
                 
                 return (
@@ -371,77 +440,9 @@ const YearPlanner = ({ myPlants }) => {
                   </div>
                 );
               })}
-            </div>
-
-            {/* Unbedded Plants Section */}
-            <div className="mt-6 pt-6 border-t-2 border-earth-200">
-              <h2 className="text-xl font-bold text-earth-800 mb-4 flex items-center gap-2">
-                🌱 Mina växter
-                <span className="text-sm font-normal text-earth-500">(utan specifik bädd)</span>
-              </h2>
-              
-              <p className="text-sm text-earth-600 mb-4">
-                Lägg till växter du planerar att odla, men som du inte har bestämt vilken bädd de ska i än.
-              </p>
-
-              {/* Valda unbedded plants */}
-              {currentPlan.unbeddedPlants && currentPlan.unbeddedPlants.length > 0 && (
-                <div className="mb-4">
-                  <div className="text-sm font-semibold text-earth-700 mb-2">
-                    Mina växter i denna plan:
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {currentPlan.unbeddedPlants.map(plant => (
-                      <span
-                        key={plant}
-                        className="text-sm bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full flex items-center gap-2"
-                      >
-                        🌱 {plant}
-                        <button
-                          onClick={() => toggleUnbeddedPlant(plant)}
-                          className="text-red-600 hover:text-red-800 font-bold text-lg leading-none"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
                 </div>
-              )}
-
-              {/* Plant selector for unbedded */}
-              <details className="bg-blue-50 border-2 border-blue-200 rounded-lg">
-                <summary className="p-3 cursor-pointer text-sm font-semibold text-blue-700 hover:bg-blue-100 rounded-lg transition-colors">
-                  + Lägg till växter från min lista
-                </summary>
-                <div className="p-3 pt-0">
-                  {myPlants.length === 0 ? (
-                    <p className="text-sm text-earth-600 text-center py-4">
-                      Inga växter i din lista. Gå till Fröbanken för att lägga till!
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mt-2">
-                      {myPlants.map(plant => {
-                        const isSelected = currentPlan.unbeddedPlants?.includes(plant);
-                        return (
-                          <button
-                            key={plant}
-                            onClick={() => toggleUnbeddedPlant(plant)}
-                            className={`p-2 rounded-lg text-sm transition-all ${
-                              isSelected
-                                ? 'bg-blue-500 text-white font-semibold'
-                                : 'bg-white border-2 border-blue-200 text-earth-700 hover:border-blue-400'
-                            }`}
-                          >
-                            {isSelected && '✓ '}{plant}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </details>
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
