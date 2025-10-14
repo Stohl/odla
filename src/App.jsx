@@ -10,6 +10,8 @@ function App() {
   const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', or 'planning'
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
+  const [yearPlans, setYearPlans] = useState({});
+  const [selectedYearPlan, setSelectedYearPlan] = useState('all'); // 'all' or planId
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(true); // Default visa endast mina växter i kalendern
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -64,6 +66,19 @@ function App() {
     localStorage.setItem('myPlants', JSON.stringify(myPlants));
   }, [myPlants]);
 
+  // Load year plans from localStorage
+  useEffect(() => {
+    const savedPlans = localStorage.getItem('yearPlans');
+    if (savedPlans) {
+      try {
+        const data = JSON.parse(savedPlans);
+        setYearPlans(data.plans || {});
+      } catch (e) {
+        console.error('Kunde inte läsa årsplaner:', e);
+      }
+    }
+  }, []);
+
   // Toggle plant selection
   const handleTogglePlant = (plantName) => {
     setMyPlants(prev => {
@@ -78,7 +93,22 @@ function App() {
   // Get unique categories
   const categories = [...new Set(plants.map(p => p.category))].sort();
 
-  // Filter plants based on search, category, and myPlants toggle
+  // Get plants from a specific year plan
+  const getPlantsFromYearPlan = (planId) => {
+    const plan = yearPlans[planId];
+    if (!plan || !plan.beds) return [];
+    
+    const plantSet = new Set();
+    Object.values(plan.beds).forEach(bed => {
+      if (bed.plants && Array.isArray(bed.plants)) {
+        bed.plants.forEach(plant => plantSet.add(plant));
+      }
+    });
+    
+    return Array.from(plantSet);
+  };
+
+  // Filter plants based on search, category, myPlants toggle, and year plan
   const filteredPlants = plants.filter(plant => {
     // Search filter
     const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,10 +117,17 @@ function App() {
     // Category filter
     const matchesCategory = !selectedCategory || plant.category === selectedCategory;
     
-    // My plants filter
-    const matchesMyPlants = !showOnlyMyPlants || myPlants.includes(plant.name);
+    // Year plan filter
+    let matchesYearPlan = true;
+    if (selectedYearPlan !== 'all') {
+      const planPlants = getPlantsFromYearPlan(selectedYearPlan);
+      matchesYearPlan = planPlants.includes(plant.name);
+    } else {
+      // If "all" is selected, use the myPlants toggle
+      matchesYearPlan = !showOnlyMyPlants || myPlants.includes(plant.name);
+    }
 
-    return matchesSearch && matchesCategory && matchesMyPlants;
+    return matchesSearch && matchesCategory && matchesYearPlan;
   });
 
   if (loading) {
@@ -176,6 +213,9 @@ function App() {
             categories={categories}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
+            yearPlans={yearPlans}
+            selectedYearPlan={selectedYearPlan}
+            onYearPlanChange={setSelectedYearPlan}
           />
 
           {/* Calendar View */}
