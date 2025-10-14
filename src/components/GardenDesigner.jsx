@@ -23,24 +23,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const canvasWidth = orientation === 'landscape' ? 1100 : 800;
   const canvasHeight = orientation === 'landscape' ? 800 : 1100;
 
-  // Skapa ny odlingsbädd från scratch
-  const createBed = () => {
-    const name = prompt('Namn på odlingsbädd:');
-    if (!name || !name.trim()) return;
-
-    const newBed = {
-      id: Date.now(),
-      name: name.trim(),
-      x: 50,
-      y: 50,
-      width: 200,
-      height: 100,
-    };
-
-    setBeds([...beds, newBed]);
-    setSelected(newBed.id);
-  };
-
   // Lägg till från sparade bäddar
   const addFromSaved = (savedBed) => {
     const newBed = {
@@ -143,17 +125,10 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       {/* Kontroller */}
       <div className="mb-4 flex flex-wrap gap-2 items-center">
         <button
-          onClick={createBed}
+          onClick={() => setShowBedSelector(!showBedSelector)}
           className="px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
         >
-          ➕ Ny bädd
-        </button>
-
-        <button
-          onClick={() => setShowBedSelector(!showBedSelector)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
-        >
-          📋 Välj från sparade bäddar
+          {showBedSelector ? '− Stäng väljare' : '📋 Lägg till bädd från mina bäddar'}
         </button>
 
         {selected && (
@@ -215,25 +190,37 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       )}
 
       {/* Bädväljare */}
-      {showBedSelector && savedBeds.length > 0 && (
-        <div className="mb-4 p-4 bg-white border-2 border-blue-300 rounded-lg">
-          <h3 className="font-semibold text-earth-800 mb-3">Välj från sparade bäddar:</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {savedBeds.map((bed) => (
-              <button
-                key={bed.id}
-                onClick={() => addFromSaved(bed)}
-                className="p-3 border-2 border-earth-200 rounded-lg hover:border-plant-400 hover:bg-plant-50 transition-colors text-left"
-              >
-                <div className="font-semibold text-earth-800 text-sm">{bed.name}</div>
-                {bed.plants && bed.plants.length > 0 && (
-                  <div className="text-xs text-plant-600 mt-1">
-                    🌱 {bed.plants.length} växter
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
+      {showBedSelector && (
+        <div className="mb-4 p-4 bg-plant-50 border-2 border-plant-300 rounded-lg">
+          {savedBeds.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-3">🌱</div>
+              <p className="text-earth-700 font-semibold mb-2">Inga odlingsbäddar skapade ännu</p>
+              <p className="text-earth-600 text-sm">
+                Gå till fliken "🌿 Mina bäddar" för att skapa dina odlingsbäddar först
+              </p>
+            </div>
+          ) : (
+            <>
+              <h3 className="font-semibold text-earth-800 mb-3">Välj från dina sparade bäddar:</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {savedBeds.map((bed) => (
+                  <button
+                    key={bed.id}
+                    onClick={() => addFromSaved(bed)}
+                    className="p-3 border-2 border-earth-200 rounded-lg hover:border-plant-400 hover:bg-white transition-colors text-left"
+                  >
+                    <div className="font-semibold text-earth-800 text-sm">{bed.name}</div>
+                    {bed.description && (
+                      <div className="text-xs text-earth-500 mt-1">
+                        {bed.description.substring(0, 30)}...
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
