@@ -22,9 +22,20 @@ const PlantRow = ({
   const renderMonthCells = () => {
     // Parse planted date if exists
     let plantedMonth = null;
+    let plantedDay = null;
     if (plantedDate) {
       const date = new Date(plantedDate);
       plantedMonth = date.getMonth() + 1; // 1-12
+      plantedDay = date.getDate();
+    }
+
+    // Parse harvested date if exists
+    let harvestedMonth = null;
+    let harvestedDay = null;
+    if (harvestedDate) {
+      const date = new Date(harvestedDate);
+      harvestedMonth = date.getMonth() + 1; // 1-12
+      harvestedDay = date.getDate();
     }
 
     return MONTHS.map((month, index) => {
@@ -34,6 +45,7 @@ const PlantRow = ({
       const isHarvest = plant.harvest_months?.includes(monthNum);
       const isCurrentMonth = monthNum === currentMonth;
       const isPlantedMonth = plantedMonth === monthNum;
+      const isHarvestedMonth = harvestedMonth === monthNum;
 
       let cellContent = null;
       let cellClass = 'relative h-12 border-r border-earth-100';
@@ -77,16 +89,15 @@ const PlantRow = ({
       }
 
       // Show planting indicator if this is the planted month
-      if (isPlantedMonth) {
+      if (isPlantedMonth && plantedDay) {
         // Calculate position based on day of month
-        const day = new Date(plantedDate).getDate();
-        let positionClass = 'justify-center'; // Default center
+        let positionClass = 'justify-center';
         
-        if (day <= 7) {
+        if (plantedDay <= 7) {
           positionClass = 'justify-start';
-        } else if (day <= 14) {
+        } else if (plantedDay <= 14) {
           positionClass = 'justify-start pl-4';
-        } else if (day <= 21) {
+        } else if (plantedDay <= 21) {
           positionClass = 'justify-end pr-4';
         } else {
           positionClass = 'justify-end';
@@ -95,10 +106,36 @@ const PlantRow = ({
         activities.push(
           <div
             key="planted"
-            className={`absolute inset-0 flex items-center ${positionClass} z-10`}
+            className={`absolute inset-0 flex items-start ${positionClass} z-10 pt-0.5`}
             title={`Planterad ${new Date(plantedDate).toLocaleDateString('sv-SE')}`}
           >
-            <span className="text-2xl drop-shadow-md">📍</span>
+            <span className="text-xl drop-shadow-md">📍</span>
+          </div>
+        );
+      }
+
+      // Show harvested indicator if this is the harvested month
+      if (isHarvestedMonth && harvestedDay) {
+        // Calculate position based on day of month
+        let positionClass = 'justify-center';
+        
+        if (harvestedDay <= 7) {
+          positionClass = 'justify-start';
+        } else if (harvestedDay <= 14) {
+          positionClass = 'justify-start pl-4';
+        } else if (harvestedDay <= 21) {
+          positionClass = 'justify-end pr-4';
+        } else {
+          positionClass = 'justify-end';
+        }
+        
+        activities.push(
+          <div
+            key="harvested"
+            className={`absolute inset-0 flex items-end ${positionClass} z-10 pb-0.5`}
+            title={`Skördad ${new Date(harvestedDate).toLocaleDateString('sv-SE')}`}
+          >
+            <span className="text-xl drop-shadow-md">🌾</span>
           </div>
         );
       }
