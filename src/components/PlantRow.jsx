@@ -18,12 +18,20 @@ const PlantRow = ({
 
   // Create month cells with activity indicators
   const renderMonthCells = () => {
+    // Parse planted date if exists
+    let plantedMonth = null;
+    if (plantedDate) {
+      const date = new Date(plantedDate);
+      plantedMonth = date.getMonth() + 1; // 1-12
+    }
+
     return MONTHS.map((month, index) => {
       const monthNum = index + 1;
       const isSeedling = plant.seedling_months?.includes(monthNum);
       const isSowing = plant.sowing_months?.includes(monthNum);
       const isHarvest = plant.harvest_months?.includes(monthNum);
       const isCurrentMonth = monthNum === currentMonth;
+      const isPlantedMonth = plantedMonth === monthNum;
 
       let cellContent = null;
       let cellClass = 'relative h-12 border-r border-earth-100';
@@ -63,6 +71,19 @@ const PlantRow = ({
             className={`absolute left-0 right-0 h-1/3 bg-yellow-400 ${topPosition}`}
             title="Skördas"
           />
+        );
+      }
+
+      // Show planting indicator if this is the planted month
+      if (isPlantedMonth) {
+        activities.push(
+          <div
+            key="planted"
+            className="absolute inset-0 flex items-center justify-center z-10"
+            title={`Planterad ${new Date(plantedDate).toLocaleDateString('sv-SE')}`}
+          >
+            <span className="text-2xl drop-shadow-md">📍</span>
+          </div>
         );
       }
 

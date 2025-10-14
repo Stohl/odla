@@ -34,6 +34,10 @@ const CalendarView = ({
             <span className="w-4 h-4 bg-yellow-400 rounded"></span>
             <span className="text-earth-700">Skördas</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📍</span>
+            <span className="text-earth-700">Planterad (datum)</span>
+          </div>
         </div>
       </div>
 
