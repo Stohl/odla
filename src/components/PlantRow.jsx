@@ -76,10 +76,24 @@ const PlantRow = ({
 
       // Show planting indicator if this is the planted month
       if (isPlantedMonth) {
+        // Calculate position based on day of month
+        const day = new Date(plantedDate).getDate();
+        let positionClass = 'justify-center'; // Default center
+        
+        if (day <= 7) {
+          positionClass = 'justify-start pl-1';
+        } else if (day <= 14) {
+          positionClass = 'justify-start pl-6';
+        } else if (day <= 21) {
+          positionClass = 'justify-end pr-6';
+        } else {
+          positionClass = 'justify-end pr-1';
+        }
+        
         activities.push(
           <div
             key="planted"
-            className="absolute inset-0 flex items-center justify-center z-10"
+            className={`absolute inset-0 flex items-center ${positionClass} z-10`}
             title={`Planterad ${new Date(plantedDate).toLocaleDateString('sv-SE')}`}
           >
             <span className="text-2xl drop-shadow-md">📍</span>
