@@ -83,6 +83,41 @@ function App() {
     }
   }, []);
 
+  // Get plant dates for the selected year plan
+  const getCurrentPlantDates = () => {
+    if (selectedYearPlan === 'all' || !yearPlans[selectedYearPlan]) {
+      return {};
+    }
+    return yearPlans[selectedYearPlan].plantDates || {};
+  };
+
+  // Update plant date for the selected year plan
+  const handleDateChange = (plantName, date) => {
+    if (selectedYearPlan === 'all') return;
+
+    setYearPlans(prev => {
+      const updatedPlans = { ...prev };
+      if (!updatedPlans[selectedYearPlan]) return prev;
+
+      updatedPlans[selectedYearPlan] = {
+        ...updatedPlans[selectedYearPlan],
+        plantDates: {
+          ...(updatedPlans[selectedYearPlan].plantDates || {}),
+          [plantName]: date
+        },
+        updatedAt: new Date().toISOString()
+      };
+
+      // Save immediately to localStorage
+      localStorage.setItem('yearPlans', JSON.stringify({
+        plans: updatedPlans,
+        activePlan: selectedYearPlan
+      }));
+
+      return updatedPlans;
+    });
+  };
+
   // Toggle plant selection
   const handleTogglePlant = (plantName) => {
     setMyPlants(prev => {
@@ -228,6 +263,9 @@ function App() {
               plants={filteredPlants}
               myPlants={myPlants}
               onTogglePlant={handleTogglePlant}
+              selectedYearPlan={selectedYearPlan}
+              plantDates={getCurrentPlantDates()}
+              onDateChange={handleDateChange}
             />
           </div>
 

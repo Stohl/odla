@@ -6,8 +6,16 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'
 ];
 
-const CalendarView = ({ plants, myPlants, onTogglePlant }) => {
+const CalendarView = ({ 
+  plants, 
+  myPlants, 
+  onTogglePlant, 
+  selectedYearPlan, 
+  plantDates, 
+  onDateChange 
+}) => {
   const currentMonth = new Date().getMonth() + 1; // 1-12
+  const canEditDate = selectedYearPlan !== 'all'; // Kan bara sätta datum när en specifik plan är vald
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -67,6 +75,9 @@ const CalendarView = ({ plants, myPlants, onTogglePlant }) => {
                   isSelected={myPlants.includes(plant.name)}
                   onToggleSelect={onTogglePlant}
                   currentMonth={currentMonth}
+                  plantedDate={plantDates?.[plant.name] || ''}
+                  onDateChange={onDateChange}
+                  canEditDate={canEditDate}
                 />
               ))
             )}

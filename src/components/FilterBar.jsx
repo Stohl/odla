@@ -12,7 +12,11 @@ const FilterBar = ({
   selectedYearPlan,
   onYearPlanChange
 }) => {
-  const plansList = Object.values(yearPlans || {});
+  // Convert plans object to array with names as keys
+  const plansList = Object.keys(yearPlans || {}).map(planName => ({
+    id: planName,
+    name: planName
+  }));
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 mb-6">
@@ -34,7 +38,7 @@ const FilterBar = ({
                   <option disabled>──────────</option>
                   {plansList.map(plan => (
                     <option key={plan.id} value={plan.id}>
-                      📋 {plan.name} ({plan.year})
+                      📋 {plan.name}
                     </option>
                   ))}
                 </>
