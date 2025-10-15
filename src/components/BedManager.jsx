@@ -33,6 +33,8 @@ const BedManager = () => {
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem('myGardenBeds', JSON.stringify(beds));
+      // Informera andra vyer (t.ex. GardenDesigner) att bäddar uppdaterats
+      window.dispatchEvent(new CustomEvent('myGardenBeds-updated'));
     }
   }, [beds, isLoaded]);
 

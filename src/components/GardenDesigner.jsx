@@ -7,17 +7,59 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [showBedSelector, setShowBedSelector] = useState(false);
   const stageRef = useRef(null);
 
-  // Ladda sparade bäddar från BedManager
+  // Ladda sparade bäddar från BedManager och håll dem synkade
   useEffect(() => {
-    const saved = localStorage.getItem('myGardenBeds');
-    if (saved) {
-      try {
-        setSavedBeds(JSON.parse(saved));
-      } catch (error) {
-        console.error('Kunde inte ladda sparade bäddar:', error);
+    const loadBeds = () => {
+      const saved = localStorage.getItem('myGardenBeds');
+      if (saved) {
+        try {
+          setSavedBeds(JSON.parse(saved));
+        } catch (error) {
+          console.error('Kunde inte ladda sparade bäddar:', error);
+        }
+      } else {
+        setSavedBeds([]);
       }
-    }
+    };
+
+    loadBeds();
+
+    const handleUpdate = (e) => {
+      if (!e || e.key === 'myGardenBeds') {
+        loadBeds();
+      }
+    };
+
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('myGardenBeds-updated', handleUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('myGardenBeds-updated', handleUpdate);
+    };
   }, []);
+
+  // När sparade odlingsplatser ändras: uppdatera namn/typ på instanser som härstammar från dem
+  useEffect(() => {
+    if (!Array.isArray(savedBeds) || savedBeds.length === 0) return;
+
+    setBeds((prev) =>
+      prev.map((instance) => {
+        if (!instance.savedBedId) return instance;
+        const source = savedBeds.find((s) => s.id === instance.savedBedId);
+        if (!source) return instance; // källan raderad, behåll instansen orörd
+        // Uppdatera bara namn/typ; behåll position och storlek i designen
+        if (instance.name !== source.name || instance.type !== (source.type || 'bed')) {
+          return {
+            ...instance,
+            name: source.name,
+            type: source.type || 'bed',
+          };
+        }
+        return instance;
+      })
+    );
+  }, [savedBeds, setBeds]);
 
   // Canvas dimensioner baserat på orientering
   const canvasWidth = orientation === 'landscape' ? 1100 : 800;
