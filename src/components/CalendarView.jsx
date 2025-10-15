@@ -153,7 +153,11 @@ const CalendarView = ({
               padding: 4px; 
               text-align: center; 
               font-size: 10px; 
+              page-break-inside: avoid;
             }
+            .calendar-table thead { display: table-header-group; }
+            .calendar-table tbody { display: table-row-group; }
+            .calendar-table tr { page-break-inside: avoid; }
             .calendar-table th { 
               background: #f0f0f0; 
               font-weight: bold; 
@@ -232,9 +236,12 @@ const CalendarView = ({
           </div>
           
           ${Object.entries(groupedPlants).map(([groupName, groupPlants]) => `
-            ${groupBy !== 'none' ? `<div class="group-header">${groupName}</div>` : ''}
             <table class="calendar-table">
               <thead>
+                ${groupBy !== 'none' ? `
+                <tr>
+                  <th colspan="13" style="text-align:left; background:#e8f5e9; font-size:12px;">${groupName}</th>
+                </tr>` : ''}
                 <tr>
                   <th class="plant-name">Växt</th>
                   ${MONTHS.map(month => `<th>${month}</th>`).join('')}
@@ -301,6 +308,16 @@ const CalendarView = ({
     const element = document.createElement('div');
     element.innerHTML = `
       <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
+        <style>
+          .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+          .pdf-cal-table th, .pdf-cal-table td { border: 1px solid #ddd; padding: 4px 6px; font-size: 10px; page-break-inside: avoid; }
+          .pdf-cal-table td { text-align: center; }
+          .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
+          .pdf-cal-table tbody { display: table-row-group; }
+          .pdf-cal-table tr { page-break-inside: avoid; }
+          .pdf-cal-header { background: #e8f5e9; font-size: 12px; text-align: left; vertical-align: middle; padding: 6px 8px; }
+          .pdf-plant-name { text-align: left; font-weight: bold; min-width: 90px; max-width: 100px; width: 100px; }
+        </style>
         <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #2d6a4f; padding-bottom: 10px;">
           <div style="font-size: 24px; font-weight: bold; color: #2d6a4f; margin-bottom: 5px;">Odlingskalender${yearPlanText}</div>
           <div style="color: #666; font-size: 14px;">Skapad: ${currentDate}</div>
@@ -330,18 +347,21 @@ const CalendarView = ({
         </div>
         
         ${Object.entries(groupedPlants).map(([groupName, groupPlants]) => `
-          ${groupBy !== 'none' ? `<div style="background: #2d6a4f; color: white; padding: 8px; font-weight: bold; margin: 10px 0 5px 0;">${groupName}</div>` : ''}
-          <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+          <table class="pdf-cal-table">
             <thead>
+              ${groupBy !== 'none' ? `
               <tr>
-                <th style="border: 1px solid #ddd; padding: 4px; text-align: left; font-weight: bold; min-width: 120px;">Växt</th>
-                ${MONTHS.map(month => `<th style="border: 1px solid #ddd; padding: 4px; text-align: center; font-weight: bold; width: 40px;">${month}</th>`).join('')}
+                <th class="pdf-cal-header" colspan="13">${groupName}</th>
+              </tr>` : ''}
+              <tr>
+                <th class="pdf-plant-name">Växt</th>
+                ${MONTHS.map(month => `<th style=\"text-align:center;\">${month}</th>`).join('')}
               </tr>
             </thead>
             <tbody>
               ${groupPlants.map(plant => `
                 <tr>
-                  <td style="border: 1px solid #ddd; padding: 4px; font-weight: bold;">${plant.name}</td>
+                  <td class="pdf-plant-name" style="vertical-align: middle;">${plant.name}</td>
                   ${MONTHS.map((month, index) => {
                     const monthNum = index + 1;
                     const isSeedling = plant.seedling_months?.includes(monthNum);
@@ -371,7 +391,7 @@ const CalendarView = ({
                     if (isPlantedMonth) cellContent += '📍';
                     if (isHarvestedMonth) cellContent += '🌾';
                     
-                    return `<td style="border: 1px solid #ddd; padding: 2px; text-align: center; width: 40px; height: 30px; position: relative;">${cellContent}</td>`;
+                    return `<td style="border: 1px solid #ddd; padding: 2px; text-align: center; width: 40px; height: 30px; position: relative; page-break-inside: avoid;">${cellContent}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
@@ -386,7 +406,8 @@ const CalendarView = ({
       filename: `odlingskalender${yearPlanText}-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+      pagebreak: { mode: ['css', 'legacy'] }
     };
     
     html2pdf().set(opt).from(element).save();
