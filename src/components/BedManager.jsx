@@ -296,7 +296,7 @@ const BedManager = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-earth-700 mb-2">
-                  Typ av odlingsplats
+                  Typ av odlingsplats (foremfaktor)
                 </label>
                 <div className="flex gap-2">
                   <button

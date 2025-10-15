@@ -284,18 +284,15 @@ const YearPlanner = ({ myPlants }) => {
             {/* Växter i planen - VISA ALLA MINA VÄXTER */}
             <div className="mb-8">
               <h2 className="text-2xl font-bold text-earth-800 mb-2 flex items-center gap-2">
-                🌱 Växter i denna plan
+                🌱 Mina växter
               </h2>
               
               <p className="text-sm text-earth-600 mb-4">
-                Välj vilka växter som ska odlas i bäddarna nedan. Grön bock ✓ = finns i en bädd.
+                Här är alla dina växter, placera dem i odlingsplatser för att spara dem i årsplanen. Här ser du vilka växter som du har placerat på odlingsplatser.
               </p>
 
               {/* Alla mina växter med status */}
               <div className="bg-plant-50 border-2 border-plant-300 rounded-lg p-4">
-                <div className="text-sm font-semibold text-plant-700 mb-3">
-                  Placerade i odlingsbäddar:
-                </div>
                 {myPlants.length === 0 ? (
                   <p className="text-earth-600 text-sm text-center py-4">
                     Inga växter i din lista. Gå till Fröbanken för att lägga till!
@@ -335,12 +332,8 @@ const YearPlanner = ({ myPlants }) => {
             {beds.length > 0 && (
               <div className="pt-6 border-t-2 border-earth-200">
                 <h2 className="text-xl font-bold text-earth-700 mb-2 flex items-center gap-2">
-                  📦 Fördelning i odlingsbäddar
-                  <span className="text-sm font-normal text-earth-500">(frivilligt)</span>
+                  Välj växtplats för dina växter
                 </h2>
-                <p className="text-sm text-earth-600 mb-4">
-                  Fördela växterna i dina bäddar för att planera växtföljd mellan år.
-                </p>
 
                 <div className="space-y-4">
                   {beds.map((bed) => {
@@ -357,35 +350,10 @@ const YearPlanner = ({ myPlants }) => {
                       <p className="text-sm text-earth-600 mb-3">{bed.description}</p>
                     )}
 
-                    {/* Valda växter för denna bädd */}
-                    {bedPlants.length > 0 && (
-                      <div className="mb-3">
-                        <div className="text-sm font-semibold text-earth-700 mb-2">
-                          Planteras i denna bädd:
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {bedPlants.map(plant => (
-                            <span
-                              key={plant}
-                              className="text-sm bg-plant-100 text-plant-700 px-3 py-1.5 rounded-full flex items-center gap-2"
-                            >
-                              🌱 {plant}
-                              <button
-                                onClick={() => togglePlantInBed(bed.id, plant)}
-                                className="text-red-600 hover:text-red-800 font-bold text-lg leading-none"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Växtväljare - ALLTID EXPANDERAD, visa ALLA mina växter */}
                     <div className="bg-earth-50 border-2 border-earth-200 rounded-lg p-3">
                       <div className="text-xs font-semibold text-earth-700 mb-2">
-                        Välj växter för denna bädd:
+                        Välj växter för denna plats:
                       </div>
                       {myPlants.length === 0 ? (
                         <p className="text-sm text-earth-600 text-center py-4">
