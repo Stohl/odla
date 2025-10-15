@@ -198,7 +198,6 @@ const BedManager = () => {
         <div className="bg-white rounded-xl shadow-md overflow-hidden divide-y divide-earth-200">
           {beds.map((bed) => {
             const isExpanded = expandedBed === bed.id;
-            const bedIcon = bed.type === 'pot' ? '🪴' : '📦';
             
             return (
               <div key={bed.id}>
@@ -209,7 +208,11 @@ const BedManager = () => {
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
-                      <span className="text-2xl">{bedIcon}</span>
+                      {bed.type === 'pot' ? (
+                        <span className="text-2xl">🪴</span>
+                      ) : (
+                        <div className="w-8 h-6 bg-gradient-to-b from-amber-700 to-amber-900 rounded-sm border-2 border-amber-800 flex-shrink-0"></div>
+                      )}
                       <div className="flex-1">
                         <div className="font-semibold text-earth-800 text-lg">{bed.name}</div>
                         {bed.description && (
@@ -293,34 +296,32 @@ const BedManager = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-earth-700 mb-2">
-                  Typ av odlingsplats *
+                  Typ av odlingsplats
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'bed' })}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`flex-1 px-3 py-2 rounded-lg border-2 transition-all flex items-center gap-2 ${
                       formData.type === 'bed'
                         ? 'border-plant-500 bg-plant-50'
                         : 'border-earth-200 hover:border-earth-300'
                     }`}
                   >
-                    <div className="text-3xl mb-2">📦</div>
-                    <div className="font-semibold text-earth-800">Odlingsbädd</div>
-                    <div className="text-xs text-earth-600">Rektangulär bädd i trädgården</div>
+                    <div className="w-6 h-4 bg-gradient-to-b from-amber-700 to-amber-900 rounded-sm border border-amber-800 flex-shrink-0"></div>
+                    <span className="font-semibold text-earth-800 text-sm">Odlingsbädd</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'pot' })}
-                    className={`p-4 rounded-lg border-2 transition-all ${
+                    className={`flex-1 px-3 py-2 rounded-lg border-2 transition-all flex items-center gap-2 ${
                       formData.type === 'pot'
                         ? 'border-plant-500 bg-plant-50'
                         : 'border-earth-200 hover:border-earth-300'
                     }`}
                   >
-                    <div className="text-3xl mb-2">🪴</div>
-                    <div className="font-semibold text-earth-800">Kruka</div>
-                    <div className="text-xs text-earth-600">Odling i kruka eller container</div>
+                    <span className="text-xl">🪴</span>
+                    <span className="font-semibold text-earth-800 text-sm">Kruka</span>
                   </button>
                 </div>
               </div>
