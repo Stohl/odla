@@ -22,16 +22,16 @@ const PlanningHub = ({ myPlants }) => {
       {/* Underflikar */}
       <div className="bg-white rounded-t-xl shadow-md border-b-2 border-earth-200">
         <div className="grid grid-cols-3 gap-1 p-2">
-          <button
-            onClick={() => setActiveSubView('beds')}
-            className={`px-4 py-3 rounded-lg font-semibold transition-all ${
-              activeSubView === 'beds'
-                ? 'bg-plant-500 text-white shadow-md'
-                : 'text-earth-600 hover:bg-earth-100'
-            }`}
-          >
-            🌿 Mina bäddar
-          </button>
+                  <button
+                    onClick={() => setActiveSubView('beds')}
+                    className={`px-4 py-3 rounded-lg font-semibold transition-all ${
+                      activeSubView === 'beds'
+                        ? 'bg-plant-500 text-white shadow-md'
+                        : 'text-earth-600 hover:bg-earth-100'
+                    }`}
+                  >
+                    🌿 Odlingsplatser
+                  </button>
           <button
             onClick={() => setActiveSubView('plans')}
             className={`px-4 py-3 rounded-lg font-semibold transition-all ${

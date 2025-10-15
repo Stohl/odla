@@ -11,7 +11,10 @@ const BedManager = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    type: 'bed', // 'bed' or 'pot'
   });
+
+  const [expandedBed, setExpandedBed] = useState(null);
 
   // Ladda bäddar från localStorage
   useEffect(() => {
@@ -39,6 +42,7 @@ const BedManager = () => {
     setFormData({
       name: '',
       description: '',
+      type: 'bed',
     });
     setShowModal(true);
   };
@@ -49,6 +53,7 @@ const BedManager = () => {
     setFormData({
       name: bed.name,
       description: bed.description || '',
+      type: bed.type || 'bed',
     });
     setShowModal(true);
   };
@@ -56,7 +61,7 @@ const BedManager = () => {
   // Spara bädd
   const saveBed = () => {
     if (!formData.name.trim()) {
-      alert('Ange ett namn för bädden');
+      alert('Ange ett namn för odlingsplatsen');
       return;
     }
 
@@ -79,20 +84,22 @@ const BedManager = () => {
     }
 
     setShowModal(false);
+    setExpandedBed(null);
     setFormData({
       name: '',
       description: '',
+      type: 'bed',
     });
   };
 
   // Ta bort bädd
   const deleteBed = (bedId) => {
-    if (!confirm('Är du säker på att du vill ta bort denna bädd?')) {
+    if (!confirm('Är du säker på att du vill ta bort denna odlingsplats?')) {
       return;
     }
     setBeds(beds.filter(b => b.id !== bedId));
-    if (selectedBed?.id === bedId) {
-      setSelectedBed(null);
+    if (expandedBed === bedId) {
+      setExpandedBed(null);
     }
   };
 
@@ -136,10 +143,10 @@ const BedManager = () => {
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-earth-800 mb-2 flex items-center gap-3">
           <span>🌿</span>
-          Mina odlingsbäddar
+          Odlingsplatser
         </h1>
         <p className="text-earth-600">
-          Hantera dina odlingsbäddar och plantera växter i dem
+          Hantera dina odlingsbäddar, krukor och andra odlingsplatser
         </p>
       </div>
 
@@ -150,7 +157,7 @@ const BedManager = () => {
             onClick={openNewBed}
             className="px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
           >
-            ➕ Ny odlingsbädd
+            ➕ Ny odlingsplats
           </button>
           <button
             onClick={exportBeds}
@@ -164,7 +171,7 @@ const BedManager = () => {
             <input type="file" accept=".json" onChange={importBeds} className="hidden" />
           </label>
           <span className="ml-auto text-earth-600 font-semibold">
-            Totalt: {beds.length} bäddar
+            Totalt: {beds.length} platser
           </span>
         </div>
       </div>
@@ -174,102 +181,104 @@ const BedManager = () => {
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
           <div className="text-6xl mb-4">🌱</div>
           <h2 className="text-2xl font-bold text-earth-800 mb-2">
-            Inga odlingsbäddar ännu
+            Inga odlingsplatser ännu
           </h2>
           <p className="text-earth-600 mb-4">
-            Skapa din första odlingsbädd för att komma igång!
+            Skapa din första odlingsplats för att komma igång!
           </p>
           <button
             onClick={openNewBed}
             className="px-6 py-3 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
           >
-            ➕ Skapa första bädden
+            ➕ Skapa första platsen
           </button>
         </div>
       ) : (
-        /* Lista och detaljer */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Vänster: Lista */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-              <div className="bg-plant-500 p-4">
-                <h2 className="text-xl font-bold text-white">Alla bäddar</h2>
-              </div>
-              <div className="divide-y divide-earth-200">
-                {beds.map((bed) => (
-                  <div
-                    key={bed.id}
-                    onClick={() => setSelectedBed(bed.id)}
-                    className={`p-4 cursor-pointer transition-colors ${
-                      selectedBed === bed.id
-                        ? 'bg-plant-50 border-l-4 border-plant-500'
-                        : 'hover:bg-earth-50'
-                    }`}
-                  >
-                    <div className="font-semibold text-earth-800">{bed.name}</div>
-                    {bed.description && (
-                      <div className="text-xs text-earth-500 mt-1">
-                        {bed.description.substring(0, 50)}{bed.description.length > 50 ? '...' : ''}
+        /* Expanderbara rader */
+        <div className="bg-white rounded-xl shadow-md overflow-hidden divide-y divide-earth-200">
+          {beds.map((bed) => {
+            const isExpanded = expandedBed === bed.id;
+            const bedIcon = bed.type === 'pot' ? '🪴' : '📦';
+            
+            return (
+              <div key={bed.id}>
+                {/* Huvudrad */}
+                <div
+                  onClick={() => setExpandedBed(isExpanded ? null : bed.id)}
+                  className="p-4 cursor-pointer hover:bg-earth-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className="text-2xl">{bedIcon}</span>
+                      <div className="flex-1">
+                        <div className="font-semibold text-earth-800 text-lg">{bed.name}</div>
+                        {bed.description && (
+                          <div className="text-sm text-earth-500 mt-0.5">
+                            {bed.description.substring(0, 80)}{bed.description.length > 80 ? '...' : ''}
+                          </div>
+                        )}
+                        <div className="text-xs text-earth-400 mt-1">
+                          {bed.type === 'pot' ? 'Kruka' : 'Odlingsbädd'}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Höger: Detaljer */}
-          <div className="lg:col-span-2">
-            {selectedBedData ? (
-              <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                <div className="bg-gradient-to-r from-plant-500 to-plant-400 p-6">
-                  <h2 className="text-2xl font-bold text-white">{selectedBedData.name}</h2>
-                </div>
-                <div className="p-6">
-                  {selectedBedData.description && (
-                    <div className="mb-6">
-                      <h3 className="text-sm font-semibold text-earth-700 mb-2">Beskrivning</h3>
-                      <p className="text-earth-600">{selectedBedData.description}</p>
                     </div>
-                  )}
-
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-800">
-                      💡 <span className="font-semibold">Tips:</span> Gå till fliken "📋 Årsplaner" för att planera vad som ska odlas i denna bädd
-                    </p>
-                  </div>
-
-                  <div className="text-xs text-earth-500">
-                    Skapad: {new Date(selectedBedData.createdAt).toLocaleDateString('sv-SE')}
-                    {selectedBedData.updatedAt && (
-                      <> • Uppdaterad: {new Date(selectedBedData.updatedAt).toLocaleDateString('sv-SE')}</>
-                    )}
-                  </div>
-
-                  {/* Knappar */}
-                  <div className="flex gap-2 mt-6 pt-6 border-t border-earth-200">
-                    <button
-                      onClick={() => openEditBed(selectedBedData)}
-                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
-                    >
-                      ✏️ Redigera
-                    </button>
-                    <button
-                      onClick={() => deleteBed(selectedBedData.id)}
-                      className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
-                    >
-                      🗑 Ta bort
-                    </button>
+                    <span className="text-earth-400 text-xl">
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
                   </div>
                 </div>
+
+                {/* Expanderad vy */}
+                {isExpanded && (
+                  <div className="bg-earth-50 p-6 border-t border-earth-200">
+                    <div className="max-w-3xl">
+                      {bed.description && (
+                        <div className="mb-4">
+                          <h3 className="text-sm font-semibold text-earth-700 mb-2">Beskrivning</h3>
+                          <p className="text-earth-600">{bed.description}</p>
+                        </div>
+                      )}
+
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <p className="text-sm text-blue-800">
+                          💡 <span className="font-semibold">Tips:</span> Gå till fliken "📋 Årsplaner" för att planera vad som ska odlas här
+                        </p>
+                      </div>
+
+                      <div className="text-xs text-earth-500 mb-4">
+                        Skapad: {new Date(bed.createdAt).toLocaleDateString('sv-SE')}
+                        {bed.updatedAt && (
+                          <> • Uppdaterad: {new Date(bed.updatedAt).toLocaleDateString('sv-SE')}</>
+                        )}
+                      </div>
+
+                      {/* Knappar */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditBed(bed);
+                          }}
+                          className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
+                        >
+                          ✏️ Redigera
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteBed(bed.id);
+                          }}
+                          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                        >
+                          🗑 Ta bort
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="bg-white rounded-xl shadow-md p-12 text-center">
-                <div className="text-4xl mb-4">👈</div>
-                <p className="text-earth-600">Välj en bädd från listan för att se detaljer</p>
-              </div>
-            )}
-          </div>
+            );
+          })}
         </div>
       )}
 
@@ -278,10 +287,44 @@ const BedManager = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-earth-800 mb-4">
-              {editingBed ? 'Redigera odlingsbädd' : 'Ny odlingsbädd'}
+              {editingBed ? 'Redigera odlingsplats' : 'Ny odlingsplats'}
             </h2>
 
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-earth-700 mb-2">
+                  Typ av odlingsplats *
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, type: 'bed' })}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      formData.type === 'bed'
+                        ? 'border-plant-500 bg-plant-50'
+                        : 'border-earth-200 hover:border-earth-300'
+                    }`}
+                  >
+                    <div className="text-3xl mb-2">📦</div>
+                    <div className="font-semibold text-earth-800">Odlingsbädd</div>
+                    <div className="text-xs text-earth-600">Rektangulär bädd i trädgården</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, type: 'pot' })}
+                    className={`p-4 rounded-lg border-2 transition-all ${
+                      formData.type === 'pot'
+                        ? 'border-plant-500 bg-plant-50'
+                        : 'border-earth-200 hover:border-earth-300'
+                    }`}
+                  >
+                    <div className="text-3xl mb-2">🪴</div>
+                    <div className="font-semibold text-earth-800">Kruka</div>
+                    <div className="text-xs text-earth-600">Odling i kruka eller container</div>
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-earth-700 mb-2">
                   Namn *
@@ -290,7 +333,7 @@ const BedManager = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="T.ex. Tomat-bädd, Rotfrukter..."
+                  placeholder={formData.type === 'pot' ? 'T.ex. Stor kruka vid verandan...' : 'T.ex. Tomat-bädd, Rotfrukter...'}
                   className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
                 />
               </div>
