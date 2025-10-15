@@ -6,6 +6,8 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [selected, setSelected] = useState(null);
   const [savedBeds, setSavedBeds] = useState([]);
   const [showBedSelector, setShowBedSelector] = useState(false);
+  const [yearPlans, setYearPlans] = useState({});
+  const [selectedPlan, setSelectedPlan] = useState('');
   const stageRef = useRef(null);
 
   // Ladda sparade bäddar från BedManager och håll dem synkade
@@ -61,6 +63,40 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       })
     );
   }, [savedBeds, setBeds]);
+
+  // Ladda och lyssna på årsplaner
+  useEffect(() => {
+    const loadPlans = () => {
+      const saved = localStorage.getItem('yearPlans');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          setYearPlans(data.plans || {});
+          // Om ingen plan vald, välj aktiv eller första
+          if (!selectedPlan) {
+            setSelectedPlan(data.activePlan || Object.keys(data.plans || {})[0] || '');
+          }
+        } catch (e) {
+          console.error('Kunde inte ladda årsplaner:', e);
+        }
+      } else {
+        setYearPlans({});
+      }
+    };
+
+    loadPlans();
+    const handler = (e) => {
+      if (!e || e.key === 'yearPlans' || e.type === 'yearPlans-updated') {
+        loadPlans();
+      }
+    };
+    window.addEventListener('storage', handler);
+    window.addEventListener('yearPlans-updated', handler);
+    return () => {
+      window.removeEventListener('storage', handler);
+      window.removeEventListener('yearPlans-updated', handler);
+    };
+  }, [selectedPlan]);
 
   // Canvas dimensioner baserat på orientering
   const canvasWidth = orientation === 'landscape' ? 1100 : 800;
@@ -182,6 +218,42 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const printDesign = () => {
     const printWindow = window.open('', '_blank');
     const canvas = stageRef.current.toDataURL();
+    const plan = selectedPlan && yearPlans[selectedPlan] ? yearPlans[selectedPlan] : null;
+
+    // Bygg tabell för bäddar/växter från vald plan
+    let bedsOrder = savedBeds; // använd sparad ordning
+    const bedIdToName = Object.fromEntries(savedBeds.map(b => [b.id, b.name]));
+    const planBedIds = plan ? Object.keys(plan.bedPlants || {}) : [];
+    // Begränsa till bäddar som finns i plan
+    bedsOrder = bedsOrder.filter(b => planBedIds.includes(String(b.id)) || planBedIds.includes(b.id));
+    const headers = bedsOrder.map(b => bedIdToName[b.id] || b.name);
+    const columns = bedsOrder.map(b => (plan?.bedPlants?.[b.id] || []).slice());
+    const maxRows = columns.reduce((m, col) => Math.max(m, col.length), 0);
+    const tableHtml = plan && bedsOrder.length > 0 ? `
+      <style>
+        .gd-print-table { border-collapse: collapse; border-spacing: 0; font-size: 12px; }
+        .gd-print-table th, .gd-print-table td { border: 0.5px solid #94a3b8; padding: 4px 6px; line-height: 1.1; background: #ffffff; }
+        .gd-print-table th { border: 1px solid #64748b; background: #f1f5f9; vertical-align: middle; text-align: left; white-space: nowrap; }
+        @media print { .gd-print-table th, .gd-print-table td { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+      </style>
+      <div style="margin-top:16px; text-align:left;">
+        <h3 style="font-size:16px; color:#2d6a4f; margin:0 0 6px 0;">Plantering per odlingsplats – ${selectedPlan}</h3>
+        <table class="gd-print-table">
+          <thead>
+            <tr>
+              ${headers.map(h => `<th>${h}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${Array.from({length: maxRows}).map((_, rIdx) => `
+              <tr>
+                ${columns.map(col => `<td>${col[rIdx] ? col[rIdx] : ''}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : '';
     
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -262,17 +334,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
             <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; height: auto;" />
           </div>
           
-          <div class="legend">
-            <h3>Förklaring</h3>
-            <div class="legend-item">
-              <div class="legend-icon bed"></div>
-              <span>Odlingsbädd</span>
-            </div>
-            <div class="legend-item">
-              <div class="legend-icon pot"></div>
-              <span>Kruka</span>
-            </div>
-          </div>
+          ${tableHtml}
         </body>
       </html>
     `);
@@ -288,6 +350,39 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   // Exportera som PDF
   const exportAsPDF = () => {
     const canvas = stageRef.current.toDataURL();
+    const plan = selectedPlan && yearPlans[selectedPlan] ? yearPlans[selectedPlan] : null;
+    const bedIdToName = Object.fromEntries(savedBeds.map(b => [b.id, b.name]));
+    let bedsOrder = savedBeds;
+    const planBedIds = plan ? Object.keys(plan.bedPlants || {}) : [];
+    bedsOrder = bedsOrder.filter(b => planBedIds.includes(String(b.id)) || planBedIds.includes(b.id));
+    const headers = bedsOrder.map(b => bedIdToName[b.id] || b.name);
+    const columns = bedsOrder.map(b => (plan?.bedPlants?.[b.id] || []).slice());
+    const maxRows = columns.reduce((m, col) => Math.max(m, col.length), 0);
+    const tableHtml = plan && bedsOrder.length > 0 ? `
+      <style>
+        .gd-print-table { border-collapse: collapse; border-spacing: 0; font-size: 12px; }
+        .gd-print-table th, .gd-print-table td { border: 0.5px solid #94a3b8; padding: 4px 6px; line-height: 1.1; background: #ffffff; }
+        .gd-print-table th { border: 1px solid #64748b; background: #f1f5f9; vertical-align: middle; text-align: left; white-space: nowrap; }
+        @media print { .gd-print-table th, .gd-print-table td { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+      </style>
+      <div style=\"margin-top:16px; text-align:left;\">
+        <h3 style=\"font-size:16px; color:#2d6a4f; margin:0 0 6px 0;\">Plantering per odlingsplats – ${selectedPlan}</h3>
+        <table class=\"gd-print-table\" style=\"width:auto;\">
+          <thead>
+            <tr>
+              ${headers.map(h => `<th>${h}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${Array.from({length: maxRows}).map((_, rIdx) => `
+              <tr>
+                ${columns.map(col => `<td>${col[rIdx] ? col[rIdx] : ''}</td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    ` : '';
     
     const element = document.createElement('div');
     element.innerHTML = `
@@ -300,18 +395,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         <div style="display: inline-block; border: 1px solid #ccc; margin: 20px 0;">
           <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; height: auto;" />
         </div>
-        
-        <div style="margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
-          <h3 style="color: #2d6a4f; border-bottom: 1px solid #2d6a4f; padding-bottom: 5px;">Förklaring</h3>
-          <div style="margin: 5px 0; display: flex; align-items: center; gap: 10px;">
-            <div style="width: 20px; height: 15px; border: 1px solid #2d6a4f; background: #d8f3dc;"></div>
-            <span>Odlingsbädd</span>
-          </div>
-          <div style="margin: 5px 0; display: flex; align-items: center; gap: 10px;">
-            <div style="width: 20px; height: 15px; border: 1px solid #2d6a4f; border-radius: 50%; background: #f4a261;"></div>
-            <span>Kruka</span>
-          </div>
-        </div>
+        ${tableHtml}
       </div>
     `;
     
@@ -333,6 +417,20 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     <div className="bg-white rounded-xl shadow-md p-6">
       {/* Kontroller */}
       <div className="mb-4 flex flex-wrap gap-2 items-center">
+        {/* Årsplan-väljare */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-semibold text-earth-700">Årsplan:</label>
+          <select
+            value={selectedPlan}
+            onChange={(e) => setSelectedPlan(e.target.value)}
+            className="px-3 py-2 border-2 border-earth-200 rounded-lg bg-white focus:outline-none focus:border-plant-400 text-sm"
+          >
+            <option value="">Ingen</option>
+            {Object.keys(yearPlans).map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+        </div>
         <button
           onClick={() => setShowBedSelector(!showBedSelector)}
           className="px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
