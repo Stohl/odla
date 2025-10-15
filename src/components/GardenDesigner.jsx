@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Rect, Circle, Text } from 'react-konva';
+import html2pdf from 'html2pdf.js';
 
 const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [selected, setSelected] = useState(null);
@@ -177,6 +178,154 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     link.click();
   };
 
+  // Skriv ut design
+  const printDesign = () => {
+    const printWindow = window.open('', '_blank');
+    const canvas = stageRef.current.toDataURL();
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Trädgårdsdesign - ${designName}</title>
+          <style>
+            body { 
+              margin: 0; 
+              padding: 20px; 
+              font-family: Arial, sans-serif; 
+              text-align: center;
+            }
+            .header { 
+              margin-bottom: 20px; 
+              border-bottom: 2px solid #2d6a4f; 
+              padding-bottom: 10px; 
+            }
+            .design-name { 
+              font-size: 24px; 
+              font-weight: bold; 
+              color: #2d6a4f; 
+              margin-bottom: 5px; 
+            }
+            .date { 
+              color: #666; 
+              font-size: 14px; 
+            }
+            .canvas-container { 
+              display: inline-block; 
+              border: 1px solid #ccc; 
+              margin: 20px 0; 
+            }
+            .legend { 
+              margin-top: 20px; 
+              text-align: left; 
+              max-width: 600px; 
+              margin-left: auto; 
+              margin-right: auto; 
+            }
+            .legend h3 { 
+              color: #2d6a4f; 
+              border-bottom: 1px solid #2d6a4f; 
+              padding-bottom: 5px; 
+            }
+            .legend-item { 
+              margin: 5px 0; 
+              display: flex; 
+              align-items: center; 
+              gap: 10px; 
+            }
+            .legend-icon { 
+              width: 20px; 
+              height: 15px; 
+              border: 1px solid #2d6a4f; 
+            }
+            .legend-icon.pot { 
+              border-radius: 50%; 
+              background: #f4a261; 
+            }
+            .legend-icon.bed { 
+              background: #d8f3dc; 
+            }
+            @media print {
+              body { margin: 0; padding: 10px; }
+              .header { page-break-after: avoid; }
+              .canvas-container { page-break-inside: avoid; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="design-name">${designName}</div>
+            <div class="date">Skapad: ${new Date().toLocaleDateString('sv-SE')}</div>
+          </div>
+          
+          <div class="canvas-container">
+            <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; height: auto;" />
+          </div>
+          
+          <div class="legend">
+            <h3>Förklaring</h3>
+            <div class="legend-item">
+              <div class="legend-icon bed"></div>
+              <span>Odlingsbädd</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-icon pot"></div>
+              <span>Kruka</span>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
+  // Exportera som PDF
+  const exportAsPDF = () => {
+    const canvas = stageRef.current.toDataURL();
+    
+    const element = document.createElement('div');
+    element.innerHTML = `
+      <div style="text-align: center; font-family: Arial, sans-serif; padding: 20px;">
+        <div style="margin-bottom: 20px; border-bottom: 2px solid #2d6a4f; padding-bottom: 10px;">
+          <div style="font-size: 24px; font-weight: bold; color: #2d6a4f; margin-bottom: 5px;">${designName}</div>
+          <div style="color: #666; font-size: 14px;">Skapad: ${new Date().toLocaleDateString('sv-SE')}</div>
+        </div>
+        
+        <div style="display: inline-block; border: 1px solid #ccc; margin: 20px 0;">
+          <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; height: auto;" />
+        </div>
+        
+        <div style="margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+          <h3 style="color: #2d6a4f; border-bottom: 1px solid #2d6a4f; padding-bottom: 5px;">Förklaring</h3>
+          <div style="margin: 5px 0; display: flex; align-items: center; gap: 10px;">
+            <div style="width: 20px; height: 15px; border: 1px solid #2d6a4f; background: #d8f3dc;"></div>
+            <span>Odlingsbädd</span>
+          </div>
+          <div style="margin: 5px 0; display: flex; align-items: center; gap: 10px;">
+            <div style="width: 20px; height: 15px; border: 1px solid #2d6a4f; border-radius: 50%; background: #f4a261;"></div>
+            <span>Kruka</span>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    const opt = {
+      margin: 0.5,
+      filename: `tradgard-${designName}-${new Date().toISOString().split('T')[0]}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save();
+  };
+
   // Hitta vald bädd
   const selectedBed = beds.find((b) => b.id === selected);
 
@@ -220,7 +369,21 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
           onClick={exportAsPNG}
           className="px-4 py-2 bg-earth-500 text-white rounded-lg hover:bg-earth-600 transition-colors font-semibold"
         >
-          📤 Exportera som PNG
+          📤 PNG
+        </button>
+
+        <button
+          onClick={exportAsPDF}
+          className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+        >
+          📄 PDF
+        </button>
+
+        <button
+          onClick={printDesign}
+          className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-semibold"
+        >
+          🖨️ Skriv ut
         </button>
 
         <span className="ml-auto text-earth-600 font-semibold">
