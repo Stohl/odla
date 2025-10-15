@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Stage, Layer, Rect, Text } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Text } from 'react-konva';
 
 const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [selected, setSelected] = useState(null);
@@ -25,13 +25,16 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
 
   // Lägg till från sparade bäddar
   const addFromSaved = (savedBed) => {
+    const isPot = savedBed.type === 'pot';
     const newBed = {
       id: Date.now(),
       name: savedBed.name,
+      type: savedBed.type || 'bed',
       x: 50,
       y: 50,
-      width: 200,
-      height: 100,
+      width: isPot ? 100 : 200,  // Krukor får mindre default-storlek
+      height: isPot ? 100 : 100,
+      radius: isPot ? 50 : undefined, // Radie för cirklar
       savedBedId: savedBed.id, // Referens till sparad bädd
     };
 
@@ -83,29 +86,44 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   // Ändra storlek på vald bädd
   const resizeSelected = () => {
     if (!selected) {
-      alert('Välj en bädd först');
+      alert('Välj en odlingsplats först');
       return;
     }
 
     const bed = beds.find((b) => b.id === selected);
     if (!bed) return;
 
-    const width = prompt('Bredd (px):', bed.width);
-    const height = prompt('Höjd (px):', bed.height);
+    if (bed.type === 'pot') {
+      // För krukor - ändra radie
+      const radius = prompt('Radie (px):', bed.radius || 50);
+      if (!radius) return;
+      const r = parseInt(radius);
+      if (isNaN(r) || r <= 0) {
+        alert('Ogiltigt värde');
+        return;
+      }
+      setBeds((prev) =>
+        prev.map((b) => (b.id === selected ? { ...b, radius: r, width: r*2, height: r*2 } : b))
+      );
+    } else {
+      // För bäddar - ändra bredd och höjd
+      const width = prompt('Bredd (px):', bed.width);
+      const height = prompt('Höjd (px):', bed.height);
 
-    if (!width || !height) return;
+      if (!width || !height) return;
 
-    const w = parseInt(width);
-    const h = parseInt(height);
+      const w = parseInt(width);
+      const h = parseInt(height);
 
-    if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
-      alert('Ogiltiga värden');
-      return;
+      if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+        alert('Ogiltiga värden');
+        return;
+      }
+
+      setBeds((prev) =>
+        prev.map((b) => (b.id === selected ? { ...b, width: w, height: h } : b))
+      );
     }
-
-    setBeds((prev) =>
-      prev.map((b) => (b.id === selected ? { ...b, width: w, height: h } : b))
-    );
   };
 
   // Exportera som PNG
@@ -128,7 +146,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
           onClick={() => setShowBedSelector(!showBedSelector)}
           className="px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
         >
-          {showBedSelector ? '− Stäng väljare' : '📋 Lägg till bädd från mina bäddar'}
+          {showBedSelector ? '− Stäng väljare' : '📋 Lägg till från odlingsplatser'}
         </button>
 
         {selected && (
@@ -164,7 +182,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         </button>
 
         <span className="ml-auto text-earth-600 font-semibold">
-          Totalt: {beds.length} bäddar
+          Totalt: {beds.length} platser
         </span>
       </div>
 
@@ -195,14 +213,14 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
           {savedBeds.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-3">🌱</div>
-              <p className="text-earth-700 font-semibold mb-2">Inga odlingsbäddar skapade ännu</p>
+              <p className="text-earth-700 font-semibold mb-2">Inga odlingsplatser skapade ännu</p>
               <p className="text-earth-600 text-sm">
-                Gå till fliken "🌿 Mina bäddar" för att skapa dina odlingsbäddar först
+                Gå till fliken "🌿 Odlingsplatser" för att skapa dina odlingsplatser först
               </p>
             </div>
           ) : (
             <>
-              <h3 className="font-semibold text-earth-800 mb-3">Välj från dina sparade bäddar:</h3>
+              <h3 className="font-semibold text-earth-800 mb-3">Välj från dina sparade odlingsplatser:</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {savedBeds.map((bed) => (
                   <button
@@ -241,75 +259,115 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
             style={{ border: '2px solid #d6d3d1', borderRadius: '4px' }}
           >
             <Layer>
-              {/* Rita odlingsbäddar */}
-              {beds.map((bed) => (
-                <React.Fragment key={bed.id}>
-                  <Rect
-                    x={bed.x}
-                    y={bed.y}
-                    width={bed.width}
-                    height={bed.height}
-                    fill="#d8f3dc"
-                    stroke={selected === bed.id ? '#1b4332' : '#2d6a4f'}
-                    strokeWidth={selected === bed.id ? 4 : 2}
-                    draggable
-                    shadowBlur={selected === bed.id ? 10 : 5}
-                    shadowColor="rgba(0,0,0,0.3)"
-                    onClick={() => setSelected(bed.id)}
-                    onTap={() => setSelected(bed.id)}
-                    onDblClick={editSelected}
-                    onDblTap={editSelected}
-                    onDragEnd={(e) => handleMove(bed.id, e.target.x(), e.target.y())}
-                  />
-                  <Text
-                    x={bed.x + 8}
-                    y={bed.y + 8}
-                    text={bed.name}
-                    fontSize={16}
-                    fontStyle="bold"
-                    fill="#1b4332"
-                    listening={false}
-                  />
-                  {/* Visa mått om bädden är vald */}
-                  {selected === bed.id && (
+              {/* Rita odlingsbäddar och krukor */}
+              {beds.map((bed) => {
+                const isPot = bed.type === 'pot';
+                const radius = bed.radius || 50;
+                
+                return (
+                  <React.Fragment key={bed.id}>
+                    {isPot ? (
+                      // Rita kruka som cirkel
+                      <Circle
+                        x={bed.x + radius}
+                        y={bed.y + radius}
+                        radius={radius}
+                        fill="#f4a261"
+                        stroke={selected === bed.id ? '#d08c60' : '#e76f51'}
+                        strokeWidth={selected === bed.id ? 4 : 2}
+                        draggable
+                        shadowBlur={selected === bed.id ? 10 : 5}
+                        shadowColor="rgba(0,0,0,0.3)"
+                        onClick={() => setSelected(bed.id)}
+                        onTap={() => setSelected(bed.id)}
+                        onDblClick={editSelected}
+                        onDblTap={editSelected}
+                        onDragEnd={(e) => handleMove(bed.id, e.target.x() - radius, e.target.y() - radius)}
+                      />
+                    ) : (
+                      // Rita bädd som rektangel
+                      <Rect
+                        x={bed.x}
+                        y={bed.y}
+                        width={bed.width}
+                        height={bed.height}
+                        fill="#d8f3dc"
+                        stroke={selected === bed.id ? '#1b4332' : '#2d6a4f'}
+                        strokeWidth={selected === bed.id ? 4 : 2}
+                        draggable
+                        shadowBlur={selected === bed.id ? 10 : 5}
+                        shadowColor="rgba(0,0,0,0.3)"
+                        onClick={() => setSelected(bed.id)}
+                        onTap={() => setSelected(bed.id)}
+                        onDblClick={editSelected}
+                        onDblTap={editSelected}
+                        onDragEnd={(e) => handleMove(bed.id, e.target.x(), e.target.y())}
+                      />
+                    )}
+                    
                     <Text
-                      x={bed.x + 8}
-                      y={bed.y + bed.height - 24}
-                      text={`${bed.width} × ${bed.height} px`}
-                      fontSize={12}
-                      fill="#52796f"
+                      x={isPot ? bed.x + radius : bed.x + 8}
+                      y={isPot ? bed.y + radius - 8 : bed.y + 8}
+                      text={bed.name}
+                      fontSize={16}
+                      fontStyle="bold"
+                      fill={isPot ? '#8b4513' : '#1b4332'}
                       listening={false}
+                      align={isPot ? 'center' : 'left'}
+                      offsetX={isPot ? radius - 8 : 0}
                     />
-                  )}
-                </React.Fragment>
-              ))}
+                    
+                    {/* Visa mått om vald */}
+                    {selected === bed.id && (
+                      <Text
+                        x={isPot ? bed.x + radius : bed.x + 8}
+                        y={isPot ? bed.y + radius * 2 - 20 : bed.y + bed.height - 24}
+                        text={isPot ? `Radie: ${radius} px` : `${bed.width} × ${bed.height} px`}
+                        fontSize={12}
+                        fill="#52796f"
+                        listening={false}
+                        align={isPot ? 'center' : 'left'}
+                        offsetX={isPot ? radius - 8 : 0}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </Layer>
           </Stage>
         </div>
       </div>
 
-      {/* Lista över bäddar */}
+      {/* Lista över odlingsplatser */}
       {beds.length > 0 && (
         <div className="mt-6">
-          <h3 className="text-lg font-bold text-earth-800 mb-3">Dina odlingsbäddar</h3>
+          <h3 className="text-lg font-bold text-earth-800 mb-3">Dina odlingsplatser</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {beds.map((bed) => (
-              <div
-                key={bed.id}
-                onClick={() => setSelected(bed.id)}
-                className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                  selected === bed.id
-                    ? 'border-plant-500 bg-plant-50'
-                    : 'border-earth-200 hover:border-plant-300'
-                }`}
-              >
-                <div className="font-semibold text-earth-800">{bed.name}</div>
-                <div className="text-xs text-earth-600 mt-1">
-                  Position: ({Math.round(bed.x)}, {Math.round(bed.y)}) • Storlek: {bed.width}×
-                  {bed.height}
+            {beds.map((bed) => {
+              const isPot = bed.type === 'pot';
+              const icon = isPot ? '🪴' : '▭';
+              const sizeText = isPot ? `Radie: ${bed.radius || 50}px` : `${bed.width}×${bed.height}px`;
+              
+              return (
+                <div
+                  key={bed.id}
+                  onClick={() => setSelected(bed.id)}
+                  className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                    selected === bed.id
+                      ? 'border-plant-500 bg-plant-50'
+                      : 'border-earth-200 hover:border-plant-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{icon}</span>
+                    <div className="font-semibold text-earth-800">{bed.name}</div>
+                  </div>
+                  <div className="text-xs text-earth-600 mt-1">
+                    Position: ({Math.round(bed.x)}, {Math.round(bed.y)}) • {sizeText}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -319,10 +377,10 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         <div className="mt-6 p-12 text-center bg-earth-50 rounded-lg">
           <div className="text-6xl mb-4">🌱</div>
           <h3 className="text-xl font-bold text-earth-800 mb-2">
-            Inga odlingsbäddar ännu
+            Inga odlingsplatser ännu
           </h3>
           <p className="text-earth-600">
-            Klicka på "➕ Lägg till bädd" för att komma igång!
+            Klicka på "📋 Lägg till bädd från mina bäddar" för att komma igång!
           </p>
         </div>
       )}
