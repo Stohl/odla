@@ -5,6 +5,8 @@ const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedMonths, setSelectedMonths] = useState([]);
+  const [monthFilterType, setMonthFilterType] = useState('sowing'); // 'sowing' or 'harvest'
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [sortBy, setSortBy] = useState('name'); // 'name', 'category', 'price'
@@ -41,6 +43,18 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
 
   // Hämta unika kategorier
   const categories = [...new Set(plants.map(p => p.category))].sort();
+  
+  const MONTHS_LONG = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
+  const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+  
+  // Toggle månad i filter
+  const toggleMonth = (monthNum) => {
+    setSelectedMonths(prev => 
+      prev.includes(monthNum) 
+        ? prev.filter(m => m !== monthNum)
+        : [...prev, monthNum]
+    );
+  };
 
   // Filtrera växter
   const filteredPlants = plants.filter(plant => {
@@ -57,7 +71,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
       return matchesCategory && matchesMyPlants;
     }
 
-    // Sökprioritet: name > id > latin_name > description
+    // Sökprioritet: name > id > latin_name
     const searchLower = searchTerm.toLowerCase();
     let matchesSearch = false;
     
@@ -67,11 +81,19 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
       matchesSearch = true;
     } else if (plant.latin_name?.toLowerCase().includes(searchLower)) {
       matchesSearch = true;
-    } else if (plant.description?.toLowerCase().includes(searchLower)) {
-      matchesSearch = true;
     }
     
-    return matchesSearch && matchesCategory && matchesMyPlants;
+    // Filtrera på månader
+    let matchesMonths = true;
+    if (selectedMonths.length > 0) {
+      if (monthFilterType === 'sowing') {
+        matchesMonths = selectedMonths.some(month => plant.sowing_months?.includes(month));
+      } else if (monthFilterType === 'harvest') {
+        matchesMonths = selectedMonths.some(month => plant.harvest_months?.includes(month));
+      }
+    }
+    
+    return matchesSearch && matchesCategory && matchesMonths && matchesMyPlants;
   });
 
   // Sortera
@@ -114,23 +136,6 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
             />
           </div>
 
-          {/* Kategori */}
-          <div>
-            <label className="block text-sm font-semibold text-earth-700 mb-2">
-              Kategori
-            </label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
-            >
-              <option value="">Alla</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat || 'Övrigt'}</option>
-              ))}
-            </select>
-          </div>
-
           {/* Sortera */}
           <div>
             <label className="block text-sm font-semibold text-earth-700 mb-2">
@@ -148,21 +153,84 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
           </div>
         </div>
 
-        {/* Toggle mina växter */}
-        <div className="mt-4 pt-4 border-t border-earth-200">
-          <button
-            onClick={() => setShowOnlyMyPlants(!showOnlyMyPlants)}
-            className={`px-6 py-2 rounded-lg font-semibold transition-all ${
-              showOnlyMyPlants
-                ? 'bg-plant-500 text-white shadow-lg'
-                : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
-            }`}
-          >
-            {showOnlyMyPlants ? `✓ Mina växter (${myPlants.length})` : `Alla växter (${plants.length})`}
-          </button>
-          <span className="ml-4 text-sm text-earth-600">
-            Visar {sortedPlants.length} växter
-          </span>
+        {/* Månadsfilter och Toggle mina växter */}
+        <div className="mt-4 pt-4 border-t border-earth-200 space-y-4">
+          {/* Filtertyp och månader */}
+          <div>
+            <label className="block text-sm font-semibold text-earth-700 mb-2">
+              Filtrera på månad
+            </label>
+            <div className="flex flex-wrap gap-2 items-center">
+              {/* Val av filtertyp */}
+              <div className="flex gap-2 mr-2">
+                <button
+                  onClick={() => setMonthFilterType('sowing')}
+                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                    monthFilterType === 'sowing'
+                      ? 'bg-plant-500 text-white'
+                      : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                  }`}
+                >
+                  Så/sådd
+                </button>
+                <button
+                  onClick={() => setMonthFilterType('harvest')}
+                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                    monthFilterType === 'harvest'
+                      ? 'bg-plant-500 text-white'
+                      : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                  }`}
+                >
+                  Skörd/Blom
+                </button>
+              </div>
+              
+              {/* Månadsknappar */}
+              {MONTHS_SHORT.map((month, index) => {
+                const monthNum = index + 1;
+                const isSelected = selectedMonths.includes(monthNum);
+                return (
+                  <button
+                    key={monthNum}
+                    onClick={() => toggleMonth(monthNum)}
+                    className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                      isSelected
+                        ? 'bg-plant-500 text-white'
+                        : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                    }`}
+                  >
+                    {month}
+                  </button>
+                );
+              })}
+              
+              {/* Rensa */}
+              {selectedMonths.length > 0 && (
+                <button
+                  onClick={() => setSelectedMonths([])}
+                  className="px-3 py-1 rounded-lg text-sm font-semibold bg-red-200 text-red-700 hover:bg-red-300"
+                >
+                  Rensa
+                </button>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowOnlyMyPlants(!showOnlyMyPlants)}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                showOnlyMyPlants
+                  ? 'bg-plant-500 text-white shadow-lg'
+                  : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+              }`}
+            >
+              {showOnlyMyPlants ? `✓ Mina växter (${myPlants.length})` : `Alla växter (${plants.length})`}
+            </button>
+            <span className="text-sm text-earth-600">
+              Visar {sortedPlants.length} växter
+            </span>
+          </div>
         </div>
       </div>
 
