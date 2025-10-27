@@ -63,6 +63,11 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
       return false;
     }
     
+    // Skippa produkter utan namn eller ID (de är oftast inte relevanta växter)
+    if (!plant.name || !plant.id) {
+      return false;
+    }
+    
     const matchesSource = !selectedSource || plant.source === selectedSource;
     const matchesMyPlants = !showOnlyMyPlants || myPlants.includes(plant.id);
 
@@ -75,11 +80,11 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
     const searchLower = searchTerm.toLowerCase();
     let matchesSearch = false;
     
-    if (plant.name?.toLowerCase().includes(searchLower)) {
+    if (plant.name.toLowerCase().includes(searchLower)) {
       matchesSearch = true;
-    } else if (plant.id?.toLowerCase().includes(searchLower)) {
+    } else if (plant.id?.toLowerCase()?.includes(searchLower)) {
       matchesSearch = true;
-    } else if (plant.latin_name?.toLowerCase().includes(searchLower)) {
+    } else if (plant.latin_name?.toLowerCase()?.includes(searchLower)) {
       matchesSearch = true;
     }
     
