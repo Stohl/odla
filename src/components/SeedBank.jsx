@@ -64,7 +64,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
     }
     
     // Skippa produkter utan namn eller ID (de är oftast inte relevanta växter)
-    if (!plant.name || !plant.id) {
+    if (!plant.name && !plant.id) {
       return false;
     }
     
