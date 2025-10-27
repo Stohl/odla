@@ -44,13 +44,33 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
 
   // Filtrera växter
   const filteredPlants = plants.filter(plant => {
-    const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         plant.latin_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         plant.category?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Om inget sökord anges, visa inga växter
+    if (!searchTerm && !showOnlyMyPlants) {
+      return false;
+    }
     
     const matchesCategory = !selectedCategory || plant.category === selectedCategory;
     const matchesMyPlants = !showOnlyMyPlants || myPlants.includes(plant.id);
 
+    // Om bara "Mina växter" är aktivt utan sökord
+    if (!searchTerm && showOnlyMyPlants) {
+      return matchesCategory && matchesMyPlants;
+    }
+
+    // Sökprioritet: name > id > latin_name > description
+    const searchLower = searchTerm.toLowerCase();
+    let matchesSearch = false;
+    
+    if (plant.name?.toLowerCase().includes(searchLower)) {
+      matchesSearch = true;
+    } else if (plant.id?.toLowerCase().includes(searchLower)) {
+      matchesSearch = true;
+    } else if (plant.latin_name?.toLowerCase().includes(searchLower)) {
+      matchesSearch = true;
+    } else if (plant.description?.toLowerCase().includes(searchLower)) {
+      matchesSearch = true;
+    }
+    
     return matchesSearch && matchesCategory && matchesMyPlants;
   });
 
