@@ -60,7 +60,7 @@ const YearPlanner = ({ myPlants }) => {
     }
 
     const newPlan = {
-      bedPlants: {}, // { bedId: [plantNames] }
+      bedPlants: {}, // { bedId: [plantIds] }
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -132,15 +132,15 @@ const YearPlanner = ({ myPlants }) => {
   };
 
   // Växla växt för en bädd
-  const togglePlantInBed = (bedId, plantName) => {
+  const togglePlantInBed = (bedId, plantId) => {
     if (!activePlan) return;
     
     setPlans(prev => {
       const currentBedPlants = prev[activePlan].bedPlants[bedId] || [];
       
-      const newBedPlants = currentBedPlants.includes(plantName)
-        ? currentBedPlants.filter(p => p !== plantName)
-        : [...currentBedPlants, plantName];
+      const newBedPlants = currentBedPlants.includes(plantId)
+        ? currentBedPlants.filter(p => p !== plantId)
+        : [...currentBedPlants, plantId];
       
       return {
         ...prev,
@@ -293,28 +293,31 @@ const YearPlanner = ({ myPlants }) => {
 
               {/* Alla mina växter med status */}
               <div className="bg-plant-50 border-2 border-plant-300 rounded-lg p-4">
+                <p className="text-xs text-earth-500 mb-2">
+                  OBS: Växter måste ha ett unikt ID för att visas här. Uppdatera fron_data.json med ID-fält.
+                </p>
                 {myPlants.length === 0 ? (
                   <p className="text-earth-600 text-sm text-center py-4">
                     Inga växter i din lista. Gå till Fröbanken för att lägga till!
                   </p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {myPlants.map(plant => {
+                    {myPlants.map(plantId => {
                       // Check if plant is in any bed
                       const isInBed = currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
-                        bedPlantArray => bedPlantArray.includes(plant)
+                        bedPlantArray => bedPlantArray.includes(plantId)
                       );
                       
                       return (
                         <div
-                          key={plant}
+                          key={plantId}
                           className={`px-4 py-2 rounded-lg flex items-center gap-2 border-2 ${
                             isInBed 
                               ? 'bg-white text-plant-700 border-plant-300'
                               : 'bg-earth-100 text-earth-600 border-earth-300'
                           }`}
                         >
-                          <span className="font-medium">{plant}</span>
+                          <span className="font-medium">{plantId}</span>
                           {isInBed && (
                             <span className="text-green-600 font-bold text-lg" title="Placerad i bädd">
                               ✓
@@ -361,19 +364,19 @@ const YearPlanner = ({ myPlants }) => {
                         </p>
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                          {myPlants.map(plant => {
-                            const isSelected = bedPlants.includes(plant);
+                          {myPlants.map(plantId => {
+                            const isSelected = bedPlants.includes(plantId);
                             return (
                               <button
-                                key={plant}
-                                onClick={() => togglePlantInBed(bed.id, plant)}
+                                key={plantId}
+                                onClick={() => togglePlantInBed(bed.id, plantId)}
                                 className={`p-2 rounded-lg text-sm transition-all ${
                                   isSelected
                                     ? 'bg-earth-600 text-white font-semibold'
                                     : 'bg-white border-2 border-earth-200 text-earth-700 hover:border-earth-400'
                                 }`}
                               >
-                                {isSelected && '✓ '}{plant}
+                                {isSelected && '✓ '}{plantId}
                               </button>
                             );
                           })}

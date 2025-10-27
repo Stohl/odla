@@ -121,7 +121,7 @@ function App() {
   };
 
   // Update plant date for the selected year plan
-  const handleDateChange = (plantName, date) => {
+  const handleDateChange = (plantId, date) => {
     if (selectedYearPlan === 'all') return;
 
     setYearPlans(prev => {
@@ -132,7 +132,7 @@ function App() {
         ...updatedPlans[selectedYearPlan],
         plantDates: {
           ...(updatedPlans[selectedYearPlan].plantDates || {}),
-          [plantName]: date
+          [plantId]: date
         },
         updatedAt: new Date().toISOString()
       };
@@ -148,7 +148,7 @@ function App() {
   };
 
   // Update harvested date for the selected year plan
-  const handleHarvestedChange = (plantName, date) => {
+  const handleHarvestedChange = (plantId, date) => {
     if (selectedYearPlan === 'all') return;
 
     setYearPlans(prev => {
@@ -159,7 +159,7 @@ function App() {
         ...updatedPlans[selectedYearPlan],
         harvestedDates: {
           ...(updatedPlans[selectedYearPlan].harvestedDates || {}),
-          [plantName]: date
+          [plantId]: date
         },
         updatedAt: new Date().toISOString()
       };
@@ -181,12 +181,12 @@ function App() {
   };
 
   // Toggle plant selection
-  const handleTogglePlant = (plantName) => {
+  const handleTogglePlant = (plantId) => {
     setMyPlants(prev => {
-      if (prev.includes(plantName)) {
-        return prev.filter(name => name !== plantName);
+      if (prev.includes(plantId)) {
+        return prev.filter(id => id !== plantId);
       } else {
-        return [...prev, plantName];
+        return [...prev, plantId];
       }
     });
   };
@@ -204,7 +204,7 @@ function App() {
     // Get all plants from all beds
     Object.values(plan.bedPlants).forEach(plantArray => {
       if (Array.isArray(plantArray)) {
-        plantArray.forEach(plantName => plantSet.add(plantName));
+        plantArray.forEach(plantId => plantSet.add(plantId));
       }
     });
     
@@ -225,10 +225,10 @@ function App() {
     if (selectedYearPlan !== 'all') {
       // Show plants from year plan (even if removed from myPlants)
       const planPlants = getPlantsFromYearPlan(selectedYearPlan);
-      matchesYearPlan = planPlants.includes(plant.name);
+      matchesYearPlan = planPlants.includes(plant.id);
     } else {
       // If "all" is selected, use the myPlants toggle
-      matchesYearPlan = !showOnlyMyPlants || myPlants.includes(plant.name);
+      matchesYearPlan = !showOnlyMyPlants || myPlants.includes(plant.id);
     }
 
     return matchesSearch && matchesCategory && matchesYearPlan;

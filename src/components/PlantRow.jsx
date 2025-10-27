@@ -252,12 +252,12 @@ const PlantRow = ({
                         <input
                           type="date"
                           value={plantedDate || ''}
-                          onChange={(e) => onDateChange(plant.name, e.target.value)}
+                          onChange={(e) => onDateChange(plant.id, e.target.value)}
                           className="flex-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
                         />
                         {plantedDate && (
                           <button
-                            onClick={() => onDateChange(plant.name, '')}
+                            onClick={() => onDateChange(plant.id, '')}
                             className="text-red-600 hover:text-red-800 text-sm font-semibold"
                             title="Rensa datum"
                           >
@@ -276,12 +276,12 @@ const PlantRow = ({
                         <input
                           type="date"
                           value={harvestedDate || ''}
-                          onChange={(e) => onHarvestedChange(plant.name, e.target.value)}
+                          onChange={(e) => onHarvestedChange(plant.id, e.target.value)}
                           className="flex-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors"
                         />
                         {harvestedDate && (
                           <button
-                            onClick={() => onHarvestedChange(plant.name, '')}
+                            onClick={() => onHarvestedChange(plant.id, '')}
                             className="text-red-600 hover:text-red-800 text-sm font-semibold"
                             title="Rensa datum"
                           >

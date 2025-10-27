@@ -7,7 +7,7 @@ const MONTHS = [
 
 const MyPlantsPanel = ({ plants, myPlants, onTogglePlant }) => {
   const currentMonth = new Date().getMonth() + 1;
-  const selectedPlants = plants.filter(p => myPlants.includes(p.name));
+  const selectedPlants = plants.filter(p => myPlants.includes(p.id));
 
   if (selectedPlants.length === 0) {
     return (
@@ -59,7 +59,7 @@ const MyPlantsPanel = ({ plants, myPlants, onTogglePlant }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {selectedPlants.map((plant) => (
             <div
-              key={plant.name}
+              key={plant.id}
               className="border-2 border-earth-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
             >
               {/* Plant Image */}
@@ -84,7 +84,7 @@ const MyPlantsPanel = ({ plants, myPlants, onTogglePlant }) => {
                     <p className="text-sm text-plant-600 mb-3">{plant.category}</p>
                   </div>
                   <button
-                    onClick={() => onTogglePlant(plant.name)}
+                    onClick={() => onTogglePlant(plant.id)}
                     className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors flex items-center justify-center font-bold"
                     title="Ta bort från mina växter"
                   >

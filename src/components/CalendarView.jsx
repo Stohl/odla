@@ -51,18 +51,18 @@ const CalendarView = ({
         
         // Create groups for each bed
         beds.forEach(bed => {
-          const bedPlantNames = plan.bedPlants[bed.id] || [];
-          if (bedPlantNames.length > 0) {
-            grouped[bed.name] = plants.filter(p => bedPlantNames.includes(p.name));
+          const bedPlantIds = plan.bedPlants[bed.id] || [];
+          if (bedPlantIds.length > 0) {
+            grouped[bed.name] = plants.filter(p => bedPlantIds.includes(p.id));
           }
         });
         
         // Plants not in any bed
         const allBeddedPlants = new Set();
         Object.values(plan.bedPlants).forEach(plantArray => {
-          plantArray.forEach(name => allBeddedPlants.add(name));
+          plantArray.forEach(id => allBeddedPlants.add(id));
         });
-        grouped['Utan bädd'] = plants.filter(p => !allBeddedPlants.has(p.name));
+        grouped['Utan bädd'] = plants.filter(p => !allBeddedPlants.has(p.id));
       } else {
         grouped['Utan bädd'] = plants;
       }
@@ -250,14 +250,14 @@ const CalendarView = ({
               <tbody>
                 ${groupPlants.map(plant => `
                   <tr>
-                    <td class="plant-name">${plant.name}</td>
+                    <td class="plant-name">${plant.name || plant.id}</td>
                     ${MONTHS.map((month, index) => {
                       const monthNum = index + 1;
                       const isSeedling = plant.seedling_months?.includes(monthNum);
                       const isSowing = plant.sowing_months?.includes(monthNum);
                       const isHarvest = plant.harvest_months?.includes(monthNum);
-                      const plantedDate = plantDates?.[plant.name];
-                      const harvestedDate = harvestedDates?.[plant.name];
+                      const plantedDate = plantDates?.[plant.id];
+                      const harvestedDate = harvestedDates?.[plant.id];
                       
                       let plantedMonth = null;
                       let harvestedMonth = null;
@@ -501,13 +501,13 @@ const CalendarView = ({
                 ) : (
                   groupPlants.map((plant) => (
                     <PlantRow
-                      key={plant.name}
+                      key={plant.id}
                       plant={plant}
-                      isSelected={myPlants.includes(plant.name)}
+                      isSelected={myPlants.includes(plant.id)}
                       onToggleSelect={onTogglePlant}
                       currentMonth={currentMonth}
-                      plantedDate={plantDates?.[plant.name] || ''}
-                      harvestedDate={harvestedDates?.[plant.name] || ''}
+                      plantedDate={plantDates?.[plant.id] || ''}
+                      harvestedDate={harvestedDates?.[plant.id] || ''}
                       onDateChange={onDateChange}
                       onHarvestedChange={onHarvestedChange}
                       canEditDate={canEditDate}

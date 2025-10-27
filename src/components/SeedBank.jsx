@@ -49,7 +49,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                          plant.category?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = !selectedCategory || plant.category === selectedCategory;
-    const matchesMyPlants = !showOnlyMyPlants || myPlants.includes(plant.name);
+    const matchesMyPlants = !showOnlyMyPlants || myPlants.includes(plant.id);
 
     return matchesSearch && matchesCategory && matchesMyPlants;
   });
@@ -62,7 +62,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
     return 0;
   });
 
-  const selectedPlantData = selectedPlant ? plants.find(p => p.name === selectedPlant) : null;
+  const selectedPlantData = selectedPlant ? plants.find(p => p.id === selectedPlant) : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -156,14 +156,14 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
         ) : (
           <div className="divide-y divide-earth-200">
             {sortedPlants.map((plant) => {
-              const isInMyList = myPlants.includes(plant.name);
-              const isExpanded = selectedPlant === plant.name;
+              const isInMyList = myPlants.includes(plant.id);
+              const isExpanded = selectedPlant === plant.id;
 
               return (
-                <div key={plant.name}>
+                <div key={plant.id}>
                   {/* Huvudrad */}
                   <div
-                    onClick={() => setSelectedPlant(isExpanded ? null : plant.name)}
+                    onClick={() => setSelectedPlant(isExpanded ? null : plant.id)}
                     className={`p-4 cursor-pointer transition-colors ${
                       isExpanded ? 'bg-plant-50' : 'hover:bg-earth-50'
                     }`}
@@ -172,7 +172,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onTogglePlant(plant.name);
+                          onTogglePlant(plant.id);
                         }}
                         className={`flex-shrink-0 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
                           isInMyList
@@ -300,7 +300,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  onTogglePlant(plant.name);
+                                  onTogglePlant(plant.id);
                                 }}
                                 className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
                                   isInMyList
