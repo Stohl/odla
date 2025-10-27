@@ -4,12 +4,12 @@ const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 
 const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedSource, setSelectedSource] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
   const [monthFilterType, setMonthFilterType] = useState('sowing'); // 'sowing' or 'harvest'
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
   const [selectedPlant, setSelectedPlant] = useState(null);
-  const [sortBy, setSortBy] = useState('name'); // 'name', 'category', 'price'
+  const [sortBy, setSortBy] = useState('name'); // 'name', 'source', 'price'
 
   // Minimal kalendervy komponent
   const MiniCalendar = ({ plant }) => {
@@ -41,8 +41,8 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
     );
   };
 
-  // Hämta unika kategorier
-  const categories = [...new Set(plants.map(p => p.category))].sort();
+  // Hämta unika sources
+  const sources = [...new Set(plants.map(p => p.source))].sort();
   
   const MONTHS_LONG = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
   const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
@@ -63,12 +63,12 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
       return false;
     }
     
-    const matchesCategory = !selectedCategory || plant.category === selectedCategory;
+    const matchesSource = !selectedSource || plant.source === selectedSource;
     const matchesMyPlants = !showOnlyMyPlants || myPlants.includes(plant.id);
 
     // Om bara "Mina växter" är aktivt utan sökord
     if (!searchTerm && showOnlyMyPlants) {
-      return matchesCategory && matchesMyPlants;
+      return matchesSource && matchesMyPlants;
     }
 
     // Sökprioritet: name > id > latin_name
@@ -93,13 +93,13 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
       }
     }
     
-    return matchesSearch && matchesCategory && matchesMonths && matchesMyPlants;
+    return matchesSearch && matchesSource && matchesMonths && matchesMyPlants;
   });
 
   // Sortera
   const sortedPlants = [...filteredPlants].sort((a, b) => {
     if (sortBy === 'name') return a.name.localeCompare(b.name);
-    if (sortBy === 'category') return (a.category || '').localeCompare(b.category || '');
+    if (sortBy === 'source') return (a.source || '').localeCompare(b.source || '');
     if (sortBy === 'price') return (a.price_numeric || 0) - (b.price_numeric || 0);
     return 0;
   });
@@ -136,6 +136,23 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
             />
           </div>
 
+          {/* Källa */}
+          <div>
+            <label className="block text-sm font-semibold text-earth-700 mb-2">
+              Källa
+            </label>
+            <select
+              value={selectedSource}
+              onChange={(e) => setSelectedSource(e.target.value)}
+              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
+            >
+              <option value="">Alla</option>
+              {sources.map(source => (
+                <option key={source} value={source}>{source || 'Okänd källa'}</option>
+              ))}
+            </select>
+          </div>
+
           {/* Sortera */}
           <div>
             <label className="block text-sm font-semibold text-earth-700 mb-2">
@@ -147,7 +164,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
               className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
             >
               <option value="name">Namn</option>
-              <option value="category">Kategori</option>
+              <option value="source">Källa</option>
               <option value="price">Pris</option>
             </select>
           </div>
@@ -287,7 +304,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                         </div>
                         <div className="flex flex-wrap gap-2 mt-2">
                           <span className="text-xs bg-plant-100 text-plant-700 px-2 py-1 rounded">
-                            {plant.category || 'Övrigt'}
+                            {plant.source || 'Okänd källa'}
                           </span>
                           {plant.price && (
                             <span className="text-xs bg-earth-100 text-earth-700 px-2 py-1 rounded">
