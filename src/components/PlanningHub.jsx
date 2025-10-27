@@ -3,7 +3,7 @@ import BedManager from './BedManager';
 import YearPlanner from './YearPlanner';
 import GardenPlanner from './GardenPlanner';
 
-const PlanningHub = ({ myPlants }) => {
+const PlanningHub = ({ myPlants, plants }) => {
   const [activeSubView, setActiveSubView] = useState('beds'); // 'beds', 'plans', or 'designs'
 
   return (
@@ -60,7 +60,7 @@ const PlanningHub = ({ myPlants }) => {
         {activeSubView === 'beds' ? (
           <BedManager />
         ) : activeSubView === 'plans' ? (
-          <YearPlanner myPlants={myPlants} />
+          <YearPlanner myPlants={myPlants} plants={plants} />
         ) : (
           <GardenPlanner />
         )}

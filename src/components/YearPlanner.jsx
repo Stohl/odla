@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const YearPlanner = ({ myPlants }) => {
+const YearPlanner = ({ myPlants, plants }) => {
   const [plans, setPlans] = useState({});
   const [activePlan, setActivePlan] = useState(null);
   const [beds, setBeds] = useState([]);
@@ -293,9 +293,6 @@ const YearPlanner = ({ myPlants }) => {
 
               {/* Alla mina växter med status */}
               <div className="bg-plant-50 border-2 border-plant-300 rounded-lg p-4">
-                <p className="text-xs text-earth-500 mb-2">
-                  OBS: Växter måste ha ett unikt ID för att visas här. Uppdatera fron_data.json med ID-fält.
-                </p>
                 {myPlants.length === 0 ? (
                   <p className="text-earth-600 text-sm text-center py-4">
                     Inga växter i din lista. Gå till Fröbanken för att lägga till!
@@ -303,6 +300,10 @@ const YearPlanner = ({ myPlants }) => {
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {myPlants.map(plantId => {
+                      // Find the plant data
+                      const plant = plants?.find(p => p.id === plantId);
+                      const plantName = plant?.name || plantId;
+                      
                       // Check if plant is in any bed
                       const isInBed = currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
                         bedPlantArray => bedPlantArray.includes(plantId)
@@ -317,7 +318,7 @@ const YearPlanner = ({ myPlants }) => {
                               : 'bg-earth-100 text-earth-600 border-earth-300'
                           }`}
                         >
-                          <span className="font-medium">{plantId}</span>
+                          <span className="font-medium">{plantName}</span>
                           {isInBed && (
                             <span className="text-green-600 font-bold text-lg" title="Placerad i bädd">
                               ✓
@@ -365,6 +366,8 @@ const YearPlanner = ({ myPlants }) => {
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                           {myPlants.map(plantId => {
+                            const plant = plants?.find(p => p.id === plantId);
+                            const plantName = plant?.name || plantId;
                             const isSelected = bedPlants.includes(plantId);
                             return (
                               <button
@@ -376,7 +379,7 @@ const YearPlanner = ({ myPlants }) => {
                                     : 'bg-white border-2 border-earth-200 text-earth-700 hover:border-earth-400'
                                 }`}
                               >
-                                {isSelected && '✓ '}{plantId}
+                                {isSelected && '✓ '}{plantName}
                               </button>
                             );
                           })}

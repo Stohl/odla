@@ -348,7 +348,7 @@ function App() {
           />
         </main>
       ) : (
-        <PlanningHub myPlants={myPlants} />
+        <PlanningHub myPlants={myPlants} plants={plants} />
       )}
 
       {/* Footer */}
