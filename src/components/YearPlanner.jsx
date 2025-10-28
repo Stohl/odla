@@ -291,42 +291,82 @@ const YearPlanner = ({ myPlants, plants }) => {
                 Här är alla dina växter, placera dem i odlingsplatser för att spara dem i årsplanen. Här ser du vilka växter som du har placerat på odlingsplatser.
               </p>
 
-              {/* Alla mina växter med status */}
+              {/* Alla mina växter med status - 2 kolumner */}
               <div className="bg-plant-50 border-2 border-plant-300 rounded-lg p-4">
                 {myPlants.length === 0 ? (
                   <p className="text-earth-600 text-sm text-center py-4">
                     Inga växter i din lista. Gå till Fröbanken för att lägga till!
                   </p>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {myPlants.map(plantId => {
-                      // Find the plant data
-                      const plant = plants?.find(p => p.id === plantId);
-                      const plantName = plant?.name || plantId;
-                      
-                      // Check if plant is in any bed
-                      const isInBed = currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
-                        bedPlantArray => bedPlantArray.includes(plantId)
-                      );
-                      
-                      return (
-                        <div
-                          key={plantId}
-                          className={`px-4 py-2 rounded-lg flex items-center gap-2 border-2 ${
-                            isInBed 
-                              ? 'bg-white text-plant-700 border-plant-300'
-                              : 'bg-earth-100 text-earth-600 border-earth-300'
-                          }`}
-                        >
-                          <span className="font-medium">{plantName}</span>
-                          {isInBed && (
-                            <span className="text-green-600 font-bold text-lg" title="Placerad i bädd">
-                              ✓
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Placerade växter */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-plant-700 mb-3 flex items-center gap-2">
+                        <span>✓</span> Placerade i odlingsplatser
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {myPlants.filter(plantId => {
+                          return currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
+                            bedPlantArray => bedPlantArray.includes(plantId)
+                          );
+                        }).map(plantId => {
+                          const plant = plants?.find(p => p.id === plantId);
+                          const plantName = plant?.name || plantId;
+                          
+                          return (
+                            <div
+                              key={plantId}
+                              className="px-4 py-2 rounded-lg flex items-center gap-2 border-2 bg-white text-plant-700 border-plant-300"
+                            >
+                              <span className="font-medium">{plantName}</span>
+                              <span className="text-green-600 font-bold text-lg" title="Placerad i bädd">
+                                ✓
+                              </span>
+                            </div>
+                          );
+                        })}
+                        {myPlants.filter(plantId => {
+                          return currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
+                            bedPlantArray => bedPlantArray.includes(plantId)
+                          );
+                        }).length === 0 && (
+                          <p className="text-sm text-earth-500">Inga växter placerade ännu</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Oplacerade växter */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-earth-600 mb-3 flex items-center gap-2">
+                        <span>○</span> Inte placerade
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {myPlants.filter(plantId => {
+                          return !currentPlan.bedPlants || !Object.values(currentPlan.bedPlants).some(
+                            bedPlantArray => bedPlantArray.includes(plantId)
+                          );
+                        }).map(plantId => {
+                          const plant = plants?.find(p => p.id === plantId);
+                          const plantName = plant?.name || plantId;
+                          
+                          return (
+                            <div
+                              key={plantId}
+                              className="px-4 py-2 rounded-lg flex items-center gap-2 border-2 bg-earth-100 text-earth-600 border-earth-300"
+                            >
+                              <span className="font-medium">{plantName}</span>
+                            </div>
+                          );
+                        })}
+                        {myPlants.filter(plantId => {
+                          return !currentPlan.bedPlants || !Object.values(currentPlan.bedPlants).some(
+                            bedPlantArray => bedPlantArray.includes(plantId)
+                          );
+                        }).length === 0 && (
+                          <p className="text-sm text-earth-500">Alla växter är placerade</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
