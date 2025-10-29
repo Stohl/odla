@@ -283,7 +283,7 @@ function App() {
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
               }`}
             >
-              📅 Odlingskalender
+              📅 Kalender
             </button>
             <button
               onClick={() => setActiveView('planning')}
@@ -293,7 +293,7 @@ function App() {
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
               }`}
             >
-              🏡 Trädgårdsplanering
+              🏡 Planering
             </button>
           </div>
         </div>
