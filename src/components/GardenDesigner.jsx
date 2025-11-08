@@ -195,47 +195,47 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     );
   };
 
-  // Ändra storlek på vald bädd
-  const resizeSelected = () => {
-    if (!selected) {
-      alert('Välj en odlingsplats först');
-      return;
-    }
+  const handleSelectedNumericChange = (field) => (event) => {
+    if (!selected) return;
+    const rawValue = event.target.value;
+    if (rawValue === '') return;
 
-    const bed = beds.find((b) => b.id === selected);
-    if (!bed) return;
+    const numericValue = Number(rawValue);
+    if (!Number.isFinite(numericValue)) return;
 
-    if (bed.type === 'pot') {
-      // För krukor - ändra radie
-      const radius = prompt('Radie (px):', bed.radius || 50);
-      if (!radius) return;
-      const r = parseInt(radius);
-      if (isNaN(r) || r <= 0) {
-        alert('Ogiltigt värde');
-        return;
-      }
-      setBeds((prev) =>
-        prev.map((b) => (b.id === selected ? { ...b, radius: r, width: r*2, height: r*2 } : b))
-      );
-    } else {
-      // För bäddar - ändra bredd och höjd
-      const width = prompt('Bredd (px):', bed.width);
-      const height = prompt('Höjd (px):', bed.height);
+    setBeds((prev) =>
+      prev.map((b) => {
+        if (b.id !== selected) return b;
 
-      if (!width || !height) return;
+        if (field === 'x' || field === 'y') {
+          return { ...b, [field]: numericValue };
+        }
 
-      const w = parseInt(width);
-      const h = parseInt(height);
+        if (numericValue <= 0) {
+          return b;
+        }
 
-      if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
-        alert('Ogiltiga värden');
-        return;
-      }
+        if (field === 'width') {
+          if (b.type === 'pot') {
+            const diameter = numericValue;
+            const radius = diameter / 2;
+            return { ...b, width: diameter, height: diameter, radius };
+          }
+          return { ...b, width: numericValue };
+        }
 
-      setBeds((prev) =>
-        prev.map((b) => (b.id === selected ? { ...b, width: w, height: h } : b))
-      );
-    }
+        if (field === 'height') {
+          if (b.type === 'pot') {
+            const diameter = numericValue;
+            const radius = diameter / 2;
+            return { ...b, width: diameter, height: diameter, radius };
+          }
+          return { ...b, height: numericValue };
+        }
+
+        return b;
+      })
+    );
   };
 
   // Exportera som PNG
@@ -472,6 +472,22 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
 
   // Hitta vald bädd
   const selectedBed = beds.find((b) => b.id === selected);
+  const selectedBedX = selectedBed?.x ?? 0;
+  const selectedBedY = selectedBed?.y ?? 0;
+  const selectedBedWidth = selectedBed
+    ? selectedBed.type === 'pot'
+      ? selectedBed.radius != null
+        ? selectedBed.radius * 2
+        : selectedBed.width ?? 0
+      : selectedBed.width ?? 0
+    : 0;
+  const selectedBedHeight = selectedBed
+    ? selectedBed.type === 'pot'
+      ? selectedBed.radius != null
+        ? selectedBed.radius * 2
+        : selectedBed.height ?? selectedBed.width ?? 0
+      : selectedBed.height ?? 0
+    : 0;
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6">
@@ -505,13 +521,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
             >
               ✏️ Ändra namn
-            </button>
-
-            <button
-              onClick={resizeSelected}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-semibold"
-            >
-              📏 Ändra storlek
             </button>
 
             <button
@@ -553,19 +562,49 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       {selectedBed && (
         <div className="mb-4 p-4 bg-plant-50 border-2 border-plant-300 rounded-lg">
           <h3 className="font-bold text-plant-800 mb-2">Vald bädd: {selectedBed.name}</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-earth-700">
-            <div>
-              <span className="font-semibold">X:</span> {Math.round(selectedBed.x)} px
-            </div>
-            <div>
-              <span className="font-semibold">Y:</span> {Math.round(selectedBed.y)} px
-            </div>
-            <div>
-              <span className="font-semibold">Bredd:</span> {selectedBed.width} px
-            </div>
-            <div>
-              <span className="font-semibold">Höjd:</span> {selectedBed.height} px
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-earth-700">
+            <label className="flex flex-col">
+              <span className="font-semibold text-earth-800">X-position (px)</span>
+              <input
+                type="number"
+                value={Number.isFinite(selectedBedX) ? selectedBedX : 0}
+                onChange={handleSelectedNumericChange('x')}
+                className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+              />
+            </label>
+            <label className="flex flex-col">
+              <span className="font-semibold text-earth-800">Y-position (px)</span>
+              <input
+                type="number"
+                value={Number.isFinite(selectedBedY) ? selectedBedY : 0}
+                onChange={handleSelectedNumericChange('y')}
+                className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+              />
+            </label>
+            <label className="flex flex-col">
+              <span className="font-semibold text-earth-800">
+                {selectedBed.type === 'pot' ? 'Diameter (px)' : 'Bredd (px)'}
+              </span>
+              <input
+                type="number"
+                min="1"
+                value={Number.isFinite(selectedBedWidth) ? selectedBedWidth : 0}
+                onChange={handleSelectedNumericChange('width')}
+                className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+              />
+            </label>
+            <label className="flex flex-col">
+              <span className="font-semibold text-earth-800">
+                {selectedBed.type === 'pot' ? 'Diameter (px)' : 'Höjd (px)'}
+              </span>
+              <input
+                type="number"
+                min="1"
+                value={Number.isFinite(selectedBedHeight) ? selectedBedHeight : 0}
+                onChange={handleSelectedNumericChange('height')}
+                className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+              />
+            </label>
           </div>
         </div>
       )}
