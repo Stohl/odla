@@ -256,6 +256,27 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     );
   };
 
+  const applySnappingDuringDrag = (bed, target) => {
+    if (!target) return;
+
+    const isPot = bed.type === 'pot';
+    const radius = bed.radius || 50;
+    const currentPos = target.position();
+    const proposedX = isPot ? currentPos.x - radius : currentPos.x;
+    const proposedY = isPot ? currentPos.y - radius : currentPos.y;
+    const { x, y } = snapPosition(bed, proposedX, proposedY, beds);
+
+    if (isPot) {
+      target.position({ x: x + radius, y: y + radius });
+    } else {
+      target.position({ x, y });
+    }
+
+    if (stageRef.current) {
+      stageRef.current.batchDraw();
+    }
+  };
+
   // Ta bort vald bädd
   const deleteSelected = () => {
     if (!selected) {
@@ -739,6 +760,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         onTap={() => setSelected(bed.id)}
                         onDblClick={editSelected}
                         onDblTap={editSelected}
+                        onDragMove={(e) => applySnappingDuringDrag(bed, e.target)}
                         onDragEnd={(e) => handleMove(bed.id, e.target.x() - radius, e.target.y() - radius)}
                       />
                     ) : (
@@ -758,6 +780,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         onTap={() => setSelected(bed.id)}
                         onDblClick={editSelected}
                         onDblTap={editSelected}
+                        onDragMove={(e) => applySnappingDuringDrag(bed, e.target)}
                         onDragEnd={(e) => handleMove(bed.id, e.target.x(), e.target.y())}
                       />
                     )}
