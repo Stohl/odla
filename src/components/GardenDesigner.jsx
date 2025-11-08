@@ -8,6 +8,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [showBedSelector, setShowBedSelector] = useState(false);
   const [yearPlans, setYearPlans] = useState({});
   const [selectedPlan, setSelectedPlan] = useState('');
+  const [plantLookup, setPlantLookup] = useState({});
   const stageRef = useRef(null);
 
   // Ladda sparade bäddar från BedManager och håll dem synkade
@@ -102,6 +103,128 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const canvasWidth = orientation === 'landscape' ? 1100 : 800;
   const canvasHeight = orientation === 'landscape' ? 800 : 1100;
 
+  // Ladda växtnamn för export så att vi kan visa namn istället för ID
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadPlants = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}fron_data.json`);
+        if (!response.ok) {
+          throw new Error('Kunde inte ladda växtdata');
+        }
+        const data = await response.json();
+        if (!isMounted) return;
+
+        const map = {};
+        data.forEach((plant) => {
+          if (!plant?.id) return;
+          const key = String(plant.id);
+          map[key] = plant.name || key;
+        });
+        setPlantLookup(map);
+      } catch (error) {
+        console.error('Kunde inte ladda växtnamn för export:', error);
+      }
+    };
+
+    loadPlants();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const SNAP_THRESHOLD = 15;
+
+  const getBounds = (bed, x, y) => {
+    if (bed.type === 'pot') {
+      const radius = bed.radius || 50;
+      return {
+        left: x,
+        right: x + radius * 2,
+        top: y,
+        bottom: y + radius * 2,
+        centerX: x + radius,
+        centerY: y + radius,
+        width: radius * 2,
+        height: radius * 2,
+      };
+    }
+
+    return {
+      left: x,
+      right: x + bed.width,
+      top: y,
+      bottom: y + bed.height,
+      centerX: x + bed.width / 2,
+      centerY: y + bed.height / 2,
+      width: bed.width,
+      height: bed.height,
+    };
+  };
+
+  const snapPosition = (bed, proposedX, proposedY, allBeds) => {
+    const currentBounds = getBounds(bed, proposedX, proposedY);
+    const candidatesX = [proposedX];
+    const candidatesY = [proposedY];
+
+    allBeds.forEach((other) => {
+      if (other.id === bed.id) return;
+      const otherBounds = getBounds(other, other.x, other.y);
+
+      // Horisontella kandidater
+      if (Math.abs(proposedX - otherBounds.left) <= SNAP_THRESHOLD) {
+        candidatesX.push(otherBounds.left);
+      }
+      if (Math.abs(proposedX - otherBounds.right) <= SNAP_THRESHOLD) {
+        candidatesX.push(otherBounds.right);
+      }
+      if (Math.abs(proposedX + currentBounds.width - otherBounds.left) <= SNAP_THRESHOLD) {
+        candidatesX.push(otherBounds.left - currentBounds.width);
+      }
+      if (Math.abs(proposedX + currentBounds.width - otherBounds.right) <= SNAP_THRESHOLD) {
+        candidatesX.push(otherBounds.right - currentBounds.width);
+      }
+      const proposedCenterX = proposedX + currentBounds.width / 2;
+      if (Math.abs(proposedCenterX - otherBounds.centerX) <= SNAP_THRESHOLD) {
+        candidatesX.push(otherBounds.centerX - currentBounds.width / 2);
+      }
+
+      // Vertikala kandidater
+      if (Math.abs(proposedY - otherBounds.top) <= SNAP_THRESHOLD) {
+        candidatesY.push(otherBounds.top);
+      }
+      if (Math.abs(proposedY - otherBounds.bottom) <= SNAP_THRESHOLD) {
+        candidatesY.push(otherBounds.bottom);
+      }
+      if (Math.abs(proposedY + currentBounds.height - otherBounds.top) <= SNAP_THRESHOLD) {
+        candidatesY.push(otherBounds.top - currentBounds.height);
+      }
+      if (Math.abs(proposedY + currentBounds.height - otherBounds.bottom) <= SNAP_THRESHOLD) {
+        candidatesY.push(otherBounds.bottom - currentBounds.height);
+      }
+      const proposedCenterY = proposedY + currentBounds.height / 2;
+      if (Math.abs(proposedCenterY - otherBounds.centerY) <= SNAP_THRESHOLD) {
+        candidatesY.push(otherBounds.centerY - currentBounds.height / 2);
+      }
+    });
+
+    const snappedX = candidatesX.reduce((closest, candidate) => {
+      return Math.abs(candidate - proposedX) < Math.abs(closest - proposedX) ? candidate : closest;
+    }, candidatesX[0]);
+
+    const snappedY = candidatesY.reduce((closest, candidate) => {
+      return Math.abs(candidate - proposedY) < Math.abs(closest - proposedY) ? candidate : closest;
+    }, candidatesY[0]);
+
+    const clampedX = Math.max(0, Math.min(snappedX, canvasWidth - currentBounds.width));
+    const clampedY = Math.max(0, Math.min(snappedY, canvasHeight - currentBounds.height));
+
+    return { x: clampedX, y: clampedY };
+  };
+
+
   // Lägg till från sparade bäddar
   const addFromSaved = (savedBed) => {
     const isPot = savedBed.type === 'pot';
@@ -125,7 +248,11 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   // Flytta bädd
   const handleMove = (id, x, y) => {
     setBeds((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, x, y } : b))
+      prev.map((b) => {
+        if (b.id !== id) return b;
+        const { x: snappedX, y: snappedY } = snapPosition(b, x, y, prev);
+        return { ...b, x: snappedX, y: snappedY };
+      })
     );
   };
 
@@ -214,6 +341,33 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     link.click();
   };
 
+  const escapeHtml = (value) => {
+    if (value === null || value === undefined) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
+  const resolvePlantName = (plantId) => {
+    if (plantId === null || plantId === undefined) return '';
+    const key = String(plantId);
+    return plantLookup[key] || plantId;
+  };
+
+  const getBedPlantNames = (plan, bedId) => {
+    if (!plan?.bedPlants) return [];
+    const possibleKeys = [bedId, String(bedId)];
+    for (const key of possibleKeys) {
+      if (Array.isArray(plan.bedPlants[key])) {
+        return plan.bedPlants[key].map((id) => resolvePlantName(id));
+      }
+    }
+    return [];
+  };
+
   // Skriv ut design
   const printDesign = () => {
     const printWindow = window.open('', '_blank');
@@ -227,7 +381,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     // Begränsa till bäddar som finns i plan
     bedsOrder = bedsOrder.filter(b => planBedIds.includes(String(b.id)) || planBedIds.includes(b.id));
     const headers = bedsOrder.map(b => bedIdToName[b.id] || b.name);
-    const columns = bedsOrder.map(b => (plan?.bedPlants?.[b.id] || []).slice());
+    const columns = bedsOrder.map(b => getBedPlantNames(plan, b.id));
     const maxRows = columns.reduce((m, col) => Math.max(m, col.length), 0);
     const tableHtml = plan && bedsOrder.length > 0 ? `
       <style>
@@ -241,13 +395,13 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         <table class="gd-print-table">
           <thead>
             <tr>
-              ${headers.map(h => `<th>${h}</th>`).join('')}
+              ${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
             ${Array.from({length: maxRows}).map((_, rIdx) => `
               <tr>
-                ${columns.map(col => `<td>${col[rIdx] ? col[rIdx] : ''}</td>`).join('')}
+                ${columns.map(col => `<td>${escapeHtml(col[rIdx] ? col[rIdx] : '')}</td>`).join('')}
               </tr>
             `).join('')}
           </tbody>
@@ -356,7 +510,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     const planBedIds = plan ? Object.keys(plan.bedPlants || {}) : [];
     bedsOrder = bedsOrder.filter(b => planBedIds.includes(String(b.id)) || planBedIds.includes(b.id));
     const headers = bedsOrder.map(b => bedIdToName[b.id] || b.name);
-    const columns = bedsOrder.map(b => (plan?.bedPlants?.[b.id] || []).slice());
+    const columns = bedsOrder.map(b => getBedPlantNames(plan, b.id));
     const maxRows = columns.reduce((m, col) => Math.max(m, col.length), 0);
     const tableHtml = plan && bedsOrder.length > 0 ? `
       <style>
@@ -370,13 +524,13 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         <table class=\"gd-print-table\" style=\"width:auto;\">
           <thead>
             <tr>
-              ${headers.map(h => `<th>${h}</th>`).join('')}
+              ${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
             ${Array.from({length: maxRows}).map((_, rIdx) => `
               <tr>
-                ${columns.map(col => `<td>${col[rIdx] ? col[rIdx] : ''}</td>`).join('')}
+                ${columns.map(col => `<td>${escapeHtml(col[rIdx] ? col[rIdx] : '')}</td>`).join('')}
               </tr>
             `).join('')}
           </tbody>
