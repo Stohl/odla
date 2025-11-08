@@ -135,96 +135,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     };
   }, []);
 
-  const SNAP_THRESHOLD = 15;
-
-  const getBounds = (bed, x, y) => {
-    if (bed.type === 'pot') {
-      const radius = bed.radius || 50;
-      return {
-        left: x,
-        right: x + radius * 2,
-        top: y,
-        bottom: y + radius * 2,
-        centerX: x + radius,
-        centerY: y + radius,
-        width: radius * 2,
-        height: radius * 2,
-      };
-    }
-
-    return {
-      left: x,
-      right: x + bed.width,
-      top: y,
-      bottom: y + bed.height,
-      centerX: x + bed.width / 2,
-      centerY: y + bed.height / 2,
-      width: bed.width,
-      height: bed.height,
-    };
-  };
-
-  const snapPosition = (bed, proposedX, proposedY, allBeds) => {
-    const currentBounds = getBounds(bed, proposedX, proposedY);
-    const candidatesX = [proposedX];
-    const candidatesY = [proposedY];
-
-    allBeds.forEach((other) => {
-      if (other.id === bed.id) return;
-      const otherBounds = getBounds(other, other.x, other.y);
-
-      // Horisontella kandidater
-      if (Math.abs(proposedX - otherBounds.left) <= SNAP_THRESHOLD) {
-        candidatesX.push(otherBounds.left);
-      }
-      if (Math.abs(proposedX - otherBounds.right) <= SNAP_THRESHOLD) {
-        candidatesX.push(otherBounds.right);
-      }
-      if (Math.abs(proposedX + currentBounds.width - otherBounds.left) <= SNAP_THRESHOLD) {
-        candidatesX.push(otherBounds.left - currentBounds.width);
-      }
-      if (Math.abs(proposedX + currentBounds.width - otherBounds.right) <= SNAP_THRESHOLD) {
-        candidatesX.push(otherBounds.right - currentBounds.width);
-      }
-      const proposedCenterX = proposedX + currentBounds.width / 2;
-      if (Math.abs(proposedCenterX - otherBounds.centerX) <= SNAP_THRESHOLD) {
-        candidatesX.push(otherBounds.centerX - currentBounds.width / 2);
-      }
-
-      // Vertikala kandidater
-      if (Math.abs(proposedY - otherBounds.top) <= SNAP_THRESHOLD) {
-        candidatesY.push(otherBounds.top);
-      }
-      if (Math.abs(proposedY - otherBounds.bottom) <= SNAP_THRESHOLD) {
-        candidatesY.push(otherBounds.bottom);
-      }
-      if (Math.abs(proposedY + currentBounds.height - otherBounds.top) <= SNAP_THRESHOLD) {
-        candidatesY.push(otherBounds.top - currentBounds.height);
-      }
-      if (Math.abs(proposedY + currentBounds.height - otherBounds.bottom) <= SNAP_THRESHOLD) {
-        candidatesY.push(otherBounds.bottom - currentBounds.height);
-      }
-      const proposedCenterY = proposedY + currentBounds.height / 2;
-      if (Math.abs(proposedCenterY - otherBounds.centerY) <= SNAP_THRESHOLD) {
-        candidatesY.push(otherBounds.centerY - currentBounds.height / 2);
-      }
-    });
-
-    const snappedX = candidatesX.reduce((closest, candidate) => {
-      return Math.abs(candidate - proposedX) < Math.abs(closest - proposedX) ? candidate : closest;
-    }, candidatesX[0]);
-
-    const snappedY = candidatesY.reduce((closest, candidate) => {
-      return Math.abs(candidate - proposedY) < Math.abs(closest - proposedY) ? candidate : closest;
-    }, candidatesY[0]);
-
-    const clampedX = Math.max(0, Math.min(snappedX, canvasWidth - currentBounds.width));
-    const clampedY = Math.max(0, Math.min(snappedY, canvasHeight - currentBounds.height));
-
-    return { x: clampedX, y: clampedY };
-  };
-
-
   // Lägg till från sparade bäddar
   const addFromSaved = (savedBed) => {
     const isPot = savedBed.type === 'pot';
@@ -248,33 +158,8 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   // Flytta bädd
   const handleMove = (id, x, y) => {
     setBeds((prev) =>
-      prev.map((b) => {
-        if (b.id !== id) return b;
-        const { x: snappedX, y: snappedY } = snapPosition(b, x, y, prev);
-        return { ...b, x: snappedX, y: snappedY };
-      })
+      prev.map((b) => (b.id === id ? { ...b, x, y } : b))
     );
-  };
-
-  const applySnappingDuringDrag = (bed, target) => {
-    if (!target) return;
-
-    const isPot = bed.type === 'pot';
-    const radius = bed.radius || 50;
-    const currentPos = target.position();
-    const proposedX = isPot ? currentPos.x - radius : currentPos.x;
-    const proposedY = isPot ? currentPos.y - radius : currentPos.y;
-    const { x, y } = snapPosition(bed, proposedX, proposedY, beds);
-
-    if (isPot) {
-      target.position({ x: x + radius, y: y + radius });
-    } else {
-      target.position({ x, y });
-    }
-
-    if (stageRef.current) {
-      stageRef.current.batchDraw();
-    }
   };
 
   // Ta bort vald bädd
@@ -760,7 +645,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         onTap={() => setSelected(bed.id)}
                         onDblClick={editSelected}
                         onDblTap={editSelected}
-                        onDragMove={(e) => applySnappingDuringDrag(bed, e.target)}
                         onDragEnd={(e) => handleMove(bed.id, e.target.x() - radius, e.target.y() - radius)}
                       />
                     ) : (
@@ -780,7 +664,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         onTap={() => setSelected(bed.id)}
                         onDblClick={editSelected}
                         onDblTap={editSelected}
-                        onDragMove={(e) => applySnappingDuringDrag(bed, e.target)}
                         onDragEnd={(e) => handleMove(bed.id, e.target.x(), e.target.y())}
                       />
                     )}
