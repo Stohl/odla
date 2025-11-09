@@ -56,7 +56,7 @@ const GardenPlanner = () => {
   const activeBeds = activeDesign && designs[activeDesign] ? designs[activeDesign].beds || [] : [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full px-3 sm:px-5 lg:px-8 py-8">
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-earth-800 mb-2 flex items-center gap-3">
           <span>🪴</span>

@@ -263,11 +263,11 @@ function App() {
       
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-earth-200 shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-2 sm:px-4 lg:px-6">
           <div className="flex gap-1 overflow-x-auto">
             <button
               onClick={() => setActiveView('seedbank')}
-              className={`px-4 py-3 font-semibold transition-all border-b-4 whitespace-nowrap ${
+              className={`px-3 py-2 font-semibold transition-all border-b-4 whitespace-nowrap ${
                 activeView === 'seedbank'
                   ? 'border-plant-500 text-plant-700 bg-plant-50'
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
@@ -277,7 +277,7 @@ function App() {
             </button>
             <button
               onClick={() => setActiveView('calendar')}
-              className={`px-4 py-3 font-semibold transition-all border-b-4 whitespace-nowrap ${
+              className={`px-3 py-2 font-semibold transition-all border-b-4 whitespace-nowrap ${
                 activeView === 'calendar'
                   ? 'border-plant-500 text-plant-700 bg-plant-50'
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
@@ -287,7 +287,7 @@ function App() {
             </button>
             <button
               onClick={() => setActiveView('planning')}
-              className={`px-4 py-3 font-semibold transition-all border-b-4 whitespace-nowrap ${
+              className={`px-3 py-2 font-semibold transition-all border-b-4 whitespace-nowrap ${
                 activeView === 'planning'
                   ? 'border-plant-500 text-plant-700 bg-plant-50'
                   : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
@@ -307,7 +307,7 @@ function App() {
           onTogglePlant={handleTogglePlant}
         />
       ) : activeView === 'calendar' ? (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="w-full px-2 sm:px-4 lg:px-6 py-8">
           {/* Filter Bar */}
           <FilterBar
             searchTerm={searchTerm}
@@ -353,7 +353,7 @@ function App() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-earth-200 mt-16 py-6">
-        <div className="max-w-7xl mx-auto px-4 text-center text-earth-600 text-sm">
+        <div className="w-full px-2 sm:px-4 text-center text-earth-600 text-sm">
           <p>🌱 Knopp - Allt börjar med en knopp.</p>
         </div>
       </footer>
