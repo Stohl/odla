@@ -247,7 +247,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                   : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
               }`}
             >
-              {showOnlyMyPlants ? `✓ Mina växter (${myPlants.length})` : `Mina växterS (${plants.length})`}
+              {showOnlyMyPlants ? `✓ Mina växter (${myPlants.length})` : `Mina växter`}
             </button>
             <span className="text-sm text-earth-600">
               Visar {sortedPlants.length} växter
