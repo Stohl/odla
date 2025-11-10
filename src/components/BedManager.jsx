@@ -298,7 +298,7 @@ const BedManager = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-earth-700 mb-2">
-                  Typ av odlingsplats (foremfaktor)
+                  Typ av odlingsplats (formfaktor)
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -310,7 +310,9 @@ const BedManager = () => {
                         : 'border-earth-200 hover:border-earth-300'
                     }`}
                   >
-                    <div className="w-6 h-4 bg-gradient-to-b from-amber-700 to-amber-900 rounded-sm border border-amber-800 flex-shrink-0"></div>
+                    <span className="w-6 h-6 border-2 border-earth-500 rounded-sm flex items-center justify-center">
+                      <span className="w-3/4 h-3/4 bg-earth-500"></span>
+                    </span>
                     <span className="font-semibold text-earth-800 text-sm">Odlingsbädd</span>
                   </button>
                   <button
@@ -322,7 +324,9 @@ const BedManager = () => {
                         : 'border-earth-200 hover:border-earth-300'
                     }`}
                   >
-                    <span className="text-xl">🪴</span>
+                    <span className="w-6 h-6 border-2 border-earth-500 rounded-full flex items-center justify-center">
+                      <span className="w-3/4 h-3/4 bg-earth-500 rounded-full"></span>
+                    </span>
                     <span className="font-semibold text-earth-800 text-sm">Kruka</span>
                   </button>
                 </div>
