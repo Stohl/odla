@@ -155,6 +155,25 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     setShowBedSelector(false);
   };
 
+  const addDesignRectangle = () => {
+    const timestamp = Date.now();
+    const count = beds.filter((b) => b.type === 'shape').length + 1;
+    const newShape = {
+      id: timestamp,
+      name: `Rektangel ${count}`,
+      type: 'shape',
+      x: 80,
+      y: 80,
+      width: 200,
+      height: 120,
+      radius: undefined,
+      savedBedId: null,
+    };
+
+    setBeds([...beds, newShape]);
+    setSelected(newShape.id);
+  };
+
   // Flytta bädd
   const handleMove = (id, x, y) => {
     setBeds((prev) =>
@@ -507,12 +526,20 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
             ))}
           </select>
         </div>
-        <button
-          onClick={() => setShowBedSelector(!showBedSelector)}
-          className="px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
-        >
-          {showBedSelector ? '− Stäng väljare' : '📋 Lägg till från odlingsplatser'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowBedSelector(!showBedSelector)}
+            className="px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
+          >
+            {showBedSelector ? '− Stäng väljare' : '📋 Lägg till från odlingsplatser'}
+          </button>
+          <button
+            onClick={addDesignRectangle}
+            className="px-4 py-2 bg-earth-500 text-white rounded-lg hover:bg-earth-600 transition-colors font-semibold"
+          >
+            ➕ Rektangel
+          </button>
+        </div>
 
         {selected && (
           <>
@@ -664,8 +691,9 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
               {/* Rita odlingsbäddar och krukor */}
               {beds.map((bed) => {
                 const isPot = bed.type === 'pot';
+                const isDesignShape = bed.type === 'shape';
                 const radius = bed.radius || 50;
-                
+
                 return (
                   <React.Fragment key={bed.id}>
                     {isPot ? (
@@ -691,8 +719,16 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         y={bed.y}
                         width={bed.width}
                         height={bed.height}
-                        fill="#d8f3dc"
-                        stroke={selected === bed.id ? '#1b4332' : '#2d6a4f'}
+                        fill={isDesignShape ? '#fde68a' : '#d8f3dc'}
+                        stroke={
+                          selected === bed.id
+                            ? isDesignShape
+                              ? '#b45309'
+                              : '#1b4332'
+                            : isDesignShape
+                            ? '#f59e0b'
+                            : '#2d6a4f'
+                        }
                         strokeWidth={selected === bed.id ? 4 : 2}
                         draggable
                         shadowBlur={selected === bed.id ? 10 : 5}
@@ -709,7 +745,13 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                       text={bed.name}
                       fontSize={16}
                       fontStyle="bold"
-                      fill={isPot ? '#8b4513' : '#1b4332'}
+                      fill={
+                        isPot
+                          ? '#8b4513'
+                          : isDesignShape
+                          ? '#92400e'
+                          : '#1b4332'
+                      }
                       listening={false}
                       align={isPot ? 'center' : 'left'}
                       offsetX={isPot ? radius - 8 : 0}
@@ -743,9 +785,12 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {beds.map((bed) => {
               const isPot = bed.type === 'pot';
-              const icon = isPot ? '🪴' : '▭';
-              const sizeText = isPot ? `Radie: ${bed.radius || 50}px` : `${bed.width}×${bed.height}px`;
-              
+              const isDesignShape = bed.type === 'shape';
+              const icon = isPot ? '🪴' : isDesignShape ? '⬛' : '▭';
+              const sizeText = isPot
+                ? `Radie: ${bed.radius || 50}px`
+                : `${bed.width}×${bed.height}px`;
+
               return (
                 <div
                   key={bed.id}
