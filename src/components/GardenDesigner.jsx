@@ -11,6 +11,12 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [plantLookup, setPlantLookup] = useState({});
   const stageRef = useRef(null);
 
+  const getDefaultColor = (type) => {
+    if (type === 'pot') return '#f4a261';
+    if (type === 'shape') return '#fde68a';
+    return '#d8f3dc';
+  };
+
   // Ladda sparade bäddar från BedManager och håll dem synkade
   useEffect(() => {
     const loadBeds = () => {
@@ -53,11 +59,19 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         const source = savedBeds.find((s) => s.id === instance.savedBedId);
         if (!source) return instance; // källan raderad, behåll instansen orörd
         // Uppdatera bara namn/typ; behåll position och storlek i designen
-        if (instance.name !== source.name || instance.type !== (source.type || 'bed')) {
+        const sourceType = source.type || 'bed';
+        const sourceColor = source.color || getDefaultColor(sourceType);
+
+        if (
+          instance.name !== source.name ||
+          instance.type !== sourceType ||
+          instance.color !== sourceColor
+        ) {
           return {
             ...instance,
             name: source.name,
-            type: source.type || 'bed',
+            type: sourceType,
+            color: sourceColor,
           };
         }
         return instance;
@@ -148,6 +162,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       height: isPot ? 100 : 100,
       radius: isPot ? 50 : undefined, // Radie för cirklar
       savedBedId: savedBed.id, // Referens till sparad bädd
+      color: savedBed.color || getDefaultColor(savedBed.type || 'bed'),
     };
 
     setBeds([...beds, newBed]);
@@ -168,6 +183,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       height: 120,
       radius: undefined,
       savedBedId: null,
+      color: getDefaultColor('shape'),
     };
 
     setBeds([...beds, newShape]);
@@ -205,6 +221,11 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
 
     const bed = beds.find((b) => b.id === selected);
     if (!bed) return;
+
+  if (bed.type !== 'shape') {
+    alert('Endast rektanglar kan byta namn här. Använd Odlingsplatser för att byta namn på bäddar.');
+    return;
+  }
 
     const newName = prompt('Nytt namn:', bed.name);
     if (!newName || !newName.trim()) return;
@@ -253,6 +274,31 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         }
 
         return b;
+      })
+    );
+  };
+
+  const handleSelectedColorChange = (event) => {
+    if (!selected) return;
+    const newColor = event.target.value;
+
+    setBeds((prev) =>
+      prev.map((b) => {
+        if (b.id !== selected) return b;
+        return { ...b, color: newColor };
+      })
+    );
+  };
+
+  const handleShapeNameChange = (event) => {
+    if (!selected) return;
+    const newName = event.target.value;
+
+    setBeds((prev) =>
+      prev.map((b) => {
+        if (b.id !== selected) return b;
+        if (b.type !== 'shape') return b;
+        return { ...b, name: newName };
       })
     );
   };
@@ -543,12 +589,14 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
 
         {selected && (
           <>
-            <button
-              onClick={editSelected}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
-            >
-              ✏️ Ändra namn
-            </button>
+            {selectedBed?.type === 'shape' && (
+              <button
+                onClick={editSelected}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
+              >
+                ✏️ Ändra namn
+              </button>
+            )}
 
             <button
               onClick={deleteSelected}
@@ -588,8 +636,51 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       {/* Info om vald bädd */}
       {selectedBed && (
         <div className="mb-4 p-4 bg-plant-50 border-2 border-plant-300 rounded-lg">
-          <h3 className="font-bold text-plant-800 mb-2">Vald bädd: {selectedBed.name}</h3>
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-3">
+            <div>
+              <h3 className="font-bold text-plant-800 mb-1">
+                Vald {selectedBed.type === 'shape' ? 'rektangel' : 'bädd'}: {selectedBed.name}
+              </h3>
+              <p className="text-xs uppercase tracking-wide text-earth-500">
+                {selectedBed.type === 'pot'
+                  ? 'Kruka'
+                  : selectedBed.type === 'shape'
+                  ? 'Designrektangel'
+                  : selectedBed.savedBedId
+                  ? 'Odlingsplats (från odlingsplatser)'
+                  : 'Fristående bädd'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-earth-700">Färg:</span>
+              <input
+                type="color"
+                value={
+                  selectedBed.color ||
+                  (selectedBed.type === 'pot'
+                    ? '#f4a261'
+                    : selectedBed.type === 'shape'
+                    ? '#fde68a'
+                    : '#d8f3dc')
+                }
+                onChange={handleSelectedColorChange}
+                className="w-12 h-8 border-2 border-earth-300 rounded cursor-pointer bg-white"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-earth-700">
+            {selectedBed.type === 'shape' && (
+              <label className="flex flex-col">
+                <span className="font-semibold text-earth-800">Namn</span>
+                <input
+                  type="text"
+                  value={selectedBed.name}
+                  onChange={handleShapeNameChange}
+                  className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+                />
+              </label>
+            )}
             <label className="flex flex-col">
               <span className="font-semibold text-earth-800">X-position (px)</span>
               <input
@@ -702,7 +793,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         x={bed.x + radius}
                         y={bed.y + radius}
                         radius={radius}
-                        fill="#f4a261"
+                        fill={bed.color || '#f4a261'}
                         stroke={selected === bed.id ? '#d08c60' : '#e76f51'}
                         strokeWidth={selected === bed.id ? 4 : 2}
                         draggable
@@ -719,7 +810,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         y={bed.y}
                         width={bed.width}
                         height={bed.height}
-                        fill={isDesignShape ? '#fde68a' : '#d8f3dc'}
+                        fill={bed.color || (isDesignShape ? '#fde68a' : '#d8f3dc')}
                         stroke={
                           selected === bed.id
                             ? isDesignShape
@@ -804,6 +895,10 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{icon}</span>
                     <div className="font-semibold text-earth-800">{bed.name}</div>
+                    <span
+                      className="w-4 h-4 rounded-full border border-earth-300"
+                      style={{ backgroundColor: bed.color || getDefaultColor(bed.type) }}
+                    />
                   </div>
                   <div className="text-xs text-earth-600 mt-1">
                     Position: ({Math.round(bed.x)}, {Math.round(bed.y)}) • {sizeText}
