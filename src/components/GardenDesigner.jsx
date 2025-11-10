@@ -646,8 +646,8 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
 
       {/* Tips */}
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-        <span className="font-semibold">💡 Tips:</span> Klicka på en bädd för att välja den, dra för att flytta. 
-        Dubbelklicka för att redigera namn.
+        <span className="font-semibold">💡 Tips:</span> Klicka på en bädd för att välja den och dra för att flytta den. 
+        Använd knapparna ovanför kartan för att byta namn eller ta bort.
       </div>
 
       {/* Canvas */}
@@ -682,8 +682,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         shadowColor="rgba(0,0,0,0.3)"
                         onClick={() => setSelected(bed.id)}
                         onTap={() => setSelected(bed.id)}
-                        onDblClick={editSelected}
-                        onDblTap={editSelected}
                         onDragEnd={(e) => handleMove(bed.id, e.target.x() - radius, e.target.y() - radius)}
                       />
                     ) : (
@@ -701,8 +699,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                         shadowColor="rgba(0,0,0,0.3)"
                         onClick={() => setSelected(bed.id)}
                         onTap={() => setSelected(bed.id)}
-                        onDblClick={editSelected}
-                        onDblTap={editSelected}
                         onDragEnd={(e) => handleMove(bed.id, e.target.x(), e.target.y())}
                       />
                     )}
