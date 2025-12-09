@@ -15,8 +15,8 @@ function App() {
   const [selectedYearPlan, setSelectedYearPlan] = useState('all'); // 'all' or planId
   const [searchTerm, setSearchTerm] = useState('');
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(true); // Default visa endast mina växter i kalendern
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [groupBy, setGroupBy] = useState('none'); // 'none', 'category', or 'bed'
+  const [selectedSource, setSelectedSource] = useState('');
+  const [groupBy, setGroupBy] = useState('none'); // 'none', 'source', or 'bed'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -191,8 +191,8 @@ function App() {
     });
   };
 
-  // Get unique categories
-  const categories = [...new Set(plants.map(p => p.category))].sort();
+  // Get unique sources (källa)
+  const sources = [...new Set(plants.map(p => p.source || 'Okänd'))].sort();
 
   // Get plants from a specific year plan (only from beds)
   const getPlantsFromYearPlan = (planId) => {
@@ -214,11 +214,13 @@ function App() {
   // Filter plants based on search, category, myPlants toggle, and year plan
   const filteredPlants = plants.filter(plant => {
     // Search filter
-    const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         plant.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      plant.name.toLowerCase().includes(searchLower) ||
+      (plant.source || '').toLowerCase().includes(searchLower);
     
-    // Category filter
-    const matchesCategory = !selectedCategory || plant.category === selectedCategory;
+    // Source filter
+    const matchesSource = !selectedSource || (plant.source || 'Okänd') === selectedSource;
     
     // Year plan filter
     let matchesYearPlan = true;
@@ -231,7 +233,7 @@ function App() {
       matchesYearPlan = !showOnlyMyPlants || myPlants.includes(plant.id);
     }
 
-    return matchesSearch && matchesCategory && matchesYearPlan;
+    return matchesSearch && matchesSource && matchesYearPlan;
   });
 
   if (loading) {
@@ -314,9 +316,9 @@ function App() {
             onSearchChange={setSearchTerm}
             showOnlyMyPlants={showOnlyMyPlants}
             onToggleMyPlants={() => setShowOnlyMyPlants(!showOnlyMyPlants)}
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
+            sources={sources}
+            selectedSource={selectedSource}
+            onSourceChange={setSelectedSource}
             yearPlans={yearPlans}
             selectedYearPlan={selectedYearPlan}
             onYearPlanChange={setSelectedYearPlan}

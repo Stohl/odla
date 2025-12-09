@@ -28,12 +28,12 @@ const CalendarView = ({
       // Sort all plants by name
       const sorted = [...plants].sort((a, b) => a.name.localeCompare(b.name, 'sv'));
       return { 'Alla växter': sorted };
-    } else if (groupBy === 'category') {
+    } else if (groupBy === 'source') {
       const grouped = {};
       plants.forEach(plant => {
-        const category = plant.category || 'Övrigt';
-        if (!grouped[category]) grouped[category] = [];
-        grouped[category].push(plant);
+        const source = plant.source || 'Okänd';
+        if (!grouped[source]) grouped[source] = [];
+        grouped[source].push(plant);
       });
       // Sort plants within each category
       Object.keys(grouped).forEach(key => {

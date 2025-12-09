@@ -4,10 +4,10 @@ const FilterBar = ({
   searchTerm, 
   onSearchChange, 
   showOnlyMyPlants, 
-  onToggleMyPlants,
-  categories,
-  selectedCategory,
-  onCategoryChange,
+  onToggleMyPlants, 
+  sources, 
+  selectedSource, 
+  onSourceChange,
   yearPlans,
   selectedYearPlan,
   onYearPlanChange,
@@ -88,14 +88,14 @@ const FilterBar = ({
           </label>
           <div className="flex gap-2">
             <button
-              onClick={() => onGroupByChange('category')}
+              onClick={() => onGroupByChange('source')}
               className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
-                groupBy === 'category'
+                groupBy === 'source'
                   ? 'bg-plant-500 text-white shadow-md'
                   : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
               }`}
             >
-              Kategori
+              Källa
             </button>
             {hasYearPlan && (
               <button
@@ -139,16 +139,16 @@ const FilterBar = ({
               />
             </div>
 
-            {/* Category Filter */}
+            {/* Source Filter */}
             <div className="w-full md:w-auto">
               <select
-                value={selectedCategory}
-                onChange={(e) => onCategoryChange(e.target.value)}
+                value={selectedSource}
+                onChange={(e) => onSourceChange(e.target.value)}
                 className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors bg-white cursor-pointer"
               >
-                <option value="">Alla kategorier</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
+                <option value="">Alla källor</option>
+                {sources.map(src => (
+                  <option key={src} value={src}>{src}</option>
                 ))}
               </select>
             </div>
