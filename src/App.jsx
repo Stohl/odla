@@ -4,10 +4,11 @@ import FilterBar from './components/FilterBar';
 import CalendarView from './components/CalendarView';
 import MyPlantsPanel from './components/MyPlantsPanel';
 import PlanningHub from './components/PlanningHub';
+import Settings from './components/Settings';
 import SeedBank from './components/SeedBank';
 
 function App() {
-  const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', or 'planning'
+  const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', 'planning', 'settings'
   const [plants, setPlants] = useState([]);
   const [myPlants, setMyPlants] = useState([]);
   const [myPlantsLoaded, setMyPlantsLoaded] = useState(false); // Flag to prevent overwriting localStorage
@@ -297,6 +298,16 @@ function App() {
             >
               🏡 Planering
             </button>
+            <button
+              onClick={() => setActiveView('settings')}
+              className={`px-3 py-2 font-semibold transition-all border-b-4 whitespace-nowrap ${
+                activeView === 'settings'
+                  ? 'border-plant-500 text-plant-700 bg-plant-50'
+                  : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
+              }`}
+            >
+              ⚙️ Inställningar
+            </button>
           </div>
         </div>
       </div>
@@ -349,8 +360,10 @@ function App() {
             onTogglePlant={handleTogglePlant}
           />
         </main>
-      ) : (
+      ) : activeView === 'planning' ? (
         <PlanningHub myPlants={myPlants} plants={plants} />
+      ) : (
+        <Settings />
       )}
 
       {/* Footer */}
