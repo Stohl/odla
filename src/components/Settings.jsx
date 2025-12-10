@@ -1,13 +1,87 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
+const STORAGE_KEYS = [
+  { key: 'myPlants', label: 'Mina växter (myPlants)' },
+  { key: 'yearPlans', label: 'Årsplaner (yearPlans)' },
+  { key: 'myGardenBeds', label: 'Odlingsplatser (myGardenBeds)' },
+];
+
+const safePretty = (raw) => {
+  try {
+    return JSON.stringify(JSON.parse(raw), null, 2);
+  } catch {
+    return raw;
+  }
+};
 
 const Settings = ({ theme, onThemeChange }) => {
+  const [entries, setEntries] = useState({});
+  const [allBundle, setAllBundle] = useState('{}');
+
+  const loadEntries = () => {
+    const next = {};
+    STORAGE_KEYS.forEach(({ key }) => {
+      const raw = localStorage.getItem(key);
+      next[key] = raw === null || raw === undefined ? '' : safePretty(raw);
+    });
+
+    const bundle = STORAGE_KEYS.reduce((acc, { key }) => {
+      const raw = localStorage.getItem(key);
+      if (raw !== null && raw !== undefined) {
+        try {
+          acc[key] = JSON.parse(raw);
+        } catch {
+          acc[key] = raw;
+        }
+      }
+      return acc;
+    }, {});
+
+    setEntries(next);
+    setAllBundle(JSON.stringify(bundle, null, 2));
+  };
+
+  useEffect(() => {
+    loadEntries();
+  }, []);
+
+  const saveEntry = (key) => {
+    const value = entries[key] ?? '';
+    try {
+      const parsed = JSON.parse(value);
+      localStorage.setItem(key, JSON.stringify(parsed));
+      alert(`Sparade ${key} som JSON`);
+    } catch {
+      localStorage.setItem(key, value);
+      alert(`Sparade ${key} som råtext (ej giltig JSON)`);
+    }
+    loadEntries();
+  };
+
+  const saveAll = () => {
+    try {
+      const parsed = JSON.parse(allBundle);
+      Object.entries(parsed).forEach(([key, val]) => {
+        localStorage.setItem(key, JSON.stringify(val));
+      });
+      alert('Sparade alla nycklar');
+      loadEntries();
+    } catch {
+      alert('Kunde inte tolka ALLA-texten som JSON. Kontrollera formatet.');
+    }
+  };
+
+  const handleChange = (key, value) => {
+    setEntries((prev) => ({ ...prev, [key]: value }));
+  };
+
   return (
     <main className="w-full px-2 sm:px-4 lg:px-6 py-8">
       <div className="bg-white rounded-xl shadow-md border border-earth-200 p-6 space-y-6">
         <div>
           <h1 className="text-xl font-bold text-earth-900 mb-1">Inställningar</h1>
           <p className="text-sm text-earth-600">
-            Här kan du samla framtida inställningar. Säg till vad du vill styra så lägger jag till kontroller här.
+            Växla tema och hantera sparad data. Du kan kopiera texten och dela (t.ex. forum) eller klistra in och spara.
           </p>
         </div>
 
@@ -43,32 +117,62 @@ const Settings = ({ theme, onThemeChange }) => {
             </div>
           </section>
 
-          <section className="p-4 rounded-lg border border-earth-200 bg-earth-50">
-            <h2 className="font-semibold text-earth-800 mb-1">Data & källor</h2>
-            <p className="text-sm text-earth-600">
-              Visa eller hantera källor (Weibulls, Nelson Garden, Wexthuset m.fl.).
+          <section className="p-4 rounded-lg border border-earth-200 bg-earth-50 sm:col-span-2">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <h2 className="font-semibold text-earth-800">LocalStorage – export/import</h2>
+              <button
+                type="button"
+                onClick={loadEntries}
+                className="px-3 py-1.5 rounded-md text-sm font-semibold bg-earth-200 text-earth-800 hover:bg-earth-300 transition-colors"
+              >
+                Ladda om
+              </button>
+            </div>
+            <p className="text-sm text-earth-600 mb-3">
+              Kopiera texten och dela. Klistra in mottagen text och spara för att skriva till localStorage.
             </p>
-          </section>
 
-          <section className="p-4 rounded-lg border border-earth-200 bg-earth-50">
-            <h2 className="font-semibold text-earth-800 mb-1">Notifieringar</h2>
-            <p className="text-sm text-earth-600">
-              Här kan du framöver styra påminnelser för sådd, omplantering och skörd.
-            </p>
-          </section>
+            <div className="space-y-4">
+              {STORAGE_KEYS.map(({ key, label }) => (
+                <div key={key} className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-earth-800 text-sm">{label}</span>
+                    <button
+                      type="button"
+                      onClick={() => saveEntry(key)}
+                      className="px-3 py-1.5 rounded-md text-xs font-semibold bg-plant-500 text-white hover:bg-plant-600 transition-colors"
+                    >
+                      Spara
+                    </button>
+                  </div>
+                  <textarea
+                    value={entries[key] ?? ''}
+                    onChange={(e) => handleChange(key, e.target.value)}
+                    className="w-full min-h-[140px] px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 text-sm font-mono bg-white"
+                    spellCheck="false"
+                  />
+                </div>
+              ))}
 
-          <section className="p-4 rounded-lg border border-earth-200 bg-earth-50">
-            <h2 className="font-semibold text-earth-800 mb-1">Export & utskrift</h2>
-            <p className="text-sm text-earth-600">
-              Planerat utrymme för inställningar för PDF/PNG-export och utskriftsformat.
-            </p>
-          </section>
-
-          <section className="p-4 rounded-lg border border-earth-200 bg-earth-50">
-            <h2 className="font-semibold text-earth-800 mb-1">Teman</h2>
-            <p className="text-sm text-earth-600">
-              Kommer användas om du vill växla mellan ljus/mörk eller kompakta layouter.
-            </p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-earth-800 text-sm">Alla (bundle JSON)</span>
+                  <button
+                    type="button"
+                    onClick={saveAll}
+                    className="px-3 py-1.5 rounded-md text-xs font-semibold bg-plant-500 text-white hover:bg-plant-600 transition-colors"
+                  >
+                    Spara alla
+                  </button>
+                </div>
+                <textarea
+                  value={allBundle}
+                  onChange={(e) => setAllBundle(e.target.value)}
+                  className="w-full min-h-[160px] px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 text-sm font-mono bg-white"
+                  spellCheck="false"
+                />
+              </div>
+            </div>
           </section>
         </div>
       </div>
