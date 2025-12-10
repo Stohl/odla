@@ -81,44 +81,44 @@ const FilterBar = ({
           )}
         </div>
 
-        {/* Gruppering - TYDLIGA KNAPPAR */}
+        {/* Gruppering - diskreta knappar */}
         <div className="mb-4">
-          <label className="block text-sm font-semibold text-earth-700 mb-2">
+          <label className="block text-xs text-earth-600 mb-1.5">
             Gruppera efter:
           </label>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             <button
-              onClick={() => onGroupByChange('source')}
-              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
-                groupBy === 'source'
-                  ? 'bg-plant-500 text-white shadow-md'
-                  : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
+              onClick={() => onGroupByChange('none')}
+              className={`px-3 py-1.5 text-xs rounded-md transition-all ${
+                groupBy === 'none'
+                  ? 'bg-plant-100 text-plant-700 border border-plant-300'
+                  : 'bg-earth-50 text-earth-600 hover:bg-earth-100 border border-earth-200'
               }`}
             >
-              Källa
+              Ingen
+            </button>
+            <button
+              onClick={() => onGroupByChange('source')}
+              className={`px-3 py-1.5 text-xs rounded-md transition-all ${
+                groupBy === 'source'
+                  ? 'bg-plant-100 text-plant-700 border border-plant-300'
+                  : 'bg-earth-50 text-earth-600 hover:bg-earth-100 border border-earth-200'
+              }`}
+            >
+              Leverantör
             </button>
             {hasYearPlan && (
               <button
                 onClick={() => onGroupByChange('bed')}
-                className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
+                className={`px-3 py-1.5 text-xs rounded-md transition-all ${
                   groupBy === 'bed'
-                    ? 'bg-plant-500 text-white shadow-md'
-                    : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
+                    ? 'bg-plant-100 text-plant-700 border border-plant-300'
+                    : 'bg-earth-50 text-earth-600 hover:bg-earth-100 border border-earth-200'
                 }`}
               >
                 Odlingsbädd
               </button>
             )}
-            <button
-              onClick={() => onGroupByChange('none')}
-              className={`flex-1 px-4 py-2 rounded-lg font-semibold transition-all ${
-                groupBy === 'none'
-                  ? 'bg-plant-500 text-white shadow-md'
-                  : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
-              }`}
-            >
-              Ingen
-            </button>
           </div>
         </div>
 
@@ -146,7 +146,7 @@ const FilterBar = ({
                 onChange={(e) => onSourceChange(e.target.value)}
                 className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 transition-colors bg-white cursor-pointer"
               >
-                <option value="">Alla källor</option>
+                <option value="">Alla leverantörer</option>
                 {sources.map(src => (
                   <option key={src} value={src}>{src}</option>
                 ))}
