@@ -179,7 +179,7 @@ const PlantRow = ({
             </span>
             <div className="flex-1">
               <div className="font-medium text-earth-800">{plant.name}</div>
-              <div className="text-xs text-earth-500">{plant.category}</div>
+              <div className="text-xs text-earth-500">{plant.source || 'Okänd leverantör'}</div>
             </div>
           </div>
         </td>
