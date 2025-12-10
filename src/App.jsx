@@ -20,6 +20,10 @@ function App() {
   const [groupBy, setGroupBy] = useState('none'); // 'none', 'source', or 'bed'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('knopp-theme');
+    return saved === 'dark' || saved === 'light' ? saved : 'light';
+  });
 
   // Load plants data from JSON
   useEffect(() => {
@@ -51,6 +55,11 @@ function App() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem('knopp-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   // Load myPlants from localStorage (runs once on mount)
   useEffect(() => {
@@ -356,7 +365,7 @@ function App() {
       ) : activeView === 'planning' ? (
         <PlanningHub myPlants={myPlants} plants={plants} />
       ) : (
-        <Settings />
+        <Settings theme={theme} onThemeChange={setTheme} />
       )}
 
       {/* Footer */}
