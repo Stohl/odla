@@ -262,7 +262,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-earth-50">
-      <Header />
+      <Header
+        onOpenSettings={() => setActiveView('settings')}
+        isSettingsActive={activeView === 'settings'}
+      />
       
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-earth-200 shadow-sm sticky top-0 z-40">
@@ -297,16 +300,6 @@ function App() {
               }`}
             >
               🏡 Planering
-            </button>
-            <button
-              onClick={() => setActiveView('settings')}
-              className={`px-3 py-2 font-semibold transition-all border-b-4 whitespace-nowrap ${
-                activeView === 'settings'
-                  ? 'border-plant-500 text-plant-700 bg-plant-50'
-                  : 'border-transparent text-earth-600 hover:text-plant-600 hover:bg-earth-50'
-              }`}
-            >
-              ⚙️ Inställningar
             </button>
           </div>
         </div>
