@@ -161,17 +161,6 @@ const BedManager = () => {
           >
             ➕ Ny odlingsplats
           </button>
-          <button
-            onClick={exportBeds}
-            className="px-4 py-2 bg-earth-500 text-white rounded-lg hover:bg-earth-600 transition-colors font-semibold"
-            disabled={beds.length === 0}
-          >
-            📤 Exportera
-          </button>
-          <label className="px-4 py-2 bg-earth-500 text-white rounded-lg hover:bg-earth-600 transition-colors font-semibold cursor-pointer">
-            📥 Importera
-            <input type="file" accept=".json" onChange={importBeds} className="hidden" />
-          </label>
           <span className="ml-auto text-earth-600 font-semibold">
             Totalt: {beds.length} platser
           </span>

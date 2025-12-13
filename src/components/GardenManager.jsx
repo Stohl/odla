@@ -214,23 +214,6 @@ const GardenManager = ({
               </button>
 
               <button
-                onClick={handleExport}
-                className="px-4 py-2 bg-earth-500 text-white rounded-lg hover:bg-earth-600 transition-colors font-semibold whitespace-nowrap"
-              >
-                📤 Exportera
-              </button>
-
-              <label className="px-4 py-2 bg-earth-500 text-white rounded-lg hover:bg-earth-600 transition-colors font-semibold cursor-pointer whitespace-nowrap">
-                📥 Importera
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImport}
-                  className="hidden"
-                />
-              </label>
-
-              <button
                 onClick={handleDeleteGarden}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold whitespace-nowrap"
               >

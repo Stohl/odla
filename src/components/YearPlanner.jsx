@@ -222,12 +222,6 @@ const YearPlanner = ({ myPlants, plants }) => {
                   📋 Kopiera plan
                 </button>
                 <button
-                  onClick={exportPlan}
-                  className="px-4 py-2 bg-earth-500 text-white rounded-lg hover:bg-earth-600 transition-colors font-semibold whitespace-nowrap"
-                >
-                  📤 Exportera
-                </button>
-                <button
                   onClick={deletePlan}
                   className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold whitespace-nowrap"
                 >
