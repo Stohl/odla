@@ -47,28 +47,73 @@ const Settings = ({ theme, onThemeChange }) => {
 
   const saveEntry = (key) => {
     const value = entries[key] ?? '';
+    
+    // Kolla om texten är giltig JSON
+    let isValidJson = false;
     try {
+      JSON.parse(value);
+      isValidJson = true;
+    } catch {
+      isValidJson = false;
+    }
+    
+    // Bygg varningsmeddelande
+    let message = 'OBS Tidigare sparad data kommer raderas!\n\n';
+    if (!isValidJson && value.trim() !== '') {
+      message += 'OBS Texten du försöker spara verkar inte vara korrekt format!\n\n';
+    }
+    message += 'Vill du fortsätta?';
+    
+    if (!confirm(message)) {
+      return; // Avbryt
+    }
+    
+    // Spara data
+    if (isValidJson) {
       const parsed = JSON.parse(value);
       localStorage.setItem(key, JSON.stringify(parsed));
-      alert(`Sparade ${key} som JSON`);
-    } catch {
+    } else {
       localStorage.setItem(key, value);
-      alert(`Sparade ${key} som råtext (ej giltig JSON)`);
     }
-    loadEntries();
+    
+    // Ladda om sidan
+    window.location.reload();
   };
 
   const saveAll = () => {
+    // Kolla om texten är giltig JSON
+    let isValidJson = false;
     try {
+      JSON.parse(allBundle);
+      isValidJson = true;
+    } catch {
+      isValidJson = false;
+    }
+    
+    // Bygg varningsmeddelande
+    let message = 'OBS Tidigare sparad data kommer raderas!\n\n';
+    if (!isValidJson && allBundle.trim() !== '{}' && allBundle.trim() !== '') {
+      message += 'OBS Texten du försöker spara verkar inte vara korrekt format!\n\n';
+    }
+    message += 'Vill du fortsätta?';
+    
+    if (!confirm(message)) {
+      return; // Avbryt
+    }
+    
+    // Spara data
+    if (isValidJson) {
       const parsed = JSON.parse(allBundle);
       Object.entries(parsed).forEach(([key, val]) => {
         localStorage.setItem(key, JSON.stringify(val));
       });
-      alert('Sparade alla nycklar');
-      loadEntries();
-    } catch {
+    } else {
       alert('Kunde inte tolka ALLA-texten som JSON. Kontrollera formatet.');
+      return;
     }
+    
+    // Ladda om sidan
+    window.location.reload();
   };
 
   const handleChange = (key, value) => {
