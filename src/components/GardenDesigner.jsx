@@ -9,6 +9,10 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
   const [yearPlans, setYearPlans] = useState({});
   const [selectedPlan, setSelectedPlan] = useState('');
   const [plantLookup, setPlantLookup] = useState({});
+  const [pixelsPerMeter, setPixelsPerMeter] = useState(() => {
+    const saved = localStorage.getItem('gardenDesignerScale');
+    return saved ? parseFloat(saved) : 100; // Standard: 100 pixlar = 1 meter
+  });
   const stageRef = useRef(null);
 
   const getDefaultColor = (type) => {
@@ -22,6 +26,26 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     if (type === 'shape') return '#b45309';
     return '#2d6a4f';
   };
+
+  // Konvertera pixlar till meter
+  const pixelsToMeters = (pixels) => {
+    if (!pixelsPerMeter || pixelsPerMeter <= 0) return 0;
+    return pixels / pixelsPerMeter;
+  };
+
+  // Formatera meter med 2 decimaler
+  const formatMeters = (meters) => {
+    if (meters === 0) return '0 m';
+    if (meters < 0.01) return `${(meters * 100).toFixed(1)} cm`;
+    return `${meters.toFixed(2)} m`;
+  };
+
+  // Spara skala när den ändras
+  useEffect(() => {
+    if (pixelsPerMeter > 0) {
+      localStorage.setItem('gardenDesignerScale', String(pixelsPerMeter));
+    }
+  }, [pixelsPerMeter]);
 
   // Ladda sparade bäddar från BedManager och håll dem synkade
   useEffect(() => {
@@ -571,6 +595,24 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     <div className="bg-white rounded-xl shadow-md p-6">
       {/* Kontroller */}
       <div className="mb-4 flex flex-wrap gap-2 items-center">
+        {/* Skalinställning */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-semibold text-earth-700">Skala:</label>
+          <div className="flex items-center gap-1">
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={pixelsPerMeter}
+              onChange={(e) => {
+                const value = parseFloat(e.target.value);
+                if (value > 0) setPixelsPerMeter(value);
+              }}
+              className="w-20 px-2 py-2 border-2 border-earth-200 rounded-lg bg-white focus:outline-none focus:border-plant-400 text-sm"
+            />
+            <span className="text-sm text-earth-600">px = 1 m</span>
+          </div>
+        </div>
         {/* Årsplan-väljare */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-semibold text-earth-700">Årsplan:</label>
@@ -690,26 +732,32 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
               </label>
             )}
             <label className="flex flex-col">
-              <span className="font-semibold text-earth-800">X-position (px)</span>
+              <span className="font-semibold text-earth-800">X-position</span>
               <input
                 type="number"
                 value={Number.isFinite(selectedBedX) ? selectedBedX : 0}
                 onChange={handleSelectedNumericChange('x')}
                 className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
               />
+              <span className="text-xs text-earth-500 mt-1">
+                {formatMeters(pixelsToMeters(selectedBedX))}
+              </span>
             </label>
             <label className="flex flex-col">
-              <span className="font-semibold text-earth-800">Y-position (px)</span>
+              <span className="font-semibold text-earth-800">Y-position</span>
               <input
                 type="number"
                 value={Number.isFinite(selectedBedY) ? selectedBedY : 0}
                 onChange={handleSelectedNumericChange('y')}
                 className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
               />
+              <span className="text-xs text-earth-500 mt-1">
+                {formatMeters(pixelsToMeters(selectedBedY))}
+              </span>
             </label>
             <label className="flex flex-col">
               <span className="font-semibold text-earth-800">
-                {selectedBed.type === 'pot' ? 'Diameter (px)' : 'Bredd (px)'}
+                {selectedBed.type === 'pot' ? 'Diameter' : 'Bredd'}
               </span>
               <input
                 type="number"
@@ -718,10 +766,13 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                 onChange={handleSelectedNumericChange('width')}
                 className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
               />
+              <span className="text-xs text-earth-500 mt-1">
+                {formatMeters(pixelsToMeters(selectedBedWidth))}
+              </span>
             </label>
             <label className="flex flex-col">
               <span className="font-semibold text-earth-800">
-                {selectedBed.type === 'pot' ? 'Diameter (px)' : 'Höjd (px)'}
+                {selectedBed.type === 'pot' ? 'Diameter' : 'Höjd'}
               </span>
               <input
                 type="number"
@@ -730,6 +781,9 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                 onChange={handleSelectedNumericChange('height')}
                 className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
               />
+              <span className="text-xs text-earth-500 mt-1">
+                {formatMeters(pixelsToMeters(selectedBedHeight))}
+              </span>
             </label>
           </div>
         </div>
@@ -854,16 +908,30 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                     
                     {/* Visa mått om vald */}
                     {selected === bed.id && (
-                      <Text
-                        x={isPot ? bed.x + radius : bed.x + 8}
-                        y={isPot ? bed.y + radius * 2 - 20 : bed.y + bed.height - 24}
-                        text={isPot ? `Radie: ${radius} px` : `${bed.width} × ${bed.height} px`}
-                        fontSize={12}
-                        fill="#52796f"
-                        listening={false}
-                        align={isPot ? 'center' : 'left'}
-                        offsetX={isPot ? radius - 8 : 0}
-                      />
+                      <>
+                        <Text
+                          x={isPot ? bed.x + radius : bed.x + 8}
+                          y={isPot ? bed.y + radius * 2 - 20 : bed.y + bed.height - 24}
+                          text={isPot ? `Radie: ${radius} px` : `${bed.width} × ${bed.height} px`}
+                          fontSize={12}
+                          fill="#52796f"
+                          listening={false}
+                          align={isPot ? 'center' : 'left'}
+                          offsetX={isPot ? radius - 8 : 0}
+                        />
+                        <Text
+                          x={isPot ? bed.x + radius : bed.x + 8}
+                          y={isPot ? bed.y + radius * 2 - 8 : bed.y + bed.height - 12}
+                          text={isPot 
+                            ? `(${formatMeters(pixelsToMeters(radius * 2))})` 
+                            : `(${formatMeters(pixelsToMeters(bed.width))} × ${formatMeters(pixelsToMeters(bed.height))})`}
+                          fontSize={11}
+                          fill="#52796f"
+                          listening={false}
+                          align={isPot ? 'center' : 'left'}
+                          offsetX={isPot ? radius - 8 : 0}
+                        />
+                      </>
                     )}
                   </React.Fragment>
                 );
@@ -885,6 +953,9 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
               const sizeText = isPot
                 ? `Radie: ${bed.radius || 50}px`
                 : `${bed.width}×${bed.height}px`;
+              const sizeMeters = isPot
+                ? formatMeters(pixelsToMeters((bed.radius || 50) * 2))
+                : `${formatMeters(pixelsToMeters(bed.width))} × ${formatMeters(pixelsToMeters(bed.height))}`;
               const fillColor = bed.color || getDefaultColor(bed.type);
               const borderColor = bed.strokeColor || getDefaultStrokeColor(bed.type);
 
@@ -908,6 +979,9 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
                   </div>
                   <div className="text-xs text-earth-600 mt-1">
                     Position: ({Math.round(bed.x)}, {Math.round(bed.y)}) • {sizeText}
+                  </div>
+                  <div className="text-xs text-earth-500 mt-0.5">
+                    Storlek: {sizeMeters}
                   </div>
                 </div>
               );
