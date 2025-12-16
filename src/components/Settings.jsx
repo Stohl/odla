@@ -4,6 +4,7 @@ const STORAGE_KEYS = [
   { key: 'myPlants', label: 'Mina växter (myPlants)' },
   { key: 'yearPlans', label: 'Årsplaner (yearPlans)' },
   { key: 'myGardenBeds', label: 'Odlingsplatser (myGardenBeds)' },
+  { key: 'gardenDesigns', label: 'Trädgårdsdesigns (gardenDesigns)' },
 ];
 
 const safePretty = (raw) => {
@@ -91,7 +92,7 @@ const Settings = ({ theme, onThemeChange }) => {
     }
     
     // Bygg varningsmeddelande
-    let message = 'OBS Tidigare sparad data kommer raderas!\n\n';
+    let message = 'Tidigare sparad data kommer raderas!\n\n';
     if (!isValidJson && allBundle.trim() !== '{}' && allBundle.trim() !== '') {
       message += 'OBS Texten du försöker spara verkar inte vara korrekt format!\n\n';
     }
@@ -108,7 +109,7 @@ const Settings = ({ theme, onThemeChange }) => {
         localStorage.setItem(key, JSON.stringify(val));
       });
     } else {
-      alert('Kunde inte tolka ALLA-texten som JSON. Kontrollera formatet.');
+      alert('Kunde inte tolka texten som JSON. Kontrollera formatet.');
       return;
     }
     
@@ -207,7 +208,7 @@ const Settings = ({ theme, onThemeChange }) => {
                     onClick={saveAll}
                     className="px-3 py-1.5 rounded-md text-xs font-semibold bg-plant-500 text-white hover:bg-plant-600 transition-colors"
                   >
-                    Spara alla
+                    Spara allt
                   </button>
                 </div>
                 <textarea
