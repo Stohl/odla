@@ -521,10 +521,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     const columns = bedsOrder.map(b => getBedPlantNames(plan, b.id));
     const maxRows = columns.reduce((m, col) => Math.max(m, col.length), 0);
 
-    // Canvas storlek i meter
-    const canvasWidthM = formatMeters(pixelsToMeters(canvasWidth));
-    const canvasHeightM = formatMeters(pixelsToMeters(canvasHeight));
-
     // Skapa mini-header för följande sidor
     const miniHeader = (pageTitle, pageIcon) => `
       <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 100%); padding: 16px 32px; margin: 0 0 20px 0; border-radius: 0 0 12px 12px;">
@@ -619,51 +615,22 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         <!-- SIDA 1: Trädgårdskarta -->
         <div>
           <!-- Header med gradient -->
-          <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%); padding: 28px 32px;">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%); padding: 24px 32px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌱</div>
               <div>
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
-                  <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌱</div>
-                  <h1 style="font-size: 28px; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.025em; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${escapeHtml(designName)}</h1>
-                </div>
-                <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin: 0; font-weight: 500;">Trädgårdsdesign • ${new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              </div>
-              <div style="text-align: right; background: rgba(255,255,255,0.15); padding: 12px 18px; border-radius: 12px;">
-                <div style="color: rgba(255,255,255,0.9); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px;">Skala</div>
-                <div style="color: #ffffff; font-size: 16px; font-weight: 700;">${pixelsPerMeter} px = 1 m</div>
+                <h1 style="font-size: 26px; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.025em; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${escapeHtml(designName)}</h1>
+                <p style="color: rgba(255,255,255,0.9); font-size: 12px; margin: 4px 0 0 0; font-weight: 500;">Trädgårdsdesign • ${new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
             </div>
           </div>
 
           <!-- Innehåll sida 1 -->
-          <div style="padding: 24px 32px;">
-            
-            <!-- Canvas info -->
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 14px 18px; background: linear-gradient(90deg, #f0fdf4, #ecfdf5); border-radius: 12px; border: 1px solid #bbf7d0;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 18px;">📐</span>
-                <span style="font-size: 13px; color: #166534; font-weight: 600;">Rityta: ${canvasWidthM} × ${canvasHeightM}</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 18px;">🗺️</span>
-                <span style="font-size: 13px; color: #166534; font-weight: 600;">${beds.length} odlingsplatser</span>
-              </div>
-              ${selectedPlan ? `
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 18px;">📅</span>
-                  <span style="font-size: 13px; color: #166534; font-weight: 600;">Plan: ${escapeHtml(selectedPlan)}</span>
-                </div>
-              ` : ''}
-            </div>
-
+          <div style="padding: 16px 24px;">
             <!-- Trädgårdskarta -->
-            <div style="background: #f9fafb; border-radius: 16px; padding: 20px; border: 2px solid #e5e7eb;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                <div style="width: 4px; height: 24px; background: linear-gradient(180deg, #3b82f6, #1d4ed8); border-radius: 2px;"></div>
-                <h3 style="font-size: 16px; font-weight: 700; color: #1f2937; margin: 0; letter-spacing: -0.025em;">Trädgårdskarta</h3>
-              </div>
-              <div style="text-align: center; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);">
-                <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; height: auto; border-radius: 8px;" />
+            <div style="background: #f9fafb; border-radius: 12px; padding: 12px; border: 2px solid #e5e7eb;">
+              <div style="text-align: center; background: #ffffff; border-radius: 8px; padding: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; max-height: 720px; height: auto; border-radius: 6px;" />
               </div>
             </div>
           </div>
