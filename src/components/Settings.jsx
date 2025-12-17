@@ -202,7 +202,7 @@ const Settings = ({ theme, onThemeChange }) => {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-earth-800 text-sm">Alla (bundle JSON)</span>
+                  <span className="font-semibold text-earth-800 text-sm">Allt</span>
                   <button
                     type="button"
                     onClick={saveAll}
