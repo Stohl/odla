@@ -520,33 +520,29 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     const headers = bedsOrder.map(b => bedIdToName[b.id] || b.name);
     const columns = bedsOrder.map(b => getBedPlantNames(plan, b.id));
     const maxRows = columns.reduce((m, col) => Math.max(m, col.length), 0);
-    
-    // Skapa tabell för växtplanering om plan finns
-    const plantTableHtml = plan && bedsOrder.length > 0 ? `
-      <div style="margin-top: 24px;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-          <div style="width: 4px; height: 20px; background: linear-gradient(180deg, #22c55e, #16a34a); border-radius: 2px;"></div>
-          <h3 style="font-size: 14px; font-weight: 700; color: #1f2937; margin: 0; letter-spacing: -0.025em;">Plantering per odlingsplats – ${escapeHtml(selectedPlan)}</h3>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 11px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <thead>
-            <tr>
-              ${headers.map(h => `<th style="background: linear-gradient(180deg, #f0fdf4, #dcfce7); color: #166534; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #86efac; white-space: nowrap;">${escapeHtml(h)}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${Array.from({length: maxRows}).map((_, rIdx) => `
-              <tr style="background: ${rIdx % 2 === 0 ? '#ffffff' : '#f9fafb'};">
-                ${columns.map(col => `<td style="padding: 8px 12px; border-bottom: 1px solid #e5e7eb; color: #374151;">${escapeHtml(col[rIdx] ? col[rIdx] : '')}</td>`).join('')}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    ` : '';
 
-    // Skapa legenda med alla odlingsplatser och deras storlek
-    const legendItems = beds.map(bed => {
+    // Canvas storlek i meter
+    const canvasWidthM = formatMeters(pixelsToMeters(canvasWidth));
+    const canvasHeightM = formatMeters(pixelsToMeters(canvasHeight));
+
+    // Skapa mini-header för följande sidor
+    const miniHeader = (pageTitle, pageIcon) => `
+      <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 100%); padding: 16px 32px; margin: 0 0 20px 0; border-radius: 0 0 12px 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">${pageIcon}</span>
+            <div>
+              <h2 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0;">${pageTitle}</h2>
+              <p style="color: rgba(255,255,255,0.8); font-size: 11px; margin: 0;">${escapeHtml(designName)}</p>
+            </div>
+          </div>
+          <div style="color: rgba(255,255,255,0.9); font-size: 11px;">${new Date().toLocaleDateString('sv-SE')}</div>
+        </div>
+      </div>
+    `;
+
+    // Skapa legenda med alla odlingsplatser - grid för bättre sidbrytning
+    const legendItems = beds.map((bed, idx) => {
       const isPot = bed.type === 'pot';
       const isShape = bed.type === 'shape';
       const icon = isPot ? '🪴' : isShape ? '⬛' : '🌱';
@@ -556,111 +552,146 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         : `${formatMeters(pixelsToMeters(bed.width))} × ${formatMeters(pixelsToMeters(bed.height))}`;
       const fillColor = bed.color || getDefaultColor(bed.type);
       return `
-        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #ffffff; border-radius: 6px; border: 1px solid #e5e7eb;">
-          <span style="font-size: 16px;">${icon}</span>
-          <div style="width: 16px; height: 16px; border-radius: 4px; background: ${fillColor}; border: 2px solid ${bed.strokeColor || getDefaultStrokeColor(bed.type)};"></div>
-          <div style="flex: 1;">
-            <div style="font-weight: 600; color: #1f2937; font-size: 11px;">${escapeHtml(bed.name)}</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; break-inside: avoid;">
+          <span style="font-size: 18px;">${icon}</span>
+          <div style="width: 20px; height: 20px; border-radius: 4px; background: ${fillColor}; border: 2px solid ${bed.strokeColor || getDefaultStrokeColor(bed.type)}; flex-shrink: 0;"></div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 600; color: #1f2937; font-size: 12px;">${escapeHtml(bed.name)}</div>
             <div style="color: #6b7280; font-size: 10px;">${typeLabel} • ${sizeInMeters}</div>
           </div>
         </div>
       `;
     }).join('');
 
-    const legendHtml = beds.length > 0 ? `
-      <div style="margin-top: 24px;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-          <div style="width: 4px; height: 20px; background: linear-gradient(180deg, #a78bfa, #8b5cf6); border-radius: 2px;"></div>
-          <h3 style="font-size: 14px; font-weight: 700; color: #1f2937; margin: 0; letter-spacing: -0.025em;">Odlingsplatser (${beds.length} st)</h3>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-          ${legendItems}
+    // Sida 2: Odlingsplatser
+    const legendPage = beds.length > 0 ? `
+      <div class="page-break">
+        ${miniHeader('Odlingsplatser', '📋')}
+        <div style="padding: 0 32px 32px 32px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 12px 16px; background: linear-gradient(90deg, #faf5ff, #f3e8ff); border-radius: 10px; border: 1px solid #e9d5ff;">
+            <span style="font-size: 16px;">🗺️</span>
+            <span style="font-size: 12px; color: #7c3aed; font-weight: 600;">Totalt ${beds.length} odlingsplatser i designen</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            ${legendItems}
+          </div>
         </div>
       </div>
     ` : '';
-
-    // Canvas storlek i meter
-    const canvasWidthM = formatMeters(pixelsToMeters(canvasWidth));
-    const canvasHeightM = formatMeters(pixelsToMeters(canvasHeight));
+    
+    // Sida 3: Plantering per odlingsplats
+    const plantTablePage = plan && bedsOrder.length > 0 ? `
+      <div class="page-break">
+        ${miniHeader('Plantering per odlingsplats', '🌱')}
+        <div style="padding: 0 32px 32px 32px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 12px 16px; background: linear-gradient(90deg, #f0fdf4, #ecfdf5); border-radius: 10px; border: 1px solid #bbf7d0;">
+            <span style="font-size: 16px;">📅</span>
+            <span style="font-size: 12px; color: #166534; font-weight: 600;">Årsplan: ${escapeHtml(selectedPlan)}</span>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <thead>
+              <tr>
+                ${headers.map(h => `<th style="background: linear-gradient(180deg, #f0fdf4, #dcfce7); color: #166534; padding: 12px 14px; text-align: left; font-weight: 600; border-bottom: 2px solid #86efac; white-space: nowrap;">${escapeHtml(h)}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${Array.from({length: maxRows}).map((_, rIdx) => `
+                <tr style="background: ${rIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; break-inside: avoid;">
+                  ${columns.map(col => `<td style="padding: 10px 14px; border-bottom: 1px solid #e5e7eb; color: #374151;">${escapeHtml(col[rIdx] ? col[rIdx] : '')}</td>`).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ` : '';
     
     const element = document.createElement('div');
     element.innerHTML = `
-      <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 0; background: #ffffff; min-height: 100%;">
+      <style>
+        .page-break { page-break-before: always; }
+        @media print {
+          .page-break { page-break-before: always; }
+        }
+      </style>
+      <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 0; background: #ffffff;">
         
-        <!-- Header med gradient -->
-        <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%); padding: 28px 32px; margin: -10px -10px 0 -10px;">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div>
-              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
-                <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px;">🌱</div>
-                <h1 style="font-size: 26px; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.025em; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${escapeHtml(designName)}</h1>
+        <!-- SIDA 1: Trädgårdskarta -->
+        <div>
+          <!-- Header med gradient -->
+          <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%); padding: 28px 32px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                  <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🌱</div>
+                  <h1 style="font-size: 28px; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.025em; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${escapeHtml(designName)}</h1>
+                </div>
+                <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin: 0; font-weight: 500;">Trädgårdsdesign • ${new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
-              <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin: 0; font-weight: 500;">Trädgårdsdesign • ${new Date().toLocaleDateString('sv-SE', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            </div>
-            <div style="text-align: right; background: rgba(255,255,255,0.15); padding: 10px 16px; border-radius: 10px; backdrop-filter: blur(4px);">
-              <div style="color: rgba(255,255,255,0.9); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Skala</div>
-              <div style="color: #ffffff; font-size: 14px; font-weight: 700;">${pixelsPerMeter} px = 1 m</div>
+              <div style="text-align: right; background: rgba(255,255,255,0.15); padding: 12px 18px; border-radius: 12px;">
+                <div style="color: rgba(255,255,255,0.9); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px;">Skala</div>
+                <div style="color: #ffffff; font-size: 16px; font-weight: 700;">${pixelsPerMeter} px = 1 m</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Innehåll -->
-        <div style="padding: 24px 32px;">
-          
-          <!-- Canvas info -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 12px 16px; background: linear-gradient(90deg, #f0fdf4, #ecfdf5); border-radius: 10px; border: 1px solid #bbf7d0;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 16px;">📐</span>
-              <span style="font-size: 12px; color: #166534; font-weight: 600;">Rityta: ${canvasWidthM} × ${canvasHeightM}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 16px;">🗺️</span>
-              <span style="font-size: 12px; color: #166534; font-weight: 600;">${beds.length} odlingsplatser</span>
-            </div>
-            ${selectedPlan ? `
+          <!-- Innehåll sida 1 -->
+          <div style="padding: 24px 32px;">
+            
+            <!-- Canvas info -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 14px 18px; background: linear-gradient(90deg, #f0fdf4, #ecfdf5); border-radius: 12px; border: 1px solid #bbf7d0;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 16px;">📅</span>
-                <span style="font-size: 12px; color: #166534; font-weight: 600;">Plan: ${escapeHtml(selectedPlan)}</span>
+                <span style="font-size: 18px;">📐</span>
+                <span style="font-size: 13px; color: #166534; font-weight: 600;">Rityta: ${canvasWidthM} × ${canvasHeightM}</span>
               </div>
-            ` : ''}
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 18px;">🗺️</span>
+                <span style="font-size: 13px; color: #166534; font-weight: 600;">${beds.length} odlingsplatser</span>
+              </div>
+              ${selectedPlan ? `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 18px;">📅</span>
+                  <span style="font-size: 13px; color: #166534; font-weight: 600;">Plan: ${escapeHtml(selectedPlan)}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Trädgårdskarta -->
+            <div style="background: #f9fafb; border-radius: 16px; padding: 20px; border: 2px solid #e5e7eb;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                <div style="width: 4px; height: 24px; background: linear-gradient(180deg, #3b82f6, #1d4ed8); border-radius: 2px;"></div>
+                <h3 style="font-size: 16px; font-weight: 700; color: #1f2937; margin: 0; letter-spacing: -0.025em;">Trädgårdskarta</h3>
+              </div>
+              <div style="text-align: center; background: #ffffff; border-radius: 12px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);">
+                <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; height: auto; border-radius: 8px;" />
+              </div>
+            </div>
           </div>
 
-          <!-- Trädgårdskarta -->
-          <div style="background: #f9fafb; border-radius: 12px; padding: 16px; border: 2px solid #e5e7eb; margin-bottom: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-              <div style="width: 4px; height: 20px; background: linear-gradient(180deg, #3b82f6, #1d4ed8); border-radius: 2px;"></div>
-              <h3 style="font-size: 14px; font-weight: 700; color: #1f2937; margin: 0; letter-spacing: -0.025em;">Trädgårdskarta</h3>
-            </div>
-            <div style="text-align: center; background: #ffffff; border-radius: 8px; padding: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);">
-              <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; height: auto; border-radius: 4px;" />
+          <!-- Footer sida 1 -->
+          <div style="padding: 16px 32px; background: linear-gradient(90deg, #f9fafb, #f3f4f6); border-top: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 14px;">🌿</span>
+                <span style="font-size: 11px; color: #6b7280; font-weight: 500;">Skapad med Odlingskalendern</span>
+              </div>
+              <div style="font-size: 10px; color: #9ca3af;">Sida 1${beds.length > 0 ? ` av ${plan && bedsOrder.length > 0 ? '3' : '2'}` : ''}</div>
             </div>
           </div>
-
-          ${legendHtml}
-          ${plantTableHtml}
         </div>
 
-        <!-- Footer -->
-        <div style="margin-top: 24px; padding: 16px 32px; background: linear-gradient(90deg, #f9fafb, #f3f4f6); border-top: 1px solid #e5e7eb;">
-          <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 14px;">🌿</span>
-              <span style="font-size: 11px; color: #6b7280; font-weight: 500;">Skapad med Odlingskalendern</span>
-            </div>
-            <div style="font-size: 10px; color: #9ca3af;">
-              Exporterad ${new Date().toLocaleString('sv-SE')}
-            </div>
-          </div>
-        </div>
+        ${legendPage}
+        ${plantTablePage}
       </div>
     `;
     
     const opt = {
-      margin: 0.4,
+      margin: 0,
       filename: `tradgard-${designName}-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'in', format: 'a4', orientation: orientation === 'landscape' ? 'landscape' : 'portrait' }
+      jsPDF: { unit: 'in', format: 'a4', orientation: orientation === 'landscape' ? 'landscape' : 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'], before: '.page-break' }
     };
     
     html2pdf().set(opt).from(element).save();
