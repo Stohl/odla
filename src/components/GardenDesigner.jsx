@@ -630,7 +630,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
             <!-- Trädgårdskarta -->
             <div style="background: #f9fafb; border-radius: 12px; padding: 10px; border: 2px solid #e5e7eb;">
               <div style="text-align: center; background: #ffffff; border-radius: 8px; padding: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; max-height: 580px; height: auto; border-radius: 6px;" />
+                <img src="${canvas}" alt="Trädgårdsdesign" style="max-width: 100%; max-height: 520px; height: auto; border-radius: 6px;" />
               </div>
             </div>
           </div>
