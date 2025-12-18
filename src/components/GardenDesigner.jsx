@@ -13,6 +13,10 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     const saved = localStorage.getItem('gardenDesignerScale');
     return saved ? parseFloat(saved) : 100; // Standard: 100 pixlar = 1 meter
   });
+  const [canvasBgColor, setCanvasBgColor] = useState(() => {
+    const saved = localStorage.getItem('gardenDesignerBgColor');
+    return saved || '#ffffff'; // Standard: vit bakgrund
+  });
   const stageRef = useRef(null);
 
   const getDefaultColor = (type) => {
@@ -46,6 +50,11 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
       localStorage.setItem('gardenDesignerScale', String(pixelsPerMeter));
     }
   }, [pixelsPerMeter]);
+
+  // Spara bakgrundsfärg när den ändras
+  useEffect(() => {
+    localStorage.setItem('gardenDesignerBgColor', canvasBgColor);
+  }, [canvasBgColor]);
 
   // Ladda sparade bäddar från BedManager och håll dem synkade
   useEffect(() => {
@@ -705,6 +714,16 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
             <span className="text-sm text-earth-600">px = 1 m</span>
           </div>
         </div>
+        {/* Bakgrundsfärg */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-semibold text-earth-700">Bakgrund:</label>
+          <input
+            type="color"
+            value={canvasBgColor}
+            onChange={(e) => setCanvasBgColor(e.target.value)}
+            className="w-10 h-8 border-2 border-earth-200 rounded cursor-pointer bg-white"
+          />
+        </div>
         {/* Årsplan-väljare */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-semibold text-earth-700">Årsplan:</label>
@@ -929,10 +948,18 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
             ref={stageRef}
             width={canvasWidth}
             height={canvasHeight}
-            className="bg-white"
-            style={{ border: '2px solid #d6d3d1', borderRadius: '4px' }}
+            style={{ border: '2px solid #d6d3d1', borderRadius: '4px', backgroundColor: canvasBgColor }}
           >
             <Layer>
+              {/* Bakgrund */}
+              <Rect
+                x={0}
+                y={0}
+                width={canvasWidth}
+                height={canvasHeight}
+                fill={canvasBgColor}
+                listening={false}
+              />
               {/* Rita odlingsbäddar och krukor */}
               {beds.map((bed) => {
                 const isPot = bed.type === 'pot';
