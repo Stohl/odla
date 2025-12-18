@@ -1082,6 +1082,60 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
         </div>
       )}
 
+      {/* Plantering per odlingsplats */}
+      {selectedPlan && yearPlans[selectedPlan] && savedBeds.length > 0 && (() => {
+        const plan = yearPlans[selectedPlan];
+        const planBedIds = Object.keys(plan.bedPlants || {});
+        const bedsWithPlants = savedBeds.filter(b => 
+          planBedIds.includes(String(b.id)) || planBedIds.includes(b.id)
+        );
+        
+        if (bedsWithPlants.length === 0) return null;
+        
+        return (
+          <div className="mt-6">
+            <h3 className="text-lg font-bold text-earth-800 mb-3">
+              🌱 Plantering per odlingsplats – {selectedPlan}
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr>
+                    {bedsWithPlants.map(bed => (
+                      <th 
+                        key={bed.id}
+                        className="bg-plant-100 text-plant-800 px-4 py-3 text-left font-semibold border-b-2 border-plant-300 whitespace-nowrap"
+                      >
+                        {bed.name}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const columns = bedsWithPlants.map(bed => getBedPlantNames(plan, bed.id));
+                    const maxRows = columns.reduce((max, col) => Math.max(max, col.length), 0);
+                    
+                    return Array.from({ length: maxRows }).map((_, rowIdx) => (
+                      <tr key={rowIdx} className={rowIdx % 2 === 0 ? 'bg-white' : 'bg-earth-50'}>
+                        {columns.map((col, colIdx) => (
+                          <td 
+                            key={colIdx}
+                            className="px-4 py-2 border-b border-earth-200 text-earth-700"
+                          >
+                            {col[rowIdx] || ''}
+                          </td>
+                        ))}
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Tom state */}
       {beds.length === 0 && (
         <div className="mt-6 p-12 text-center bg-earth-50 rounded-lg">
