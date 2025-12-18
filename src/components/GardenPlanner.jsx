@@ -53,7 +53,35 @@ const GardenPlanner = () => {
     });
   };
 
+  // Uppdatera skala för aktiv design
+  const setScale = (scale) => {
+    if (!activeDesign) return;
+    setDesigns((prev) => ({
+      ...prev,
+      [activeDesign]: {
+        ...prev[activeDesign],
+        scale,
+        updatedAt: new Date().toISOString(),
+      },
+    }));
+  };
+
+  // Uppdatera bakgrundsfärg för aktiv design
+  const setBgColor = (bgColor) => {
+    if (!activeDesign) return;
+    setDesigns((prev) => ({
+      ...prev,
+      [activeDesign]: {
+        ...prev[activeDesign],
+        bgColor,
+        updatedAt: new Date().toISOString(),
+      },
+    }));
+  };
+
   const activeBeds = activeDesign && designs[activeDesign] ? designs[activeDesign].beds || [] : [];
+  const activeScale = activeDesign && designs[activeDesign]?.scale != null ? designs[activeDesign].scale : 20;
+  const activeBgColor = activeDesign && designs[activeDesign]?.bgColor ? designs[activeDesign].bgColor : '#cce8b5';
 
   return (
     <div className="w-full px-3 sm:px-5 lg:px-8 py-8">
@@ -80,6 +108,10 @@ const GardenPlanner = () => {
           setBeds={setBeds}
           designName={activeDesign}
           orientation={designs[activeDesign]?.orientation || 'portrait'}
+          scale={activeScale}
+          setScale={setScale}
+          bgColor={activeBgColor}
+          setBgColor={setBgColor}
         />
       ) : (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">

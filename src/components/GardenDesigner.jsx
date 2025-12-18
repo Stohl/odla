@@ -2,22 +2,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Rect, Circle, Text } from 'react-konva';
 import html2pdf from 'html2pdf.js';
 
-const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
+const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScale, bgColor, setBgColor }) => {
   const [selected, setSelected] = useState(null);
   const [savedBeds, setSavedBeds] = useState([]);
   const [showBedSelector, setShowBedSelector] = useState(false);
   const [yearPlans, setYearPlans] = useState({});
   const [selectedPlan, setSelectedPlan] = useState('');
   const [plantLookup, setPlantLookup] = useState({});
-  const [pixelsPerMeter, setPixelsPerMeter] = useState(() => {
-    const saved = localStorage.getItem('gardenDesignerScale');
-    return saved ? parseFloat(saved) : 100; // Standard: 100 pixlar = 1 meter
-  });
-  const [canvasBgColor, setCanvasBgColor] = useState(() => {
-    const saved = localStorage.getItem('gardenDesignerBgColor');
-    return saved || '#ffffff'; // Standard: vit bakgrund
-  });
   const stageRef = useRef(null);
+
+  // Använd props för skala och bakgrundsfärg (sparas per design)
+  const pixelsPerMeter = scale ?? 20;
+  const canvasBgColor = bgColor ?? '#cce8b5';
 
   const getDefaultColor = (type) => {
     if (type === 'pot') return '#f4a261';
@@ -44,17 +40,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
     return `${meters.toFixed(2)} m`;
   };
 
-  // Spara skala när den ändras
-  useEffect(() => {
-    if (pixelsPerMeter > 0) {
-      localStorage.setItem('gardenDesignerScale', String(pixelsPerMeter));
-    }
-  }, [pixelsPerMeter]);
-
-  // Spara bakgrundsfärg när den ändras
-  useEffect(() => {
-    localStorage.setItem('gardenDesignerBgColor', canvasBgColor);
-  }, [canvasBgColor]);
 
   // Ladda sparade bäddar från BedManager och håll dem synkade
   useEffect(() => {
@@ -707,7 +692,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
               value={pixelsPerMeter}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
-                if (value > 0) setPixelsPerMeter(value);
+                if (value > 0) setScale(value);
               }}
               className="w-20 px-2 py-2 border-2 border-earth-200 rounded-lg bg-white focus:outline-none focus:border-plant-400 text-sm"
             />
@@ -720,7 +705,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation }) => {
           <input
             type="color"
             value={canvasBgColor}
-            onChange={(e) => setCanvasBgColor(e.target.value)}
+            onChange={(e) => setBgColor(e.target.value)}
             className="w-10 h-8 border-2 border-earth-200 rounded cursor-pointer bg-white"
           />
         </div>
