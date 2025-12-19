@@ -275,154 +275,112 @@ const YearPlanner = ({ myPlants, plants }) => {
           </div>
 
           <div className="p-6">
-            {/* Växter i planen - VISA ALLA MINA VÄXTER */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-earth-800 mb-2 flex items-center gap-2">
-                🌱 Mina växter
-              </h2>
-              
-              <p className="text-sm text-earth-600 mb-4">
-                Här är alla dina växter, placera dem i odlingsplatser för att spara dem i årsplanen. Här ser du vilka växter som du har placerat på odlingsplatser.
-              </p>
 
-              {/* Alla mina växter med status - 2 kolumner */}
-              <div className="bg-plant-50 border-2 border-plant-300 rounded-lg p-4">
-                {myPlants.length === 0 ? (
-                  <p className="text-earth-600 text-sm text-center py-4">
-                    Inga växter i din lista. Gå till Fröbanken för att lägga till!
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Placerade växter */}
-                    <div>
-                      <h3 className="text-sm font-semibold text-plant-700 mb-3 flex items-center gap-2">
-                        <span>✓</span> Placerade i odlingsplatser
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {myPlants.filter(plantId => {
-                          return currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
-                            bedPlantArray => bedPlantArray.includes(plantId)
-                          );
-                        }).map(plantId => {
-                          const plant = plants?.find(p => p.id === plantId);
-                          const plantName = plant?.name || plantId;
-                          
-                          return (
-                            <div
-                              key={plantId}
-                              className="px-4 py-2 rounded-lg flex items-center gap-2 border-2 bg-white text-plant-700 border-plant-300"
-                            >
-                              <span className="font-medium">{plantName}</span>
-                              <span className="text-green-600 font-bold text-lg" title="Placerad i bädd">
-                                ✓
-                              </span>
-                            </div>
-                          );
-                        })}
-                        {myPlants.filter(plantId => {
-                          return currentPlan.bedPlants && Object.values(currentPlan.bedPlants).some(
-                            bedPlantArray => bedPlantArray.includes(plantId)
-                          );
-                        }).length === 0 && (
-                          <p className="text-sm text-earth-500">Inga växter placerade ännu</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Oplacerade växter */}
-                    <div>
-                      <h3 className="text-sm font-semibold text-earth-600 mb-3 flex items-center gap-2">
-                        <span>○</span> Inte placerade
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {myPlants.filter(plantId => {
-                          return !currentPlan.bedPlants || !Object.values(currentPlan.bedPlants).some(
-                            bedPlantArray => bedPlantArray.includes(plantId)
-                          );
-                        }).map(plantId => {
-                          const plant = plants?.find(p => p.id === plantId);
-                          const plantName = plant?.name || plantId;
-                          
-                          return (
-                            <div
-                              key={plantId}
-                              className="px-4 py-2 rounded-lg flex items-center gap-2 border-2 bg-earth-100 text-earth-600 border-earth-300"
-                            >
-                              <span className="font-medium">{plantName}</span>
-                            </div>
-                          );
-                        })}
-                        {myPlants.filter(plantId => {
-                          return !currentPlan.bedPlants || !Object.values(currentPlan.bedPlants).some(
-                            bedPlantArray => bedPlantArray.includes(plantId)
-                          );
-                        }).length === 0 && (
-                          <p className="text-sm text-earth-500">Alla växter är placerade</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Bäddfördelning - SEKUNDÄR SEKTION */}
-            {beds.length > 0 && (
+            {/* Plantering per odlingsplats - Tabell-layout */}
+            {beds.length > 0 && myPlants.length > 0 ? (
               <div className="pt-6 border-t-2 border-earth-200">
-                <h2 className="text-xl font-bold text-earth-700 mb-2 flex items-center gap-2">
-                  Välj växtplats för dina växter
-                </h2>
-
-                <div className="space-y-4">
-                  {beds.map((bed) => {
-                const bedPlants = currentPlan.bedPlants[bed.id] || [];
+                <div className="flex items-center gap-2 mb-4">
+                  <h2 className="text-xl font-bold text-earth-800 flex items-center gap-2">
+                    🌱 Plantering per odlingsplats
+                  </h2>
+                  <span className="text-sm text-earth-600">
+                    ({beds.length} platser, {myPlants.length} växter)
+                  </span>
+                </div>
+                <p className="text-sm text-earth-600 mb-4">
+                  Klicka i cellerna för att lägga till eller ta bort växter från odlingsplatser
+                </p>
                 
-                return (
-                  <div
-                    key={bed.id}
-                    className="border-2 border-earth-200 rounded-xl p-4 hover:border-plant-300 transition-colors"
-                  >
-                    <h3 className="text-lg font-bold text-earth-800 mb-3">{bed.name}</h3>
-                    
-                    {bed.description && (
-                      <p className="text-sm text-earth-600 mb-3">{bed.description}</p>
-                    )}
-
-                    {/* Växtväljare - ALLTID EXPANDERAD, visa ALLA mina växter */}
-                    <div className="bg-earth-50 border-2 border-earth-200 rounded-lg p-3">
-                      <div className="text-xs font-semibold text-earth-700 mb-2">
-                        Välj växter för denna plats:
-                      </div>
-                      {myPlants.length === 0 ? (
-                        <p className="text-sm text-earth-600 text-center py-4">
-                          Inga växter i din lista. Gå till Fröbanken för att lägga till!
-                        </p>
-                      ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                          {myPlants.map(plantId => {
-                            const plant = plants?.find(p => p.id === plantId);
-                            const plantName = plant?.name || plantId;
-                            const isSelected = bedPlants.includes(plantId);
-                            return (
-                              <button
-                                key={plantId}
-                                onClick={() => togglePlantInBed(bed.id, plantId)}
-                                className={`p-2 rounded-lg text-sm transition-all ${
-                                  isSelected
-                                    ? 'bg-earth-600 text-white font-semibold'
-                                    : 'bg-white border-2 border-earth-200 text-earth-700 hover:border-earth-400'
-                                }`}
-                              >
-                                {isSelected && '✓ '}{plantName}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                <div className="overflow-x-auto bg-white rounded-lg border-2 border-earth-200">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr>
+                        <th className="bg-plant-100 text-plant-800 px-4 py-3 text-left font-semibold border-b-2 border-plant-300 sticky left-0 z-10 bg-plant-100">
+                          Växt
+                        </th>
+                        {beds.map(bed => (
+                          <th 
+                            key={bed.id}
+                            className="bg-plant-100 text-plant-800 px-4 py-3 text-center font-semibold border-b-2 border-plant-300 min-w-[120px]"
+                            title={bed.description || bed.name}
+                          >
+                            <div className="flex flex-col items-center gap-1">
+                              <span>{bed.name}</span>
+                              {bed.description && (
+                                <span className="text-xs font-normal text-plant-600">
+                                  {bed.description.length > 20 ? bed.description.substring(0, 20) + '...' : bed.description}
+                                </span>
+                              )}
+                            </div>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {myPlants.map((plantId, plantIdx) => {
+                        const plant = plants?.find(p => p.id === plantId);
+                        const plantName = plant?.name || plantId;
+                        
+                        return (
+                          <tr 
+                            key={plantId} 
+                            className={plantIdx % 2 === 0 ? 'bg-white' : 'bg-earth-50 hover:bg-plant-50 transition-colors'}
+                          >
+                            <td className="px-4 py-3 border-b border-earth-200 text-earth-700 font-medium sticky left-0 z-10 bg-inherit">
+                              {plantName}
+                            </td>
+                            {beds.map(bed => {
+                              const bedPlants = currentPlan.bedPlants[bed.id] || [];
+                              const isSelected = bedPlants.includes(plantId);
+                              
+                              return (
+                                <td 
+                                  key={bed.id}
+                                  className="px-2 py-2 border-b border-earth-200 text-center"
+                                >
+                                  <button
+                                    onClick={() => togglePlantInBed(bed.id, plantId)}
+                                    className={`w-full py-2 px-2 rounded-lg transition-all ${
+                                      isSelected
+                                        ? 'bg-plant-500 text-white font-semibold hover:bg-plant-600'
+                                        : 'bg-white border-2 border-earth-200 text-earth-600 hover:border-plant-300 hover:bg-plant-50'
+                                    }`}
+                                    title={isSelected ? `Ta bort ${plantName} från ${bed.name}` : `Lägg till ${plantName} i ${bed.name}`}
+                                  >
+                                    {isSelected ? '✓' : '+'}
+                                  </button>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : beds.length === 0 ? (
+              <div className="pt-6 border-t-2 border-earth-200">
+                <div className="bg-earth-50 border-2 border-earth-200 rounded-lg p-8 text-center">
+                  <div className="text-4xl mb-3">🌱</div>
+                  <h3 className="text-lg font-bold text-earth-800 mb-2">
+                    Inga odlingsplatser ännu
+                  </h3>
+                  <p className="text-earth-600 text-sm">
+                    Gå till fliken "🌿 Odlingsplatser" för att skapa dina odlingsplatser först
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="pt-6 border-t-2 border-earth-200">
+                <div className="bg-earth-50 border-2 border-earth-200 rounded-lg p-8 text-center">
+                  <div className="text-4xl mb-3">🌱</div>
+                  <h3 className="text-lg font-bold text-earth-800 mb-2">
+                    Inga växter i din lista
+                  </h3>
+                  <p className="text-earth-600 text-sm">
+                    Gå till fliken "🌾 Fröbank" för att lägga till växter i din lista
+                  </p>
                 </div>
               </div>
             )}
