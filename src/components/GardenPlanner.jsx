@@ -100,6 +100,10 @@ const GardenPlanner = () => {
         setDesigns={setDesigns}
         activeDesign={activeDesign}
         setActiveDesign={setActiveDesign}
+        scale={activeScale}
+        setScale={setScale}
+        bgColor={activeBgColor}
+        setBgColor={setBgColor}
       />
 
       {activeDesign ? (

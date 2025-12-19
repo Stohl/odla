@@ -681,34 +681,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
     <div className="bg-white rounded-xl shadow-md p-6">
       {/* Kontroller */}
       <div className="mb-4 flex flex-wrap gap-2 items-center">
-        {/* Skalinställning */}
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-semibold text-earth-700">Skala:</label>
-          <div className="flex items-center gap-1">
-            <input
-              type="number"
-              min="1"
-              step="1"
-              value={pixelsPerMeter}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value > 0) setScale(value);
-              }}
-              className="w-20 px-2 py-2 border-2 border-earth-200 rounded-lg bg-white focus:outline-none focus:border-plant-400 text-sm"
-            />
-            <span className="text-sm text-earth-600">px = 1 m</span>
-          </div>
-        </div>
-        {/* Bakgrundsfärg */}
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-semibold text-earth-700">Bakgrund:</label>
-          <input
-            type="color"
-            value={canvasBgColor}
-            onChange={(e) => setBgColor(e.target.value)}
-            className="w-10 h-8 border-2 border-earth-200 rounded cursor-pointer bg-white"
-          />
-        </div>
         {/* Årsplan-väljare */}
         <div className="flex items-center gap-2">
           <label className="text-sm font-semibold text-earth-700">Årsplan:</label>

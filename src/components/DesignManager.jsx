@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign }) => {
+const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, scale, setScale, bgColor, setBgColor }) => {
   const [showNewModal, setShowNewModal] = useState(false);
   const [newDesignName, setNewDesignName] = useState('');
 
@@ -19,6 +19,8 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign }) =
     const newDesign = {
       beds: [],
       orientation: 'portrait', // 'portrait' or 'landscape'
+      scale: 20, // Standard: 20 px = 1 m
+      bgColor: '#cce8b5', // Standard: ljusgrön
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -206,24 +208,60 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign }) =
       {/* Info om aktiv design */}
       {activeDesign && designs[activeDesign] && (
         <div className="mt-4 pt-4 border-t border-earth-200">
-          <div className="flex flex-wrap gap-4 text-sm text-earth-600">
-            <div>
-              <span className="font-semibold">Format:</span>{' '}
-              {designs[activeDesign].orientation === 'portrait' ? 'Stående (800×1100)' : 'Liggande (1100×800)'}
-            </div>
-            <div>
-              <span className="font-semibold">Bäddar:</span> {designs[activeDesign].beds?.length || 0}
-            </div>
-            <div>
-              <span className="font-semibold">Skapad:</span>{' '}
-              {new Date(designs[activeDesign].createdAt).toLocaleDateString('sv-SE')}
-            </div>
-            {designs[activeDesign].updatedAt && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Vänster kolumn: Info */}
+            <div className="flex flex-wrap gap-4 text-sm text-earth-600">
               <div>
-                <span className="font-semibold">Uppdaterad:</span>{' '}
-                {new Date(designs[activeDesign].updatedAt).toLocaleDateString('sv-SE')}
+                <span className="font-semibold">Format:</span>{' '}
+                {designs[activeDesign].orientation === 'portrait' ? 'Stående (800×1100)' : 'Liggande (1100×800)'}
               </div>
-            )}
+              <div>
+                <span className="font-semibold">Bäddar:</span> {designs[activeDesign].beds?.length || 0}
+              </div>
+              <div>
+                <span className="font-semibold">Skapad:</span>{' '}
+                {new Date(designs[activeDesign].createdAt).toLocaleDateString('sv-SE')}
+              </div>
+              {designs[activeDesign].updatedAt && (
+                <div>
+                  <span className="font-semibold">Uppdaterad:</span>{' '}
+                  {new Date(designs[activeDesign].updatedAt).toLocaleDateString('sv-SE')}
+                </div>
+              )}
+            </div>
+
+            {/* Höger kolumn: Inställningar */}
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Skala */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-semibold text-earth-700 whitespace-nowrap">Skala:</label>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={scale ?? 20}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (value > 0) setScale(value);
+                    }}
+                    className="w-16 px-2 py-1.5 border-2 border-earth-200 rounded-lg bg-white focus:outline-none focus:border-plant-400 text-sm"
+                  />
+                  <span className="text-xs text-earth-600">px = 1 m</span>
+                </div>
+              </div>
+
+              {/* Bakgrundsfärg */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-semibold text-earth-700 whitespace-nowrap">Bakgrund:</label>
+                <input
+                  type="color"
+                  value={bgColor ?? '#cce8b5'}
+                  onChange={(e) => setBgColor(e.target.value)}
+                  className="w-10 h-8 border-2 border-earth-200 rounded cursor-pointer bg-white"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
