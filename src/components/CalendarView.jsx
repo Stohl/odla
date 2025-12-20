@@ -415,107 +415,126 @@ const CalendarView = ({
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      {/* Export/Skrivut knappar */}
-      <div className="bg-earth-50 p-4 border-b border-earth-200">
-        <div className="flex flex-wrap gap-2 justify-center mb-4">
-          <button
-            onClick={exportCalendarAsPDF}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
-          >
-            📄 PDF
-          </button>
-          <button
-            onClick={printCalendar}
-            className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-semibold"
-          >
-            🖨️ Skriv ut
-          </button>
+      {/* Header med gradient */}
+      <div className="bg-gradient-to-r from-plant-500 to-plant-400 p-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-1">
+              📅 Odlingskalender
+            </h2>
+            {selectedYearPlan && selectedYearPlan !== 'all' && (
+              <p className="text-white/90 text-sm">
+                Plan: {selectedYearPlan}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={exportCalendarAsPDF}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors font-semibold backdrop-blur-sm border border-white/30"
+            >
+              📄 PDF
+            </button>
+            <button
+              onClick={printCalendar}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors font-semibold backdrop-blur-sm border border-white/30"
+            >
+              🖨️ Skriv ut
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="bg-earth-50 p-4 border-b border-earth-200">
-        <div className="flex flex-wrap gap-6 justify-center text-sm">
-          <div className="flex items-center gap-2">
+      <div className="bg-gradient-to-r from-plant-50 to-earth-50 p-4 border-b border-earth-200">
+        <div className="flex flex-wrap gap-4 md:gap-6 justify-center text-sm">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-earth-200">
             <span className="w-4 h-4 bg-blue-400 rounded"></span>
-            <span className="text-earth-700">Förkultiveras inomhus</span>
+            <span className="text-earth-700 font-medium">Förkultiveras inomhus</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-earth-200">
             <span className="w-4 h-4 bg-green-400 rounded"></span>
-            <span className="text-earth-700">Direktsås ute</span>
+            <span className="text-earth-700 font-medium">Direktsås ute</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-earth-200">
             <span className="w-4 h-4 bg-yellow-400 rounded"></span>
-            <span className="text-earth-700">Skördas</span>
+            <span className="text-earth-700 font-medium">Skördas</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">📍</span>
-            <span className="text-earth-700">Planterad</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-earth-200">
+            <span className="text-lg">📍</span>
+            <span className="text-earth-700 font-medium">Planterad</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🌾</span>
-            <span className="text-earth-700">Skördad</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-earth-200">
+            <span className="text-lg">🌾</span>
+            <span className="text-earth-700 font-medium">Skördad</span>
           </div>
         </div>
       </div>
 
       {/* Calendar Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto p-6">
         {Object.entries(groupedPlants).map(([groupName, groupPlants]) => (
-          <div key={groupName} className="mb-6 last:mb-0">
+          <div key={groupName} className="mb-8 last:mb-0">
             {groupBy !== 'none' && (
-              <div className="bg-gradient-to-r from-plant-400 to-plant-300 px-4 py-2 mb-2 rounded-t-lg">
-                <h3 className="font-bold text-white text-lg">
-                  {groupBy === 'bed' ? '📦' : '🏷️'} {groupName}
-                </h3>
+              <div className="mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-1 h-6 bg-gradient-to-b from-plant-500 to-plant-400 rounded-full"></div>
+                  <h3 className="font-bold text-earth-800 text-lg">
+                    {groupBy === 'bed' ? '📦' : '🏷️'} {groupName}
+                  </h3>
+                </div>
               </div>
             )}
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-earth-100 border-b-2 border-earth-300">
-                  <th className="sticky left-0 bg-earth-100 z-20 p-3 text-left font-semibold text-earth-800 border-r border-earth-200 shadow-sm min-w-[250px]">
-                    Växt
-                  </th>
-                  {MONTHS.map((month, index) => {
-                    const isCurrentMonth = index + 1 === currentMonth;
-                    return (
-                      <th
-                        key={month}
-                        className={`p-3 text-center font-semibold text-earth-700 border-r border-earth-100 min-w-[60px] ${
-                          isCurrentMonth ? 'bg-plant-100 text-plant-800' : ''
-                        }`}
-                      >
-                        {month}
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {groupPlants.length === 0 ? (
-                  <tr>
-                    <td colSpan={13} className="p-8 text-center text-earth-500">
-                      Inga växter i denna grupp.
-                    </td>
+            <div className="bg-white rounded-lg border-2 border-earth-200 overflow-hidden">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gradient-to-r from-plant-100 to-plant-50 border-b-2 border-plant-300">
+                    <th className="sticky left-0 bg-gradient-to-r from-plant-100 to-plant-50 z-20 p-4 text-left font-semibold text-plant-800 border-r-2 border-plant-300 shadow-sm min-w-[250px]">
+                      Växt
+                    </th>
+                    {MONTHS.map((month, index) => {
+                      const isCurrentMonth = index + 1 === currentMonth;
+                      return (
+                        <th
+                          key={month}
+                          className={`p-3 text-center font-semibold border-r border-plant-200 min-w-[60px] ${
+                            isCurrentMonth 
+                              ? 'bg-plant-200 text-plant-900 ring-2 ring-plant-400' 
+                              : 'text-plant-700'
+                          }`}
+                        >
+                          {month}
+                        </th>
+                      );
+                    })}
                   </tr>
-                ) : (
-                  groupPlants.map((plant) => (
-                    <PlantRow
-                      key={plant.id}
-                      plant={plant}
-                      isSelected={myPlants.includes(plant.id)}
-                      onToggleSelect={onTogglePlant}
-                      currentMonth={currentMonth}
-                      plantedDate={plantDates?.[plant.id] || ''}
-                      harvestedDate={harvestedDates?.[plant.id] || ''}
-                      onDateChange={onDateChange}
-                      onHarvestedChange={onHarvestedChange}
-                      canEditDate={canEditDate}
-                    />
-                  ))
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {groupPlants.length === 0 ? (
+                    <tr>
+                      <td colSpan={13} className="p-8 text-center text-earth-500 bg-earth-50">
+                        Inga växter i denna grupp.
+                      </td>
+                    </tr>
+                  ) : (
+                    groupPlants.map((plant) => (
+                      <PlantRow
+                        key={plant.id}
+                        plant={plant}
+                        isSelected={myPlants.includes(plant.id)}
+                        onToggleSelect={onTogglePlant}
+                        currentMonth={currentMonth}
+                        plantedDate={plantDates?.[plant.id] || ''}
+                        harvestedDate={harvestedDates?.[plant.id] || ''}
+                        onDateChange={onDateChange}
+                        onHarvestedChange={onHarvestedChange}
+                        canEditDate={canEditDate}
+                      />
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         ))}
       </div>

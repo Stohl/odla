@@ -166,19 +166,19 @@ const PlantRow = ({
   return (
     <>
       <tr 
-        className={`border-b border-earth-100 hover:bg-earth-50 transition-colors cursor-pointer ${
+        className={`border-b border-earth-100 transition-colors cursor-pointer ${
           isExpanded ? 'bg-plant-50' : ''
         }`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {/* Plant Name Cell */}
-        <td className="sticky left-0 bg-white z-10 border-r border-earth-200 shadow-sm">
-          <div className="flex items-center gap-3 p-3 min-w-[250px]">
-            <span className="text-earth-400 text-sm">
+        <td className="sticky left-0 bg-inherit z-10 border-r-2 border-plant-300 shadow-sm">
+          <div className="flex items-center gap-3 p-4 min-w-[250px]">
+            <span className="text-plant-500 text-sm font-bold">
               {isExpanded ? '▼' : '▶'}
             </span>
             <div className="flex-1">
-              <div className="font-medium text-earth-800">{plant.name}</div>
+              <div className="font-semibold text-earth-800">{plant.name}</div>
               <div className="text-xs text-earth-500">{plant.source || 'Okänd leverantör'}</div>
             </div>
           </div>
@@ -190,8 +190,8 @@ const PlantRow = ({
 
       {/* Expanded Details Row */}
       {isExpanded && (
-        <tr className="bg-earth-50">
-          <td colSpan={13} className="p-6" onClick={(e) => e.stopPropagation()}>
+        <tr className="bg-plant-50">
+          <td colSpan={13} className="p-6 border-b border-earth-100" onClick={(e) => e.stopPropagation()}>
             <div className="max-w-4xl">
               {/* Plant Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
