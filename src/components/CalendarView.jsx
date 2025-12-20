@@ -89,6 +89,7 @@ const CalendarView = ({
     const printWindow = window.open('', '_blank');
     const currentDate = new Date().toLocaleDateString('sv-SE');
     const yearPlanText = selectedYearPlan && selectedYearPlan !== 'all' ? ` - ${selectedYearPlan}` : '';
+    const currentMonth = new Date().getMonth() + 1;
     
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -98,108 +99,138 @@ const CalendarView = ({
           <style>
             body { 
               margin: 0; 
-              padding: 20px; 
-              font-family: Arial, sans-serif; 
+              padding: 0; 
+              font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
               font-size: 12px;
+              background: #ffffff;
             }
             .header { 
-              text-align: center; 
-              margin-bottom: 20px; 
-              border-bottom: 2px solid #2d6a4f; 
-              padding-bottom: 10px; 
+              background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%);
+              padding: 24px 32px; 
+              margin: 0 0 24px 0;
+            }
+            .header-content {
+              display: flex;
+              align-items: center;
+              gap: 12px;
             }
             .title { 
-              font-size: 24px; 
-              font-weight: bold; 
-              color: #2d6a4f; 
-              margin-bottom: 5px; 
+              font-size: 26px; 
+              font-weight: 800; 
+              color: #ffffff; 
+              margin: 0;
+              letter-spacing: -0.025em;
             }
             .subtitle { 
-              color: #666; 
-              font-size: 14px; 
+              color: rgba(255,255,255,0.9); 
+              font-size: 13px; 
+              margin: 4px 0 0 0;
             }
             .legend { 
-              margin: 15px 0; 
-              padding: 10px; 
-              background: #f5f5f5; 
-              border-radius: 5px; 
+              margin: 0 32px 24px 32px; 
+              padding: 16px; 
+              background: linear-gradient(90deg, #f0fdf4, #ecfdf5);
+              border-radius: 12px; 
+              border: 1px solid #bbf7d0;
               display: flex; 
               flex-wrap: wrap; 
-              gap: 15px; 
+              gap: 8px; 
               justify-content: center; 
             }
             .legend-item { 
-              display: flex; 
+              display: inline-flex;
               align-items: center; 
-              gap: 5px; 
-              font-size: 11px; 
+              gap: 6px; 
+              padding: 6px 12px;
+              background: white;
+              border: 1px solid #d1d5db;
+              border-radius: 6px;
+              font-size: 11px;
             }
             .legend-color { 
-              width: 12px; 
-              height: 12px; 
-              border-radius: 2px; 
-            }
-            .legend-icon { 
-              font-size: 14px; 
+              width: 14px; 
+              height: 14px; 
+              border-radius: 3px; 
             }
             .calendar-table { 
               width: 100%; 
               border-collapse: collapse; 
-              margin: 10px 0; 
+              margin: 20px 0; 
+              border: 2px solid #d1d5db;
+              border-radius: 8px;
+              overflow: hidden;
             }
             .calendar-table th, 
             .calendar-table td { 
-              border: 1px solid #ddd; 
-              padding: 4px; 
+              padding: 8px 6px; 
               text-align: center; 
               font-size: 10px; 
               page-break-inside: avoid;
+              border-right: 1px solid #e5e7eb;
             }
             .calendar-table thead { display: table-header-group; }
             .calendar-table tbody { display: table-row-group; }
-            .calendar-table tr { page-break-inside: avoid; }
+            .calendar-table tbody tr:nth-child(even) { background: #f9fafb; }
+            .calendar-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; }
             .calendar-table th { 
-              background: #f0f0f0; 
-              font-weight: bold; 
+              background: linear-gradient(180deg, #dcfce7, #bbf7d0);
+              color: #166534;
+              font-weight: 600;
             }
             .plant-name { 
+              background: linear-gradient(180deg, #f0fdf4, #ecfdf5);
               text-align: left; 
-              font-weight: bold; 
-              min-width: 120px; 
-              max-width: 120px; 
+              font-weight: 600; 
+              min-width: 150px; 
+              max-width: 150px; 
+              width: 150px;
+              padding: 8px 12px;
+              border-right: 2px solid #86efac;
+              color: #166534;
             }
             .month-cell { 
-              width: 40px; 
-              height: 30px; 
-              position: relative; 
+              width: 50px; 
+              height: 32px; 
+              position: relative;
+              vertical-align: middle;
             }
             .activity-band { 
-              position: absolute; 
-              left: 0; 
-              right: 0; 
-              height: 8px; 
+              height: 5px; 
+              margin: 2px 0;
+              border-radius: 2px;
             }
             .band-seedling { 
               background: #60a5fa; 
-              top: 0; 
             }
             .band-sowing { 
               background: #4ade80; 
-              top: 8px; 
             }
             .band-harvest { 
               background: #fbbf24; 
-              top: 16px; 
             }
             .group-header { 
-              background: #2d6a4f; 
-              color: white; 
-              padding: 8px; 
-              font-weight: bold; 
-              margin: 10px 0 5px 0; 
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin: 0 32px 12px 32px;
+            }
+            .group-accent {
+              width: 4px;
+              height: 24px;
+              background: linear-gradient(180deg, #22c55e, #16a34a);
+              border-radius: 2px;
+            }
+            .group-title {
+              font-size: 16px;
+              font-weight: 700;
+              color: #1f2937;
+              margin: 0;
+            }
+            .content-wrapper {
+              padding: 0 32px 32px 32px;
             }
             @media print {
-              body { margin: 0; padding: 10px; font-size: 10px; }
+              body { margin: 0; padding: 0; font-size: 10px; }
               .header { page-break-after: avoid; }
               .legend { page-break-after: avoid; }
               .group-header { page-break-after: avoid; }
@@ -208,48 +239,59 @@ const CalendarView = ({
         </head>
         <body>
           <div class="header">
-            <div class="title">Odlingskalender${yearPlanText}</div>
-            <div class="subtitle">Skapad: ${currentDate}</div>
+            <div class="header-content">
+              <span style="font-size: 28px;">📅</span>
+              <div>
+                <div class="title">Odlingskalender${yearPlanText}</div>
+                <div class="subtitle">Skapad: ${currentDate}</div>
+              </div>
+            </div>
           </div>
           
           <div class="legend">
             <div class="legend-item">
               <div class="legend-color" style="background: #60a5fa;"></div>
-              <span>Förkultiveras inomhus</span>
+              <span style="color: #374151; font-weight: 500;">Förkultiveras inomhus</span>
             </div>
             <div class="legend-item">
               <div class="legend-color" style="background: #4ade80;"></div>
-              <span>Direktsås ute</span>
+              <span style="color: #374151; font-weight: 500;">Direktsås ute</span>
             </div>
             <div class="legend-item">
               <div class="legend-color" style="background: #fbbf24;"></div>
-              <span>Skördas</span>
+              <span style="color: #374151; font-weight: 500;">Skördas</span>
             </div>
             <div class="legend-item">
-              <span class="legend-icon">📍</span>
-              <span>Planterad</span>
+              <span style="font-size: 16px;">📍</span>
+              <span style="color: #374151; font-weight: 500;">Planterad</span>
             </div>
             <div class="legend-item">
-              <span class="legend-icon">🌾</span>
-              <span>Skördad</span>
+              <span style="font-size: 16px;">🌾</span>
+              <span style="color: #374151; font-weight: 500;">Skördad</span>
             </div>
           </div>
           
+          <div class="content-wrapper">
           ${Object.entries(groupedPlants).map(([groupName, groupPlants]) => `
+            ${groupBy !== 'none' ? `
+            <div class="group-header">
+              <div class="group-accent"></div>
+              <h3 class="group-title">${groupBy === 'bed' ? '📦' : '🏷️'} ${groupName}</h3>
+            </div>
+            ` : ''}
             <table class="calendar-table">
               <thead>
-                ${groupBy !== 'none' ? `
-                <tr>
-                  <th colspan="13" style="text-align:left; background:#e8f5e9; font-size:12px;">${groupName}</th>
-                </tr>` : ''}
                 <tr>
                   <th class="plant-name">Växt</th>
-                  ${MONTHS.map(month => `<th>${month}</th>`).join('')}
+                  ${MONTHS.map((month, index) => {
+                    const isCurrentMonth = index + 1 === currentMonth;
+                    return `<th style="${isCurrentMonth ? 'background: linear-gradient(180deg, #bbf7d0, #86efac); border: 2px solid #22c55e;' : ''}">${month}</th>`;
+                  }).join('')}
                 </tr>
               </thead>
               <tbody>
-                ${groupPlants.map(plant => `
-                  <tr>
+                ${groupPlants.map((plant, plantIdx) => `
+                  <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'};">
                     <td class="plant-name">${plant.name || plant.id}</td>
                     ${MONTHS.map((month, index) => {
                       const monthNum = index + 1;
@@ -273,21 +315,21 @@ const CalendarView = ({
                       const isPlantedMonth = plantedMonth === monthNum;
                       const isHarvestedMonth = harvestedMonth === monthNum;
                       
-                      return `
-                        <td class="month-cell">
-                          ${isSeedling ? '<div class="activity-band band-seedling"></div>' : ''}
-                          ${isSowing ? '<div class="activity-band band-sowing"></div>' : ''}
-                          ${isHarvest ? '<div class="activity-band band-harvest"></div>' : ''}
-                          ${isPlantedMonth ? '📍' : ''}
-                          ${isHarvestedMonth ? '🌾' : ''}
-                        </td>
-                      `;
+                      let cellContent = '';
+                      if (isSeedling) cellContent += '<div class="activity-band band-seedling"></div>';
+                      if (isSowing) cellContent += '<div class="activity-band band-sowing"></div>';
+                      if (isHarvest) cellContent += '<div class="activity-band band-harvest"></div>';
+                      if (isPlantedMonth) cellContent += '<span style="font-size: 14px;">📍</span>';
+                      if (isHarvestedMonth) cellContent += '<span style="font-size: 14px;">🌾</span>';
+                      
+                      return `<td class="month-cell">${cellContent || ''}</td>`;
                     }).join('')}
                   </tr>
                 `).join('')}
               </tbody>
             </table>
           `).join('')}
+          </div>
         </body>
       </html>
     `);
@@ -304,71 +346,91 @@ const CalendarView = ({
   const exportCalendarAsPDF = () => {
     const currentDate = new Date().toLocaleDateString('sv-SE');
     const yearPlanText = selectedYearPlan && selectedYearPlan !== 'all' ? ` - ${selectedYearPlan}` : '';
+    const currentMonth = new Date().getMonth() + 1;
     
     const element = document.createElement('div');
     element.innerHTML = `
-      <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
-        <style>
-          .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-          .pdf-cal-table th, .pdf-cal-table td { border: 1px solid #ddd; padding: 4px 6px; font-size: 10px; page-break-inside: avoid; }
-          .pdf-cal-table td { text-align: center; }
-          .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
-          .pdf-cal-table tbody { display: table-row-group; }
-          .pdf-cal-table tr { page-break-inside: avoid; }
-          .pdf-cal-header { background: #e8f5e9; font-size: 12px; text-align: left; vertical-align: middle; padding: 6px 8px; }
-          .pdf-plant-name { text-align: left; font-weight: bold; min-width: 90px; max-width: 100px; width: 100px; }
-        </style>
-        <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #2d6a4f; padding-bottom: 10px;">
-          <div style="font-size: 24px; font-weight: bold; color: #2d6a4f; margin-bottom: 5px;">Odlingskalender${yearPlanText}</div>
-          <div style="color: #666; font-size: 14px;">Skapad: ${currentDate}</div>
-        </div>
-        
-        <div style="margin: 15px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
-          <div style="display: flex; align-items: center; gap: 5px; font-size: 11px;">
-            <div style="width: 12px; height: 12px; border-radius: 2px; background: #60a5fa;"></div>
-            <span>Förkultiveras inomhus</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 5px; font-size: 11px;">
-            <div style="width: 12px; height: 12px; border-radius: 2px; background: #4ade80;"></div>
-            <span>Direktsås ute</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 5px; font-size: 11px;">
-            <div style="width: 12px; height: 12px; border-radius: 2px; background: #fbbf24;"></div>
-            <span>Skördas</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 5px; font-size: 11px;">
-            <span style="font-size: 14px;">📍</span>
-            <span>Planterad</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 5px; font-size: 11px;">
-            <span style="font-size: 14px;">🌾</span>
-            <span>Skördad</span>
+      <style>
+        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 20px 0; border: 2px solid #d1d5db; border-radius: 8px; overflow: hidden; }
+        .pdf-cal-table th, .pdf-cal-table td { padding: 8px 6px; font-size: 10px; page-break-inside: avoid; }
+        .pdf-cal-table td { text-align: center; border-right: 1px solid #e5e7eb; }
+        .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
+        .pdf-cal-table tbody { display: table-row-group; }
+        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; }
+        .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
+        .pdf-cal-table tbody tr:hover { background: #f0fdf4; }
+        .pdf-group-header { background: linear-gradient(90deg, #dcfce7, #bbf7d0); font-size: 12px; text-align: left; vertical-align: middle; padding: 10px 12px; font-weight: 600; color: #166534; border-bottom: 2px solid #86efac; }
+        .pdf-table-header { background: linear-gradient(180deg, #dcfce7, #bbf7d0); color: #166534; font-weight: 600; text-align: center; border-right: 1px solid #86efac; }
+        .pdf-plant-name { background: linear-gradient(180deg, #f0fdf4, #ecfdf5); text-align: left; font-weight: 600; min-width: 150px; max-width: 150px; width: 150px; padding: 8px 12px; border-right: 2px solid #86efac; color: #166534; }
+        .pdf-legend-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: white; border: 1px solid #d1d5db; border-radius: 6px; font-size: 11px; margin: 4px; }
+      </style>
+      <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 0; background: #ffffff;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%); padding: 24px 32px; margin: 0 0 24px 0;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+            <span style="font-size: 28px;">📅</span>
+            <div>
+              <h1 style="font-size: 26px; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.025em;">Odlingskalender${yearPlanText}</h1>
+              <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin: 4px 0 0 0;">Skapad: ${currentDate}</p>
+            </div>
           </div>
         </div>
         
+        <!-- Legend -->
+        <div style="margin: 0 32px 24px 32px; padding: 16px; background: linear-gradient(90deg, #f0fdf4, #ecfdf5); border-radius: 12px; border: 1px solid #bbf7d0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+          <div class="pdf-legend-item">
+            <div style="width: 14px; height: 14px; border-radius: 3px; background: #60a5fa;"></div>
+            <span style="color: #374151; font-weight: 500;">Förkultiveras inomhus</span>
+          </div>
+          <div class="pdf-legend-item">
+            <div style="width: 14px; height: 14px; border-radius: 3px; background: #4ade80;"></div>
+            <span style="color: #374151; font-weight: 500;">Direktsås ute</span>
+          </div>
+          <div class="pdf-legend-item">
+            <div style="width: 14px; height: 14px; border-radius: 3px; background: #fbbf24;"></div>
+            <span style="color: #374151; font-weight: 500;">Skördas</span>
+          </div>
+          <div class="pdf-legend-item">
+            <span style="font-size: 16px;">📍</span>
+            <span style="color: #374151; font-weight: 500;">Planterad</span>
+          </div>
+          <div class="pdf-legend-item">
+            <span style="font-size: 16px;">🌾</span>
+            <span style="color: #374151; font-weight: 500;">Skördad</span>
+          </div>
+        </div>
+        
+        <!-- Tables -->
+        <div style="padding: 0 32px 32px 32px;">
         ${Object.entries(groupedPlants).map(([groupName, groupPlants]) => `
-          <table class="pdf-cal-table">
-            <thead>
-              ${groupBy !== 'none' ? `
-              <tr>
-                <th class="pdf-cal-header" colspan="13">${groupName}</th>
-              </tr>` : ''}
-              <tr>
-                <th class="pdf-plant-name">Växt</th>
-                ${MONTHS.map(month => `<th style=\"text-align:center;\">${month}</th>`).join('')}
-              </tr>
-            </thead>
-            <tbody>
-              ${groupPlants.map(plant => `
+          <div style="margin-bottom: 32px;">
+            ${groupBy !== 'none' ? `
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <div style="width: 4px; height: 24px; background: linear-gradient(180deg, #22c55e, #16a34a); border-radius: 2px;"></div>
+              <h3 style="font-size: 16px; font-weight: 700; color: #1f2937; margin: 0;">${groupBy === 'bed' ? '📦' : '🏷️'} ${groupName}</h3>
+            </div>
+            ` : ''}
+            <table class="pdf-cal-table">
+              <thead>
                 <tr>
-                  <td class="pdf-plant-name" style="vertical-align: middle;">${plant.name}</td>
+                  <th class="pdf-plant-name">Växt</th>
+                  ${MONTHS.map((month, index) => {
+                    const isCurrentMonth = index + 1 === currentMonth;
+                    return `<th class="pdf-table-header" style="${isCurrentMonth ? 'background: linear-gradient(180deg, #bbf7d0, #86efac); border: 2px solid #22c55e;' : ''}">${month}</th>`;
+                  }).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${groupPlants.map((plant, plantIdx) => `
+                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'};">
+                  <td class="pdf-plant-name" style="vertical-align: middle;">${plant.name || plant.id}</td>
                   ${MONTHS.map((month, index) => {
                     const monthNum = index + 1;
                     const isSeedling = plant.seedling_months?.includes(monthNum);
                     const isSowing = plant.sowing_months?.includes(monthNum);
                     const isHarvest = plant.harvest_months?.includes(monthNum);
-                    const plantedDate = plantDates?.[plant.name];
-                    const harvestedDate = harvestedDates?.[plant.name];
+                    const plantedDate = plantDates?.[plant.id];
+                    const harvestedDate = harvestedDates?.[plant.id];
                     
                     let plantedMonth = null;
                     let harvestedMonth = null;
@@ -385,19 +447,21 @@ const CalendarView = ({
                     const isHarvestedMonth = harvestedMonth === monthNum;
                     
                     let cellContent = '';
-                    if (isSeedling) cellContent += '<div style="background: #60a5fa; height: 4px; margin: 1px 0;"></div>';
-                    if (isSowing) cellContent += '<div style="background: #4ade80; height: 4px; margin: 1px 0;"></div>';
-                    if (isHarvest) cellContent += '<div style="background: #fbbf24; height: 4px; margin: 1px 0;"></div>';
-                    if (isPlantedMonth) cellContent += '📍';
-                    if (isHarvestedMonth) cellContent += '🌾';
+                    if (isSeedling) cellContent += '<div style="background: #60a5fa; height: 5px; margin: 2px 0; border-radius: 2px;"></div>';
+                    if (isSowing) cellContent += '<div style="background: #4ade80; height: 5px; margin: 2px 0; border-radius: 2px;"></div>';
+                    if (isHarvest) cellContent += '<div style="background: #fbbf24; height: 5px; margin: 2px 0; border-radius: 2px;"></div>';
+                    if (isPlantedMonth) cellContent += '<span style="font-size: 14px;">📍</span>';
+                    if (isHarvestedMonth) cellContent += '<span style="font-size: 14px;">🌾</span>';
                     
-                    return `<td style="border: 1px solid #ddd; padding: 2px; text-align: center; width: 40px; height: 30px; position: relative; page-break-inside: avoid;">${cellContent}</td>`;
+                    return `<td style="padding: 4px; text-align: center; min-width: 50px; height: 32px; vertical-align: middle; position: relative;">${cellContent || ''}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         `).join('')}
+        </div>
       </div>
     `;
     
