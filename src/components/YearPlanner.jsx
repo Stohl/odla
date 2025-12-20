@@ -20,6 +20,8 @@ const YearPlanner = ({ myPlants, plants }) => {
     }
     return new Set();
   });
+  const [sortType, setSortType] = useState('name'); // 'name', 'placed', eller bedId
+  const [selectedPlant, setSelectedPlant] = useState(null);
 
   // Ladda odlingsbäddar
   useEffect(() => {
@@ -58,6 +60,11 @@ const YearPlanner = ({ myPlants, plants }) => {
     }
     setIsLoaded(true);
   }, []);
+
+  // Återställ sortering när plan ändras
+  useEffect(() => {
+    setSortType('name');
+  }, [activePlan]);
 
   // Spara planer till localStorage
   useEffect(() => {
@@ -203,13 +210,43 @@ const YearPlanner = ({ myPlants, plants }) => {
   const planNames = Object.keys(plans);
   const currentPlan = activePlan && plans[activePlan] ? plans[activePlan] : null;
 
-  // Sortera växter efter namn
+  // Sortera växter baserat på sortType
   const sortedPlants = [...myPlants].sort((a, b) => {
-    const plantA = plants?.find(p => p.id === a);
-    const plantB = plants?.find(p => p.id === b);
-    const nameA = plantA?.name || a;
-    const nameB = plantB?.name || b;
-    return nameA.localeCompare(nameB, 'sv');
+    if (sortType === 'placed') {
+      // Sortera efter placerad/ej placerad (placerade först)
+      const aPlaced = isPlantPlaced(a);
+      const bPlaced = isPlantPlaced(b);
+      if (aPlaced !== bPlaced) {
+        return aPlaced ? -1 : 1;
+      }
+      // Om båda är placerade eller båda ej placerade, sortera alfabetiskt
+      const plantA = plants?.find(p => p.id === a);
+      const plantB = plants?.find(p => p.id === b);
+      const nameA = plantA?.name || a;
+      const nameB = plantB?.name || b;
+      return nameA.localeCompare(nameB, 'sv');
+    } else if (sortType !== 'name' && currentPlan?.bedPlants) {
+      // Sortera efter om växten finns i den valda bädden (sortType är bedId)
+      const bedPlants = currentPlan.bedPlants[sortType] || [];
+      const aInBed = bedPlants.includes(a);
+      const bInBed = bedPlants.includes(b);
+      if (aInBed !== bInBed) {
+        return aInBed ? -1 : 1;
+      }
+      // Om båda finns eller båda inte finns, sortera alfabetiskt
+      const plantA = plants?.find(p => p.id === a);
+      const plantB = plants?.find(p => p.id === b);
+      const nameA = plantA?.name || a;
+      const nameB = plantB?.name || b;
+      return nameA.localeCompare(nameB, 'sv');
+    } else {
+      // Standard: sortera alfabetiskt
+      const plantA = plants?.find(p => p.id === a);
+      const plantB = plants?.find(p => p.id === b);
+      const nameA = plantA?.name || a;
+      const nameB = plantB?.name || b;
+      return nameA.localeCompare(nameB, 'sv');
+    }
   });
 
   // Filtrera bäddar baserat på val
@@ -391,17 +428,28 @@ const YearPlanner = ({ myPlants, plants }) => {
                     <table className="w-full border-collapse text-sm">
                       <thead>
                         <tr>
-                          <th className="bg-plant-100 text-plant-800 px-4 py-3 text-left font-semibold border-b-2 border-plant-300 sticky left-0 z-10 bg-plant-100">
-                            Växt
+                          <th 
+                            onClick={() => setSortType(sortType === 'placed' ? 'name' : 'placed')}
+                            className="bg-plant-100 text-plant-800 px-4 py-3 text-left font-semibold border-b-2 border-plant-300 sticky left-0 z-10 bg-plant-100 cursor-pointer hover:bg-plant-200 transition-colors"
+                            title="Klicka för att sortera efter placerad/ej placerad"
+                          >
+                            <div className="flex items-center gap-2">
+                              Växt
+                              {sortType === 'placed' && <span className="text-xs">▼</span>}
+                            </div>
                           </th>
                           {visibleBeds.map(bed => (
                             <th 
                               key={bed.id}
-                              className="bg-plant-100 text-plant-800 px-4 py-3 text-center font-semibold border-b-2 border-plant-300 min-w-[120px]"
-                              title={bed.description || bed.name}
+                              onClick={() => setSortType(sortType === bed.id ? 'name' : bed.id)}
+                              className={`bg-plant-100 text-plant-800 px-4 py-3 text-center font-semibold border-b-2 border-plant-300 min-w-[120px] cursor-pointer hover:bg-plant-200 transition-colors ${sortType === bed.id ? 'ring-2 ring-plant-500' : ''}`}
+                              title={`Klicka för att sortera efter växter i ${bed.name}`}
                             >
                               <div className="flex flex-col items-center gap-1">
-                                <span>{bed.name}</span>
+                                <div className="flex items-center gap-1">
+                                  <span>{bed.name}</span>
+                                  {sortType === bed.id && <span className="text-xs">▼</span>}
+                                </div>
                                 {bed.description && (
                                   <span className="text-xs font-normal text-plant-600">
                                     {bed.description.length > 20 ? bed.description.substring(0, 20) + '...' : bed.description}
@@ -430,9 +478,12 @@ const YearPlanner = ({ myPlants, plants }) => {
                                   ) : (
                                     <span className="text-earth-400" title="Inte placerad i någon odlingsplats">○</span>
                                   )}
-                                  <span className={isPlaced ? 'text-plant-700' : 'text-earth-600'}>
+                                  <button
+                                    onClick={() => setSelectedPlant(plantId)}
+                                    className={`text-left hover:underline ${isPlaced ? 'text-plant-700' : 'text-earth-600'}`}
+                                  >
                                     {plantName}
-                                  </span>
+                                  </button>
                                 </div>
                               </td>
                               {visibleBeds.map(bed => {
@@ -544,6 +595,118 @@ const YearPlanner = ({ myPlants, plants }) => {
           </div>
         </div>
       )}
+
+      {/* Modal för växtinfo */}
+      {selectedPlant && (() => {
+        const plant = plants?.find(p => p.id === selectedPlant);
+        if (!plant) return null;
+        
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setSelectedPlant(null)}>
+            <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-start justify-between mb-4">
+                <h2 className="text-2xl font-bold text-earth-800">{plant.name}</h2>
+                <button
+                  onClick={() => setSelectedPlant(null)}
+                  className="text-earth-400 hover:text-earth-600 text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+
+              {plant.latin_name && (
+                <p className="text-sm text-earth-500 italic mb-4">{plant.latin_name}</p>
+              )}
+
+              {plant.description && (
+                <div className="mb-4">
+                  <h3 className="text-sm font-semibold text-earth-700 mb-2">Beskrivning</h3>
+                  <p className="text-sm text-earth-600">{plant.description}</p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {plant.category && (
+                  <div>
+                    <span className="text-sm text-earth-600">Kategori:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.category}</span>
+                  </div>
+                )}
+                {plant.position && (
+                  <div>
+                    <span className="text-sm text-earth-600">Plats:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.position}</span>
+                  </div>
+                )}
+                {plant.sowing_time && (
+                  <div>
+                    <span className="text-sm text-earth-600">Såtid:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.sowing_time}</span>
+                  </div>
+                )}
+                {plant.harvest_time && (
+                  <div>
+                    <span className="text-sm text-earth-600">Skördas:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.harvest_time}</span>
+                  </div>
+                )}
+                {plant.bloom_time && (
+                  <div>
+                    <span className="text-sm text-earth-600">Blommar:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.bloom_time}</span>
+                  </div>
+                )}
+                {plant.germination_time && (
+                  <div>
+                    <span className="text-sm text-earth-600">Grodd:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.germination_time}</span>
+                  </div>
+                )}
+                {plant.quantity && (
+                  <div>
+                    <span className="text-sm text-earth-600">Antal:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.quantity}</span>
+                  </div>
+                )}
+                {plant.height_cm && (
+                  <div>
+                    <span className="text-sm text-earth-600">Höjd:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.height_cm}</span>
+                  </div>
+                )}
+                {plant.color && (
+                  <div>
+                    <span className="text-sm text-earth-600">Färg:</span>
+                    <span className="text-sm font-semibold text-earth-800 ml-2">{plant.color}</span>
+                  </div>
+                )}
+              </div>
+
+              {plant.product_url && (
+                <div className="mt-4 pt-4 border-t border-earth-200">
+                  <a
+                    href={plant.product_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-plant-500 hover:text-plant-600 underline text-sm"
+                  >
+                    Läs mer om denna växt →
+                  </a>
+                </div>
+              )}
+
+              <div className="mt-6">
+                <button
+                  onClick={() => setSelectedPlant(null)}
+                  className="w-full px-4 py-2 bg-plant-500 text-white rounded-lg hover:bg-plant-600 transition-colors font-semibold"
+                >
+                  Stäng
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
