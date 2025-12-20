@@ -210,6 +210,14 @@ const YearPlanner = ({ myPlants, plants }) => {
   const planNames = Object.keys(plans);
   const currentPlan = activePlan && plans[activePlan] ? plans[activePlan] : null;
 
+  // Kolla om en växt är placerad i någon odlingsplats
+  const isPlantPlaced = (plantId) => {
+    if (!currentPlan?.bedPlants) return false;
+    return Object.values(currentPlan.bedPlants).some(
+      bedPlantArray => bedPlantArray.includes(plantId)
+    );
+  };
+
   // Sortera växter baserat på sortType
   const sortedPlants = [...myPlants].sort((a, b) => {
     if (sortType === 'placed') {
@@ -251,14 +259,6 @@ const YearPlanner = ({ myPlants, plants }) => {
 
   // Filtrera bäddar baserat på val
   const visibleBeds = beds.filter(bed => selectedBeds.has(bed.id));
-
-  // Kolla om en växt är placerad i någon odlingsplats
-  const isPlantPlaced = (plantId) => {
-    if (!currentPlan?.bedPlants) return false;
-    return Object.values(currentPlan.bedPlants).some(
-      bedPlantArray => bedPlantArray.includes(plantId)
-    );
-  };
 
   // Toggle bädd i val
   const toggleBedSelection = (bedId) => {
