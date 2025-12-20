@@ -357,7 +357,8 @@ const CalendarView = ({
         .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; }
         .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
         .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
-        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 500; padding: 6px 8px; border-right: 2px solid #9ca3af; color: #1f2937; }
+        .pdf-plant-name-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 2px solid #9ca3af; padding: 6px 4px; width: 120px; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 500; padding: 6px 8px; border-right: 2px solid #9ca3af; color: #1f2937; width: 120px; word-wrap: break-word; line-height: 1.3; white-space: normal; }
       </style>
       <div style="font-family: Arial, sans-serif; padding: 10px; background: #ffffff;">
         <!-- Diskret legend -->
@@ -379,7 +380,7 @@ const CalendarView = ({
             <table class="pdf-cal-table">
               <thead>
                 <tr>
-                  <th class="pdf-plant-name" style="border-bottom: 2px solid #9ca3af;">Växt</th>
+                  <th class="pdf-plant-name-header" style="border-bottom: 2px solid #9ca3af;">Växt</th>
                   ${MONTHS.map(month => `<th class="pdf-table-header">${month}</th>`).join('')}
                 </tr>
               </thead>
