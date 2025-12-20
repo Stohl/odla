@@ -344,86 +344,49 @@ const CalendarView = ({
 
   // Exportera kalender som PDF
   const exportCalendarAsPDF = () => {
-    const currentDate = new Date().toLocaleDateString('sv-SE');
     const yearPlanText = selectedYearPlan && selectedYearPlan !== 'all' ? ` - ${selectedYearPlan}` : '';
-    const currentMonth = new Date().getMonth() + 1;
     
     const element = document.createElement('div');
     element.innerHTML = `
       <style>
-        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 20px 0; border: 2px solid #d1d5db; border-radius: 8px; overflow: hidden; }
-        .pdf-cal-table th, .pdf-cal-table td { padding: 8px 6px; font-size: 10px; page-break-inside: avoid; }
+        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .pdf-cal-table th, .pdf-cal-table td { padding: 6px 4px; font-size: 9px; page-break-inside: avoid; }
         .pdf-cal-table td { text-align: center; border-right: 1px solid #e5e7eb; }
         .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
         .pdf-cal-table tbody { display: table-row-group; }
         .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; }
         .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
-        .pdf-cal-table tbody tr:hover { background: #f0fdf4; }
-        .pdf-group-header { background: linear-gradient(90deg, #dcfce7, #bbf7d0); font-size: 12px; text-align: left; vertical-align: middle; padding: 10px 12px; font-weight: 600; color: #166534; border-bottom: 2px solid #86efac; }
-        .pdf-table-header { background: linear-gradient(180deg, #dcfce7, #bbf7d0); color: #166534; font-weight: 600; text-align: center; border-right: 1px solid #86efac; }
-        .pdf-plant-name { background: linear-gradient(180deg, #f0fdf4, #ecfdf5); text-align: left; font-weight: 600; min-width: 150px; max-width: 150px; width: 150px; padding: 8px 12px; border-right: 2px solid #86efac; color: #166534; }
-        .pdf-legend-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: white; border: 1px solid #d1d5db; border-radius: 6px; font-size: 11px; margin: 4px; }
+        .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 500; padding: 6px 8px; border-right: 2px solid #9ca3af; color: #1f2937; }
       </style>
-      <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 0; background: #ffffff;">
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%); padding: 24px 32px; margin: 0 0 24px 0;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
-            <span style="font-size: 28px;">📅</span>
-            <div>
-              <h1 style="font-size: 26px; font-weight: 800; color: #ffffff; margin: 0; letter-spacing: -0.025em;">Odlingskalender${yearPlanText}</h1>
-              <p style="color: rgba(255,255,255,0.9); font-size: 13px; margin: 4px 0 0 0;">Skapad: ${currentDate}</p>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Legend -->
-        <div style="margin: 0 32px 24px 32px; padding: 16px; background: linear-gradient(90deg, #f0fdf4, #ecfdf5); border-radius: 12px; border: 1px solid #bbf7d0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
-          <div class="pdf-legend-item">
-            <div style="width: 14px; height: 14px; border-radius: 3px; background: #60a5fa;"></div>
-            <span style="color: #374151; font-weight: 500;">Förkultiveras inomhus</span>
-          </div>
-          <div class="pdf-legend-item">
-            <div style="width: 14px; height: 14px; border-radius: 3px; background: #4ade80;"></div>
-            <span style="color: #374151; font-weight: 500;">Direktsås ute</span>
-          </div>
-          <div class="pdf-legend-item">
-            <div style="width: 14px; height: 14px; border-radius: 3px; background: #fbbf24;"></div>
-            <span style="color: #374151; font-weight: 500;">Skördas</span>
-          </div>
-          <div class="pdf-legend-item">
-            <span style="font-size: 16px;">📍</span>
-            <span style="color: #374151; font-weight: 500;">Planterad</span>
-          </div>
-          <div class="pdf-legend-item">
-            <span style="font-size: 16px;">🌾</span>
-            <span style="color: #374151; font-weight: 500;">Skördad</span>
-          </div>
+      <div style="font-family: Arial, sans-serif; padding: 10px; background: #ffffff;">
+        <!-- Diskret legend -->
+        <div style="margin: 0 0 12px 0; padding: 4px 0; text-align: center; font-size: 8px; color: #6b7280; border-bottom: 1px solid #e5e7eb;">
+          <span style="color: #60a5fa;">█</span> Förkultiveras inomhus • 
+          <span style="color: #4ade80;">█</span> Direktsås ute • 
+          <span style="color: #fbbf24;">█</span> Skördas • 
+          📍 Planterad • 🌾 Skördad
         </div>
         
         <!-- Tables -->
-        <div style="padding: 0 32px 32px 32px;">
         ${Object.entries(groupedPlants).map(([groupName, groupPlants]) => `
-          <div style="margin-bottom: 32px;">
+          <div style="margin-bottom: 20px;">
             ${groupBy !== 'none' ? `
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-              <div style="width: 4px; height: 24px; background: linear-gradient(180deg, #22c55e, #16a34a); border-radius: 2px;"></div>
-              <h3 style="font-size: 16px; font-weight: 700; color: #1f2937; margin: 0;">${groupBy === 'bed' ? '📦' : '🏷️'} ${groupName}</h3>
+            <div style="margin-bottom: 8px;">
+              <h3 style="font-size: 11px; font-weight: 600; color: #4b5563; margin: 0;">${groupBy === 'bed' ? '📦' : '🏷️'} ${groupName}</h3>
             </div>
             ` : ''}
             <table class="pdf-cal-table">
               <thead>
                 <tr>
-                  <th class="pdf-plant-name">Växt</th>
-                  ${MONTHS.map((month, index) => {
-                    const isCurrentMonth = index + 1 === currentMonth;
-                    return `<th class="pdf-table-header" style="${isCurrentMonth ? 'background: linear-gradient(180deg, #bbf7d0, #86efac); border: 2px solid #22c55e;' : ''}">${month}</th>`;
-                  }).join('')}
+                  <th class="pdf-plant-name" style="border-bottom: 2px solid #9ca3af;">Växt</th>
+                  ${MONTHS.map(month => `<th class="pdf-table-header">${month}</th>`).join('')}
                 </tr>
               </thead>
               <tbody>
                 ${groupPlants.map((plant, plantIdx) => `
                 <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'};">
-                  <td class="pdf-plant-name" style="vertical-align: middle;">${plant.name || plant.id}</td>
+                  <td class="pdf-plant-name" style="vertical-align: middle; border-bottom: 1px solid #e5e7eb;">${plant.name || plant.id}</td>
                   ${MONTHS.map((month, index) => {
                     const monthNum = index + 1;
                     const isSeedling = plant.seedling_months?.includes(monthNum);
@@ -447,13 +410,13 @@ const CalendarView = ({
                     const isHarvestedMonth = harvestedMonth === monthNum;
                     
                     let cellContent = '';
-                    if (isSeedling) cellContent += '<div style="background: #60a5fa; height: 5px; margin: 2px 0; border-radius: 2px;"></div>';
-                    if (isSowing) cellContent += '<div style="background: #4ade80; height: 5px; margin: 2px 0; border-radius: 2px;"></div>';
-                    if (isHarvest) cellContent += '<div style="background: #fbbf24; height: 5px; margin: 2px 0; border-radius: 2px;"></div>';
-                    if (isPlantedMonth) cellContent += '<span style="font-size: 14px;">📍</span>';
-                    if (isHarvestedMonth) cellContent += '<span style="font-size: 14px;">🌾</span>';
+                    if (isSeedling) cellContent += '<div style="background: #60a5fa; height: 3px; margin: 1px 0; border-radius: 1px;"></div>';
+                    if (isSowing) cellContent += '<div style="background: #4ade80; height: 3px; margin: 1px 0; border-radius: 1px;"></div>';
+                    if (isHarvest) cellContent += '<div style="background: #fbbf24; height: 3px; margin: 1px 0; border-radius: 1px;"></div>';
+                    if (isPlantedMonth) cellContent += '<span style="font-size: 11px;">📍</span>';
+                    if (isHarvestedMonth) cellContent += '<span style="font-size: 11px;">🌾</span>';
                     
-                    return `<td style="padding: 4px; text-align: center; min-width: 50px; height: 32px; vertical-align: middle; position: relative;">${cellContent || ''}</td>`;
+                    return `<td style="padding: 3px; text-align: center; min-width: 35px; height: 24px; vertical-align: middle; position: relative; border-bottom: 1px solid #e5e7eb;">${cellContent || ''}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
@@ -461,12 +424,11 @@ const CalendarView = ({
             </table>
           </div>
         `).join('')}
-        </div>
       </div>
     `;
     
     const opt = {
-      margin: 0.5,
+      margin: 0.3,
       filename: `odlingskalender${yearPlanText}-${new Date().toISOString().split('T')[0]}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
