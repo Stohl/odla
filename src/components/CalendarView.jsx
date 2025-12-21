@@ -348,6 +348,9 @@ const CalendarView = ({
     const yearPlanText = selectedYearPlan && selectedYearPlan !== 'all' ? ` - ${selectedYearPlan}` : '';
     const currentMonth = new Date().getMonth() + 1;
     
+    // Räkna totalt antal växter
+    const totalPlants = Object.values(groupedPlants).reduce((sum, group) => sum + group.length, 0);
+    
     const element = document.createElement('div');
     element.innerHTML = `
       <style>
@@ -367,15 +370,18 @@ const CalendarView = ({
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
             <div style="font-size: 28px; line-height: 1;">🌱</div>
             <div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #166534; letter-spacing: -0.5px;">Odlingskalender</h1>
-              ${selectedYearPlan && selectedYearPlan !== 'all' ? `
-                <div style="margin-top: 4px; font-size: 14px; font-weight: 500; color: #15803d;">${selectedYearPlan}</div>
-              ` : ''}
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #166534; letter-spacing: -0.5px;">Knopp - Odlingskalender</h1>
             </div>
           </div>
-          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px;">
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span>📅</span>
             <span>Utskriven: ${currentDate}</span>
+            ${selectedYearPlan && selectedYearPlan !== 'all' ? `
+              <span>•</span>
+              <span>Årsplan: ${selectedYearPlan}</span>
+            ` : ''}
+            <span>•</span>
+            <span>${totalPlants} växter</span>
             <span style="margin-left: auto; color: #9ca3af;">${new Date().getFullYear()}</span>
           </div>
         </div>
