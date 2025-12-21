@@ -10,7 +10,7 @@ import SeedBank from './components/SeedBank';
 function App() {
   const [activeView, setActiveView] = useState('seedbank'); // 'seedbank', 'calendar', 'planning', 'settings'
   const [plants, setPlants] = useState([]);
-  const [myPlants, setMyPlants] = useState([]);
+  const [myPlants, setMyPlants] = useState({ plants: [], customPlants: {} });
   const [myPlantsLoaded, setMyPlantsLoaded] = useState(false); // Flag to prevent overwriting localStorage
   const [yearPlans, setYearPlans] = useState({});
   const [selectedYearPlan, setSelectedYearPlan] = useState('all'); // 'all' or planId
@@ -66,9 +66,23 @@ function App() {
     const saved = localStorage.getItem('myPlants');
     if (saved) {
       try {
-        setMyPlants(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Backward compatibility: om det är en array, konvertera till ny struktur
+        if (Array.isArray(parsed)) {
+          setMyPlants({ plants: parsed, customPlants: {} });
+        } else if (parsed && typeof parsed === 'object' && parsed.plants) {
+          // Ny struktur med plants och customPlants
+          setMyPlants({
+            plants: parsed.plants || [],
+            customPlants: parsed.customPlants || {}
+          });
+        } else {
+          // Fallback till tom struktur
+          setMyPlants({ plants: [], customPlants: {} });
+        }
       } catch (e) {
         console.error('Kunde inte läsa sparade växter:', e);
+        setMyPlants({ plants: [], customPlants: {} });
       }
     }
     setMyPlantsLoaded(true); // Mark as loaded
@@ -190,19 +204,78 @@ function App() {
     return;
   };
 
+  // Generera unikt ID för egna växter (prefix "k" + 7 siffror)
+  const generateCustomPlantId = () => {
+    const randomNum = Math.floor(1000000 + Math.random() * 9000000); // 7 siffror
+    return `k${randomNum}`;
+  };
+
   // Toggle plant selection
   const handleTogglePlant = (plantId) => {
     setMyPlants(prev => {
-      if (prev.includes(plantId)) {
-        return prev.filter(id => id !== plantId);
+      const plants = prev.plants || [];
+      if (plants.includes(plantId)) {
+        return {
+          ...prev,
+          plants: plants.filter(id => id !== plantId)
+        };
       } else {
-        return [...prev, plantId];
+        return {
+          ...prev,
+          plants: [...plants, plantId]
+        };
       }
     });
   };
 
+  // Lägg till/uppdatera egen växt
+  const handleSaveCustomPlant = (plantData) => {
+    setMyPlants(prev => {
+      const customPlants = { ...prev.customPlants };
+      const plantId = plantData.id || generateCustomPlantId();
+      
+      customPlants[plantId] = {
+        id: plantId,
+        name: plantData.name,
+        sowing_months: plantData.sowing_months || [],
+        harvest_months: plantData.harvest_months || [],
+        direct_sow_months: plantData.direct_sow_months || [],
+        source: 'Egen',
+        ...plantData
+      };
+
+      return {
+        ...prev,
+        customPlants
+      };
+    });
+  };
+
+  // Ta bort egen växt
+  const handleDeleteCustomPlant = (plantId) => {
+    setMyPlants(prev => {
+      const customPlants = { ...prev.customPlants };
+      delete customPlants[plantId];
+      
+      // Ta också bort från plants-arrayen om den finns där
+      const plants = prev.plants.filter(id => id !== plantId);
+      
+      return {
+        ...prev,
+        plants,
+        customPlants
+      };
+    });
+  };
+
+  // Kombinera plants med customPlants för att skapa en komplett lista
+  const allPlants = [
+    ...plants,
+    ...Object.values(myPlants.customPlants || {})
+  ];
+
   // Get unique sources (källa)
-  const sources = [...new Set(plants.map(p => p.source || 'Okänd'))].sort();
+  const sources = [...new Set(allPlants.map(p => p.source || 'Okänd'))].sort();
 
   // Get plants from a specific year plan (only from beds)
   const getPlantsFromYearPlan = (planId) => {
@@ -222,7 +295,7 @@ function App() {
   };
 
   // Filter plants based on search, category, myPlants toggle, and year plan
-  const filteredPlants = plants.filter(plant => {
+  const filteredPlants = allPlants.filter(plant => {
     // Search filter
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
@@ -240,7 +313,7 @@ function App() {
       matchesYearPlan = planPlants.includes(plant.id);
     } else {
       // If "all" is selected, use the myPlants toggle
-      matchesYearPlan = !showOnlyMyPlants || myPlants.includes(plant.id);
+      matchesYearPlan = !showOnlyMyPlants || (myPlants.plants || []).includes(plant.id);
     }
 
     return matchesSearch && matchesSource && matchesYearPlan;
@@ -317,9 +390,12 @@ function App() {
       {/* Main Content */}
       {activeView === 'seedbank' ? (
         <SeedBank 
-          plants={plants}
+          plants={allPlants}
           myPlants={myPlants}
           onTogglePlant={handleTogglePlant}
+          onSaveCustomPlant={handleSaveCustomPlant}
+          onDeleteCustomPlant={handleDeleteCustomPlant}
+          generateCustomPlantId={generateCustomPlantId}
         />
       ) : activeView === 'calendar' ? (
         <main className="w-full px-2 sm:px-4 lg:px-6 py-8">
@@ -363,7 +439,7 @@ function App() {
           />
         </main>
       ) : activeView === 'planning' ? (
-        <PlanningHub myPlants={myPlants} plants={plants} />
+        <PlanningHub myPlants={myPlants} plants={allPlants} />
       ) : (
         <Settings theme={theme} onThemeChange={setTheme} />
       )}

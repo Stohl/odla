@@ -218,8 +218,16 @@ const YearPlanner = ({ myPlants, plants }) => {
     );
   };
 
+  // Hämta plants-arrayen från myPlants-objektet
+  const plantIds = myPlants.plants || [];
+  const allPlantsWithCustom = [
+    ...plants,
+    ...Object.values(myPlants.customPlants || {})
+  ];
+  const myPlantsList = allPlantsWithCustom.filter(p => plantIds.includes(p.id));
+
   // Sortera växter baserat på sortType
-  const sortedPlants = [...myPlants].sort((a, b) => {
+  const sortedPlants = [...myPlantsList].sort((a, b) => {
     if (sortType === 'placed') {
       // Sortera efter placerad/ej placerad (placerade först)
       const aPlaced = isPlantPlaced(a);
@@ -371,7 +379,7 @@ const YearPlanner = ({ myPlants, plants }) => {
           <div className="p-6">
 
             {/* Plantering per odlingsplats - Tabell-layout */}
-            {beds.length > 0 && myPlants.length > 0 ? (
+            {beds.length > 0 && (myPlants.plants || []).length > 0 ? (
               <div className="pt-6 border-t-2 border-earth-200">
                 <div className="flex items-center gap-2 mb-4">
                   <h2 className="text-xl font-bold text-earth-800 flex items-center gap-2">

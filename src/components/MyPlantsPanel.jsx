@@ -7,7 +7,8 @@ const MONTHS = [
 
 const MyPlantsPanel = ({ plants, myPlants, onTogglePlant }) => {
   const currentMonth = new Date().getMonth() + 1;
-  const selectedPlants = plants.filter(p => myPlants.includes(p.id));
+  const plantIds = myPlants.plants || [];
+  const selectedPlants = plants.filter(p => plantIds.includes(p.id));
 
   if (selectedPlants.length === 0) {
     return (

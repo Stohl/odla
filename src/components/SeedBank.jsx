@@ -1,8 +1,158 @@
 import React, { useState } from 'react';
 
 const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+const MONTHS_LONG = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
 
-const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
+// Formulär för att skapa/redigera egna växter
+const CustomPlantForm = ({ plant, onSave, onCancel, generateId }) => {
+  const [name, setName] = useState(plant?.name || '');
+  const [sowingMonths, setSowingMonths] = useState(plant?.sowing_months || []);
+  const [harvestMonths, setHarvestMonths] = useState(plant?.harvest_months || []);
+  const [directSowMonths, setDirectSowMonths] = useState(plant?.direct_sow_months || []);
+
+  const toggleMonth = (monthNum, setter, currentMonths) => {
+    setter(
+      currentMonths.includes(monthNum)
+        ? currentMonths.filter(m => m !== monthNum)
+        : [...currentMonths, monthNum]
+    );
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      alert('Namn är obligatoriskt');
+      return;
+    }
+
+    onSave({
+      id: plant?.id || generateId(),
+      name: name.trim(),
+      sowing_months: sowingMonths.sort((a, b) => a - b),
+      harvest_months: harvestMonths.sort((a, b) => a - b),
+      direct_sow_months: directSowMonths.sort((a, b) => a - b)
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+      <h2 className="text-2xl font-bold text-earth-800 mb-4">
+        {plant ? 'Redigera egen växt' : 'Skapa egen växt'}
+      </h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-semibold text-earth-700 mb-2">
+            Namn *
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-earth-700 mb-2">
+            Planteringsmånader (förkultivering)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {MONTHS_LONG.map((month, index) => {
+              const monthNum = index + 1;
+              const isSelected = sowingMonths.includes(monthNum);
+              return (
+                <button
+                  key={monthNum}
+                  type="button"
+                  onClick={() => toggleMonth(monthNum, setSowingMonths, sowingMonths)}
+                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                    isSelected
+                      ? 'bg-plant-500 text-white'
+                      : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                  }`}
+                >
+                  {month.substring(0, 3)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-earth-700 mb-2">
+            Direktsås (direkt utsådd)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {MONTHS_LONG.map((month, index) => {
+              const monthNum = index + 1;
+              const isSelected = directSowMonths.includes(monthNum);
+              return (
+                <button
+                  key={monthNum}
+                  type="button"
+                  onClick={() => toggleMonth(monthNum, setDirectSowMonths, directSowMonths)}
+                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                    isSelected
+                      ? 'bg-plant-500 text-white'
+                      : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                  }`}
+                >
+                  {month.substring(0, 3)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-earth-700 mb-2">
+            Skördemånader
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {MONTHS_LONG.map((month, index) => {
+              const monthNum = index + 1;
+              const isSelected = harvestMonths.includes(monthNum);
+              return (
+                <button
+                  key={monthNum}
+                  type="button"
+                  onClick={() => toggleMonth(monthNum, setHarvestMonths, harvestMonths)}
+                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                    isSelected
+                      ? 'bg-plant-500 text-white'
+                      : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                  }`}
+                >
+                  {month.substring(0, 3)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex gap-2 pt-4">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-plant-500 text-white rounded-lg font-semibold hover:bg-plant-600 transition-colors"
+          >
+            Spara
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 bg-earth-200 text-earth-700 rounded-lg font-semibold hover:bg-earth-300 transition-colors"
+          >
+            Avbryt
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDeleteCustomPlant, generateCustomPlantId }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSource, setSelectedSource] = useState('');
   const [selectedMonths, setSelectedMonths] = useState([]);
@@ -10,6 +160,8 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
   const [showOnlyMyPlants, setShowOnlyMyPlants] = useState(false);
   const [selectedPlant, setSelectedPlant] = useState(null);
   const [sortBy, setSortBy] = useState('name'); // 'name', 'source', 'price'
+  const [showCustomPlantForm, setShowCustomPlantForm] = useState(false);
+  const [editingCustomPlant, setEditingCustomPlant] = useState(null);
 
   // Minimal kalendervy komponent
   const MiniCalendar = ({ plant }) => {
@@ -69,7 +221,8 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
     }
     
     const matchesSource = !selectedSource || plant.source === selectedSource;
-    const matchesMyPlants = !showOnlyMyPlants || myPlants.includes(plant.id);
+    const plantIds = myPlants.plants || [];
+    const matchesMyPlants = !showOnlyMyPlants || plantIds.includes(plant.id);
 
     // Om bara "Mina växter" är aktivt utan sökord
     if (!searchTerm && showOnlyMyPlants) {
@@ -115,13 +268,26 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
     <div className="w-full px-3 sm:px-5 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-4xl font-bold text-earth-800 mb-2 flex items-center gap-3">
-          <span>🌱</span>
-          Fröbank
-        </h1>
-        <p className="text-earth-600">
-          Utforska {plants.length} växter och bygg din önskelista
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-earth-800 mb-2 flex items-center gap-3">
+              <span>🌱</span>
+              Fröbank
+            </h1>
+            <p className="text-earth-600">
+              Utforska {plants.length} växter och bygg din önskelista
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setEditingCustomPlant(null);
+              setShowCustomPlantForm(true);
+            }}
+            className="px-4 py-2 bg-plant-500 text-white rounded-lg font-semibold hover:bg-plant-600 transition-colors"
+          >
+            + Skapa egen växt
+          </button>
+        </div>
       </div>
 
       {/* Filter och sök */}
@@ -247,7 +413,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                   : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
               }`}
             >
-              {showOnlyMyPlants ? `✓ Mina växter (${myPlants.length})` : `Mina växter`}
+              {showOnlyMyPlants ? `✓ Mina växter (${(myPlants.plants || []).length})` : `Mina växter`}
             </button>
             <span className="text-sm text-earth-600">
               Visar {sortedPlants.length} växter
@@ -255,6 +421,23 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
           </div>
         </div>
       </div>
+
+      {/* Formulär för egna växter */}
+      {showCustomPlantForm && (
+        <CustomPlantForm
+          plant={editingCustomPlant}
+          onSave={(plantData) => {
+            onSaveCustomPlant(plantData);
+            setShowCustomPlantForm(false);
+            setEditingCustomPlant(null);
+          }}
+          onCancel={() => {
+            setShowCustomPlantForm(false);
+            setEditingCustomPlant(null);
+          }}
+          generateId={generateCustomPlantId}
+        />
+      )}
 
       {/* Växtlista med expanderbara rader */}
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -266,7 +449,9 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
         ) : (
           <div className="divide-y divide-earth-200">
             {sortedPlants.map((plant) => {
-              const isInMyList = myPlants.includes(plant.id);
+              const plantIds = myPlants.plants || [];
+              const isInMyList = plantIds.includes(plant.id);
+              const isCustomPlant = plant.id && plant.id.startsWith('k');
               const isExpanded = selectedPlant === plant.id;
 
               return (
@@ -406,7 +591,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                             </div>
 
                             {/* Knappar */}
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -420,6 +605,33 @@ const SeedBank = ({ plants, myPlants, onTogglePlant }) => {
                               >
                                 {isInMyList ? '− Ta bort från min lista' : '+ Lägg till i min lista'}
                               </button>
+
+                              {isCustomPlant && (
+                                <>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingCustomPlant(plant);
+                                      setShowCustomPlantForm(true);
+                                    }}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold"
+                                  >
+                                    ✏️ Redigera
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (confirm(`Är du säker på att du vill ta bort "${plant.name}"?`)) {
+                                        onDeleteCustomPlant(plant.id);
+                                        if (isExpanded) setSelectedPlant(null);
+                                      }
+                                    }}
+                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                                  >
+                                    🗑️ Ta bort
+                                  </button>
+                                </>
+                              )}
 
                               {plant.product_url && (
                                 <a

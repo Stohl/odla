@@ -600,7 +600,7 @@ const CalendarView = ({
                       <PlantRow
                         key={plant.id}
                         plant={plant}
-                        isSelected={myPlants.includes(plant.id)}
+                        isSelected={(myPlants.plants || []).includes(plant.id)}
                         onToggleSelect={onTogglePlant}
                         currentMonth={currentMonth}
                         plantedDate={plantDates?.[plant.id] || ''}
