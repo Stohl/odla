@@ -354,15 +354,16 @@ const CalendarView = ({
     const element = document.createElement('div');
     element.innerHTML = `
       <style>
-        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 12px 0; border: 1px solid #d1d5db; }
+        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 12px 0; border: 1px solid #d1d5db; table-layout: fixed; }
         .pdf-cal-table th, .pdf-cal-table td { padding: 6px 4px; font-size: 9px; page-break-inside: avoid; }
         .pdf-cal-table td { text-align: center; border-right: 1px solid #e5e7eb; }
         .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
         .pdf-cal-table tbody { display: table-row-group; }
-        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; height: 28px; max-height: 28px; }
+        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; height: 28px !important; max-height: 28px !important; }
         .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
         .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
-        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 2px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px; max-height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.1; vertical-align: top; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 0; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px !important; max-height: 28px !important; overflow: hidden; vertical-align: top; }
+        .pdf-plant-name-inner { padding: 2px 8px; height: 28px; max-height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
       </style>
       <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
         <!-- Modern rubrik -->
@@ -412,8 +413,10 @@ const CalendarView = ({
               </thead>
               <tbody>
                 ${groupPlants.map((plant, plantIdx) => `
-                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; height: 28px; max-height: 28px;">
-                  <td class="pdf-plant-name" style="vertical-align: top; border-bottom: 1px solid #e5e7eb; height: 28px; max-height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.1;">${plant.name || plant.id}</td>
+                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; height: 28px !important; max-height: 28px !important;">
+                  <td class="pdf-plant-name" style="vertical-align: top; border-bottom: 1px solid #e5e7eb; height: 28px !important; max-height: 28px !important; padding: 0;">
+                    <div class="pdf-plant-name-inner">${plant.name || plant.id}</div>
+                  </td>
                   ${MONTHS.map((month, index) => {
                     const monthNum = index + 1;
                     const isSeedling = plant.seedling_months?.includes(monthNum);
@@ -443,7 +446,7 @@ const CalendarView = ({
                     if (isPlantedMonth) cellContent += '<span style="font-size: 11px;">📍</span>';
                     if (isHarvestedMonth) cellContent += '<span style="font-size: 11px;">🌾</span>';
                     
-                    return `<td style="padding: 3px; text-align: center; min-width: 35px; height: 28px; vertical-align: middle; position: relative; border-bottom: 1px solid #e5e7eb;">${cellContent || ''}</td>`;
+                    return `<td style="padding: 3px; text-align: center; min-width: 35px; height: 28px !important; max-height: 28px !important; vertical-align: middle; position: relative; border-bottom: 1px solid #e5e7eb;">${cellContent || ''}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
