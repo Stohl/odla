@@ -269,9 +269,20 @@ function App() {
   };
 
   // Kombinera plants med customPlants för att skapa en komplett lista
+  // Mappa customPlants så att de har samma struktur som vanliga växter
+  const customPlantsMapped = Object.values(myPlants.customPlants || {}).map(plant => ({
+    ...plant,
+    // Mappa sowing_months till seedling_months (förkultivering inomhus)
+    seedling_months: plant.sowing_months || [],
+    // Använd direct_sow_months för direktsås ute
+    sowing_months: plant.direct_sow_months || [],
+    // Sätt source till 'Egen' om det inte finns
+    source: plant.source || 'Egen'
+  }));
+
   const allPlants = [
     ...plants,
-    ...Object.values(myPlants.customPlants || {})
+    ...customPlantsMapped
   ];
 
   // Get unique sources (källa)
