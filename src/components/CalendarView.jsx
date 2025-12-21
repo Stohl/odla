@@ -344,12 +344,14 @@ const CalendarView = ({
 
   // Exportera kalender som PDF
   const exportCalendarAsPDF = () => {
+    const currentDate = new Date().toLocaleDateString('sv-SE');
     const yearPlanText = selectedYearPlan && selectedYearPlan !== 'all' ? ` - ${selectedYearPlan}` : '';
+    const currentMonth = new Date().getMonth() + 1;
     
     const element = document.createElement('div');
     element.innerHTML = `
       <style>
-        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 12px 0; border: 1px solid #d1d5db; }
         .pdf-cal-table th, .pdf-cal-table td { padding: 6px 4px; font-size: 9px; page-break-inside: avoid; }
         .pdf-cal-table td { text-align: center; border-right: 1px solid #e5e7eb; }
         .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
@@ -357,10 +359,9 @@ const CalendarView = ({
         .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; }
         .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
         .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
-        .pdf-plant-name-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 2px solid #9ca3af; padding: 6px 4px; width: 120px; }
-        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 500; padding: 6px 8px; border-right: 2px solid #9ca3af; color: #1f2937; width: 120px; word-wrap: break-word; line-height: 1.3; white-space: normal; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 6px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; }
       </style>
-      <div style="font-family: Arial, sans-serif; padding: 10px; background: #ffffff;">
+      <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
         <!-- Diskret legend -->
         <div style="margin: 0 0 12px 0; padding: 4px 0; text-align: center; font-size: 8px; color: #6b7280; border-bottom: 1px solid #e5e7eb;">
           <span style="color: #60a5fa;">█</span> Förkultiveras inomhus • 
@@ -370,6 +371,7 @@ const CalendarView = ({
         </div>
         
         <!-- Tables -->
+        <div style="padding: 0;">
         ${Object.entries(groupedPlants).map(([groupName, groupPlants]) => `
           <div style="margin-bottom: 20px;">
             ${groupBy !== 'none' ? `
@@ -380,7 +382,7 @@ const CalendarView = ({
             <table class="pdf-cal-table">
               <thead>
                 <tr>
-                  <th class="pdf-plant-name-header" style="border-bottom: 2px solid #9ca3af;">Växt</th>
+                  <th class="pdf-plant-name" style="border-bottom: 2px solid #9ca3af;">Växt</th>
                   ${MONTHS.map(month => `<th class="pdf-table-header">${month}</th>`).join('')}
                 </tr>
               </thead>
@@ -425,6 +427,7 @@ const CalendarView = ({
             </table>
           </div>
         `).join('')}
+        </div>
       </div>
     `;
     
