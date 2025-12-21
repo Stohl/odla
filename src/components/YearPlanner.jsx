@@ -227,41 +227,33 @@ const YearPlanner = ({ myPlants, plants }) => {
   const myPlantsList = allPlantsWithCustom.filter(p => plantIds.includes(p.id));
 
   // Sortera växter baserat på sortType
+  // myPlantsList är nu en array av plant-objekt, inte ID:n
   const sortedPlants = [...myPlantsList].sort((a, b) => {
+    const nameA = a?.name || a?.id || '';
+    const nameB = b?.name || b?.id || '';
+    
     if (sortType === 'placed') {
       // Sortera efter placerad/ej placerad (placerade först)
-      const aPlaced = isPlantPlaced(a);
-      const bPlaced = isPlantPlaced(b);
+      const aPlaced = isPlantPlaced(a.id);
+      const bPlaced = isPlantPlaced(b.id);
       if (aPlaced !== bPlaced) {
         return aPlaced ? -1 : 1;
       }
       // Om båda är placerade eller båda ej placerade, sortera alfabetiskt
-      const plantA = plants?.find(p => p.id === a);
-      const plantB = plants?.find(p => p.id === b);
-      const nameA = plantA?.name || a;
-      const nameB = plantB?.name || b;
-      return nameA.localeCompare(nameB, 'sv');
+      return (nameA || '').localeCompare(nameB || '', 'sv');
     } else if (sortType !== 'name' && currentPlan?.bedPlants) {
       // Sortera efter om växten finns i den valda bädden (sortType är bedId)
       const bedPlants = currentPlan.bedPlants[sortType] || [];
-      const aInBed = bedPlants.includes(a);
-      const bInBed = bedPlants.includes(b);
+      const aInBed = bedPlants.includes(a.id);
+      const bInBed = bedPlants.includes(b.id);
       if (aInBed !== bInBed) {
         return aInBed ? -1 : 1;
       }
       // Om båda finns eller båda inte finns, sortera alfabetiskt
-      const plantA = plants?.find(p => p.id === a);
-      const plantB = plants?.find(p => p.id === b);
-      const nameA = plantA?.name || a;
-      const nameB = plantB?.name || b;
-      return nameA.localeCompare(nameB, 'sv');
+      return (nameA || '').localeCompare(nameB || '', 'sv');
     } else {
       // Standard: sortera alfabetiskt
-      const plantA = plants?.find(p => p.id === a);
-      const plantB = plants?.find(p => p.id === b);
-      const nameA = plantA?.name || a;
-      const nameB = plantB?.name || b;
-      return nameA.localeCompare(nameB, 'sv');
+      return (nameA || '').localeCompare(nameB || '', 'sv');
     }
   });
 
@@ -469,9 +461,9 @@ const YearPlanner = ({ myPlants, plants }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {sortedPlants.map((plantId, plantIdx) => {
-                          const plant = plants?.find(p => p.id === plantId);
-                          const plantName = plant?.name || plantId;
+                        {sortedPlants.map((plant, plantIdx) => {
+                          const plantName = plant?.name || plant?.id || '';
+                          const plantId = plant.id;
                           const isPlaced = isPlantPlaced(plantId);
                           
                           return (
