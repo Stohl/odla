@@ -359,10 +359,10 @@ const CalendarView = ({
         .pdf-cal-table td { text-align: center; border-right: 1px solid #e5e7eb; }
         .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
         .pdf-cal-table tbody { display: table-row-group; }
-        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; height: 28px; }
+        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; height: 28px; max-height: 28px; }
         .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
         .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
-        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 4px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 2px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px; max-height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.1; vertical-align: top; }
       </style>
       <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
         <!-- Modern rubrik -->
@@ -412,8 +412,8 @@ const CalendarView = ({
               </thead>
               <tbody>
                 ${groupPlants.map((plant, plantIdx) => `
-                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; height: 28px;">
-                  <td class="pdf-plant-name" style="vertical-align: middle; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2;">${plant.name || plant.id}</td>
+                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; height: 28px; max-height: 28px;">
+                  <td class="pdf-plant-name" style="vertical-align: top; border-bottom: 1px solid #e5e7eb; height: 28px; max-height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.1;">${plant.name || plant.id}</td>
                   ${MONTHS.map((month, index) => {
                     const monthNum = index + 1;
                     const isSeedling = plant.seedling_months?.includes(monthNum);
