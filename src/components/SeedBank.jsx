@@ -314,23 +314,34 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
 
       {/* Filter och sök */}
       <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+        <div className="flex flex-col gap-4">
           {/* Sökfält */}
-          <div className="flex-1 w-full">
+          <div className="w-full">
             <label className="block text-sm font-semibold text-earth-700 mb-2">
               Sök växt
             </label>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Namn, latinsk namn, kategori..."
-              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Namn, latinsk namn, kategori..."
+                className="w-full px-4 py-2 pr-10 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-earth-400 hover:text-earth-600 transition-colors"
+                  type="button"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Knappar */}
-          <div className="flex gap-2 items-end">
+          <div className="flex gap-2 items-center">
             <button
               onClick={() => setShowOnlyMyPlants(!showOnlyMyPlants)}
               className={`px-6 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
