@@ -362,6 +362,24 @@ const CalendarView = ({
         .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 6px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; }
       </style>
       <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
+        <!-- Modern rubrik -->
+        <div style="margin: 0 0 20px 0; padding: 16px 20px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #22c55e; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <div style="font-size: 28px; line-height: 1;">🌱</div>
+            <div>
+              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #166534; letter-spacing: -0.5px;">Odlingskalender</h1>
+              ${selectedYearPlan && selectedYearPlan !== 'all' ? `
+                <div style="margin-top: 4px; font-size: 14px; font-weight: 500; color: #15803d;">${selectedYearPlan}</div>
+              ` : ''}
+            </div>
+          </div>
+          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px;">
+            <span>📅</span>
+            <span>Utskriven: ${currentDate}</span>
+            <span style="margin-left: auto; color: #9ca3af;">${new Date().getFullYear()}</span>
+          </div>
+        </div>
+        
         <!-- Diskret legend -->
         <div style="margin: 0 0 12px 0; padding: 4px 0; text-align: center; font-size: 8px; color: #6b7280; border-bottom: 1px solid #e5e7eb;">
           <span style="color: #60a5fa;">█</span> Förkultiveras inomhus • 
