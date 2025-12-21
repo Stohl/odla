@@ -366,14 +366,14 @@ const CalendarView = ({
       </style>
       <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
         <!-- Modern rubrik -->
-        <div style="margin: 0 0 20px 0; padding: 10px 16px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #22c55e; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+        <div style="margin: 0 0 20px 0; padding: 14px 18px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #22c55e; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
             <div style="font-size: 24px; line-height: 1;">🌱</div>
             <div>
               <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #166534; letter-spacing: -0.5px; line-height: 1.2;">Knopp - Odlingskalender</h1>
             </div>
           </div>
-          <div style="margin-top: 4px; padding-top: 6px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <div style="padding-top: 10px; border-top: 2px solid #22c55e; font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span>📅</span>
             <span>Utskriven: ${currentDate}</span>
             ${selectedYearPlan && selectedYearPlan !== 'all' ? `
