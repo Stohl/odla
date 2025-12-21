@@ -359,21 +359,21 @@ const CalendarView = ({
         .pdf-cal-table td { text-align: center; border-right: 1px solid #e5e7eb; }
         .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
         .pdf-cal-table tbody { display: table-row-group; }
-        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; }
+        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; height: 28px; }
         .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
         .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
-        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 6px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 4px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       </style>
       <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
         <!-- Modern rubrik -->
-        <div style="margin: 0 0 20px 0; padding: 16px 20px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #22c55e; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <div style="font-size: 28px; line-height: 1;">🌱</div>
+        <div style="margin: 0 0 20px 0; padding: 10px 16px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #22c55e; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+            <div style="font-size: 24px; line-height: 1;">🌱</div>
             <div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: 700; color: #166534; letter-spacing: -0.5px;">Knopp - Odlingskalender</h1>
+              <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #166534; letter-spacing: -0.5px; line-height: 1.2;">Knopp - Odlingskalender</h1>
             </div>
           </div>
-          <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <div style="margin-top: 4px; padding-top: 6px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span>📅</span>
             <span>Utskriven: ${currentDate}</span>
             ${selectedYearPlan && selectedYearPlan !== 'all' ? `
@@ -412,8 +412,8 @@ const CalendarView = ({
               </thead>
               <tbody>
                 ${groupPlants.map((plant, plantIdx) => `
-                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'};">
-                  <td class="pdf-plant-name" style="vertical-align: middle; border-bottom: 1px solid #e5e7eb;">${plant.name || plant.id}</td>
+                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; height: 28px;">
+                  <td class="pdf-plant-name" style="vertical-align: middle; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${plant.name || plant.id}</td>
                   ${MONTHS.map((month, index) => {
                     const monthNum = index + 1;
                     const isSeedling = plant.seedling_months?.includes(monthNum);
@@ -443,7 +443,7 @@ const CalendarView = ({
                     if (isPlantedMonth) cellContent += '<span style="font-size: 11px;">📍</span>';
                     if (isHarvestedMonth) cellContent += '<span style="font-size: 11px;">🌾</span>';
                     
-                    return `<td style="padding: 3px; text-align: center; min-width: 35px; height: 24px; vertical-align: middle; position: relative; border-bottom: 1px solid #e5e7eb;">${cellContent || ''}</td>`;
+                    return `<td style="padding: 3px; text-align: center; min-width: 35px; height: 28px; vertical-align: middle; position: relative; border-bottom: 1px solid #e5e7eb;">${cellContent || ''}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
