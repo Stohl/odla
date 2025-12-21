@@ -465,12 +465,6 @@ const CalendarView = ({
             >
               📄 PDF
             </button>
-            <button
-              onClick={printCalendar}
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors font-semibold backdrop-blur-sm border border-white/30"
-            >
-              🖨️ Skriv ut
-            </button>
           </div>
         </div>
       </div>
