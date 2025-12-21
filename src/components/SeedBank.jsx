@@ -183,6 +183,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
   const [sortBy, setSortBy] = useState('name'); // 'name', 'source', 'price'
   const [showCustomPlantForm, setShowCustomPlantForm] = useState(false);
   const [editingCustomPlant, setEditingCustomPlant] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Minimal kalendervy komponent
   const MiniCalendar = ({ plant }) => {
@@ -313,9 +314,9 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
 
       {/* Filter och sök */}
       <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
           {/* Sökfält */}
-          <div className="lg:col-span-2">
+          <div className="flex-1 w-full">
             <label className="block text-sm font-semibold text-earth-700 mb-2">
               Sök växt
             </label>
@@ -328,107 +329,11 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
             />
           </div>
 
-          {/* Källa */}
-          <div>
-            <label className="block text-sm font-semibold text-earth-700 mb-2">
-              Källa
-            </label>
-            <select
-              value={selectedSource}
-              onChange={(e) => setSelectedSource(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
-            >
-              <option value="">Alla</option>
-              {sources.map(source => (
-                <option key={source} value={source}>{source || 'Okänd källa'}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Sortera */}
-          <div>
-            <label className="block text-sm font-semibold text-earth-700 mb-2">
-              Sortera
-            </label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
-            >
-              <option value="name">Namn</option>
-              <option value="source">Källa</option>
-              <option value="price">Pris</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Månadsfilter och Toggle mina växter */}
-        <div className="mt-4 pt-4 border-t border-earth-200 space-y-4">
-          {/* Filtertyp och månader */}
-          <div>
-            <label className="block text-sm font-semibold text-earth-700 mb-2">
-              Filtrera på månad
-            </label>
-            <div className="flex flex-wrap gap-2 items-center">
-              {/* Val av filtertyp */}
-              <div className="flex gap-2 mr-2">
-                <button
-                  onClick={() => setMonthFilterType('sowing')}
-                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
-                    monthFilterType === 'sowing'
-                      ? 'bg-plant-500 text-white'
-                      : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
-                  }`}
-                >
-                  Så/sådd
-                </button>
-                <button
-                  onClick={() => setMonthFilterType('harvest')}
-                  className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
-                    monthFilterType === 'harvest'
-                      ? 'bg-plant-500 text-white'
-                      : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
-                  }`}
-                >
-                  Skörd/Blom
-                </button>
-              </div>
-              
-              {/* Månadsknappar */}
-              {MONTHS_SHORT.map((month, index) => {
-                const monthNum = index + 1;
-                const isSelected = selectedMonths.includes(monthNum);
-                return (
-                  <button
-                    key={monthNum}
-                    onClick={() => toggleMonth(monthNum)}
-                    className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
-                      isSelected
-                        ? 'bg-plant-500 text-white'
-                        : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
-                    }`}
-                  >
-                    {month}
-                  </button>
-                );
-              })}
-              
-              {/* Rensa */}
-              {selectedMonths.length > 0 && (
-                <button
-                  onClick={() => setSelectedMonths([])}
-                  className="px-3 py-1 rounded-lg text-sm font-semibold bg-red-200 text-red-700 hover:bg-red-300"
-                >
-                  Rensa
-                </button>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-4">
+          {/* Knappar */}
+          <div className="flex gap-2 items-end">
             <button
               onClick={() => setShowOnlyMyPlants(!showOnlyMyPlants)}
-              className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+              className={`px-6 py-2 rounded-lg font-semibold transition-all whitespace-nowrap ${
                 showOnlyMyPlants
                   ? 'bg-plant-500 text-white shadow-lg'
                   : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
@@ -436,11 +341,119 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
             >
               {showOnlyMyPlants ? `✓ Mina växter (${(myPlants.plants || []).length})` : `Mina växter`}
             </button>
-            <span className="text-sm text-earth-600">
-              Visar {sortedPlants.length} växter
-            </span>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-4 py-2 bg-earth-200 text-earth-700 rounded-lg font-semibold hover:bg-earth-300 transition-colors whitespace-nowrap"
+            >
+              {showFilters ? '▼ Dölj filter' : '▶ Visa filter'}
+            </button>
           </div>
         </div>
+
+        {/* Dropdown med filter */}
+        {showFilters && (
+          <div className="mt-4 pt-4 border-t border-earth-200 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Källa */}
+              <div>
+                <label className="block text-sm font-semibold text-earth-700 mb-2">
+                  Källa
+                </label>
+                <select
+                  value={selectedSource}
+                  onChange={(e) => setSelectedSource(e.target.value)}
+                  className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
+                >
+                  <option value="">Alla</option>
+                  {sources.map(source => (
+                    <option key={source} value={source}>{source || 'Okänd källa'}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sortera */}
+              <div>
+                <label className="block text-sm font-semibold text-earth-700 mb-2">
+                  Sortera
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
+                >
+                  <option value="name">Namn</option>
+                  <option value="source">Källa</option>
+                  <option value="price">Pris</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Månadsfilter */}
+            <div>
+              <label className="block text-sm font-semibold text-earth-700 mb-2">
+                Filtrera på månad
+              </label>
+              <div className="flex flex-wrap gap-2 items-center">
+                {/* Val av filtertyp */}
+                <div className="flex gap-2 mr-2">
+                  <button
+                    onClick={() => setMonthFilterType('sowing')}
+                    className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                      monthFilterType === 'sowing'
+                        ? 'bg-plant-500 text-white'
+                        : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                    }`}
+                  >
+                    Så/sådd
+                  </button>
+                  <button
+                    onClick={() => setMonthFilterType('harvest')}
+                    className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                      monthFilterType === 'harvest'
+                        ? 'bg-plant-500 text-white'
+                        : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                    }`}
+                  >
+                    Skörd/Blom
+                  </button>
+                </div>
+                
+                {/* Månadsknappar */}
+                {MONTHS_SHORT.map((month, index) => {
+                  const monthNum = index + 1;
+                  const isSelected = selectedMonths.includes(monthNum);
+                  return (
+                    <button
+                      key={monthNum}
+                      onClick={() => toggleMonth(monthNum)}
+                      className={`px-3 py-1 rounded-lg text-sm font-semibold transition-all ${
+                        isSelected
+                          ? 'bg-plant-500 text-white'
+                          : 'bg-earth-200 text-earth-700 hover:bg-earth-300'
+                      }`}
+                    >
+                      {month}
+                    </button>
+                  );
+                })}
+                
+                {/* Rensa */}
+                {selectedMonths.length > 0 && (
+                  <button
+                    onClick={() => setSelectedMonths([])}
+                    className="px-3 py-1 rounded-lg text-sm font-semibold bg-red-200 text-red-700 hover:bg-red-300"
+                  >
+                    Rensa
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="text-sm text-earth-600">
+              Visar {sortedPlants.length} växter
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Formulär för egna växter */}
