@@ -470,6 +470,132 @@ const CalendarView = ({
     html2pdf().set(opt).from(element).save();
   };
 
+  // Öppna HTML-koden i en ny flik
+  const openHTMLInNewTab = () => {
+    const currentDate = new Date().toLocaleDateString('sv-SE');
+    const yearPlanText = selectedYearPlan && selectedYearPlan !== 'all' ? ` - ${selectedYearPlan}` : '';
+    
+    // Räkna totalt antal växter
+    const totalPlants = Object.values(groupedPlants).reduce((sum, group) => sum + group.length, 0);
+    
+    // Använd samma HTML-generering som PDF-funktionen
+    const element = document.createElement('div');
+    element.innerHTML = `
+      <style>
+        .pdf-cal-table { width: 100%; border-collapse: collapse; margin: 12px 0; border: 1px solid #d1d5db; table-layout: fixed; }
+        .pdf-cal-table th, .pdf-cal-table td { padding: 6px 4px; font-size: 9px; page-break-inside: avoid; }
+        .pdf-cal-table td { text-align: center; border-right: 1px solid #e5e7eb; }
+        .pdf-cal-table thead { display: table-header-group; page-break-inside: avoid; page-break-after: avoid; }
+        .pdf-cal-table tbody { display: table-row-group; }
+        .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; height: 28px !important; max-height: 28px !important; }
+        .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
+        .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 0; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px !important; max-height: 28px !important; overflow: hidden; vertical-align: top; }
+        .pdf-plant-name-inner { padding: 2px 8px; height: 28px; max-height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+      </style>
+      <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
+        <!-- Modern rubrik -->
+        <div style="margin: 0 0 20px 0; padding: 14px 18px; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #22c55e; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+            <div style="font-size: 24px; line-height: 1;">🌱</div>
+            <div>
+              <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #166534; letter-spacing: -0.5px; line-height: 1.2;">Knopp - Odlingskalender</h1>
+            </div>
+          </div>
+          <div style="padding-top: 10px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span>📅</span>
+            <span>Utskriven: ${currentDate}</span>
+            ${selectedYearPlan && selectedYearPlan !== 'all' ? `
+              <span>•</span>
+              <span>Årsplan: ${selectedYearPlan}</span>
+            ` : ''}
+            <span>•</span>
+            <span>${totalPlants} växter</span>
+            <span style="margin-left: auto; color: #9ca3af;">${new Date().getFullYear()}</span>
+          </div>
+        </div>
+        
+        <!-- Diskret legend -->
+        <div style="margin: 0 0 12px 0; padding: 4px 0; text-align: center; font-size: 8px; color: #6b7280; border-bottom: 1px solid #e5e7eb;">
+          <span style="color: #60a5fa;">█</span> Förkultiveras inomhus • 
+          <span style="color: #4ade80;">█</span> Direktsås ute • 
+          <span style="color: #fbbf24;">█</span> Skördas • 
+          📍 Planterad • 🌾 Skördad
+        </div>
+        
+        <!-- Tables -->
+        <div style="padding: 0;">
+        ${Object.entries(groupedPlants).map(([groupName, groupPlants]) => `
+          <div style="margin-bottom: 20px;">
+            ${groupBy !== 'none' ? `
+            <div style="margin-bottom: 8px;">
+              <h3 style="font-size: 11px; font-weight: 600; color: #4b5563; margin: 0;">${groupBy === 'bed' ? '📦' : '🏷️'} ${groupName}</h3>
+            </div>
+            ` : ''}
+            <table class="pdf-cal-table">
+              <thead>
+                <tr>
+                  <th class="pdf-plant-name" style="border-bottom: 2px solid #9ca3af;">Växt</th>
+                  ${MONTHS.map(month => `<th class="pdf-table-header">${month}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${groupPlants.map((plant, plantIdx) => `
+                <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; height: 28px !important; max-height: 28px !important;">
+                  <td class="pdf-plant-name" style="vertical-align: top; border-bottom: 1px solid #e5e7eb; height: 28px !important; max-height: 28px !important; padding: 0;">
+                    <div class="pdf-plant-name-inner">${plant.name || plant.id}</div>
+                  </td>
+                  ${MONTHS.map((month, index) => {
+                    const monthNum = index + 1;
+                    const isSeedling = plant.seedling_months?.includes(monthNum);
+                    const isSowing = plant.sowing_months?.includes(monthNum);
+                    const isHarvest = plant.harvest_months?.includes(monthNum);
+                    const plantedDate = plantDates?.[plant.id];
+                    const harvestedDate = harvestedDates?.[plant.id];
+                    
+                    let plantedMonth = null;
+                    let harvestedMonth = null;
+                    if (plantedDate) {
+                      const date = new Date(plantedDate);
+                      plantedMonth = date.getMonth() + 1;
+                    }
+                    if (harvestedDate) {
+                      const date = new Date(harvestedDate);
+                      harvestedMonth = date.getMonth() + 1;
+                    }
+                    
+                    const isPlantedMonth = plantedMonth === monthNum;
+                    const isHarvestedMonth = harvestedMonth === monthNum;
+                    
+                    let cellContent = '';
+                    if (isSeedling) cellContent += '<div style="background: #60a5fa; height: 3px; margin: 1px 0; border-radius: 1px;"></div>';
+                    if (isSowing) cellContent += '<div style="background: #4ade80; height: 3px; margin: 1px 0; border-radius: 1px;"></div>';
+                    if (isHarvest) cellContent += '<div style="background: #fbbf24; height: 3px; margin: 1px 0; border-radius: 1px;"></div>';
+                    if (isPlantedMonth) cellContent += '<span style="font-size: 11px;">📍</span>';
+                    if (isHarvestedMonth) cellContent += '<span style="font-size: 11px;">🌾</span>';
+                    
+                    return `<td style="padding: 3px; text-align: center; min-width: 35px; height: 28px !important; max-height: 28px !important; vertical-align: middle; position: relative; border-bottom: 1px solid #e5e7eb;">${cellContent || ''}</td>`;
+                  }).join('')}
+                </tr>
+              `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `).join('')}
+        </div>
+      </div>
+    `;
+    
+    // Öppna i ny flik med fullständig HTML-dokument
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Odlingskalender' + yearPlanText + '</title></head><body>');
+      newWindow.document.write(element.innerHTML);
+      newWindow.document.write('</body></html>');
+      newWindow.document.close();
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
       {/* Header med gradient */}
@@ -491,6 +617,12 @@ const CalendarView = ({
               className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors font-semibold backdrop-blur-sm border border-white/30"
             >
               📄 PDF
+            </button>
+            <button
+              onClick={openHTMLInNewTab}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors font-semibold backdrop-blur-sm border border-white/30"
+            >
+              🔍 HTML
             </button>
           </div>
         </div>
