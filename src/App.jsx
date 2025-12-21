@@ -240,7 +240,7 @@ function App() {
         sowing_months: plantData.sowing_months || [],
         harvest_months: plantData.harvest_months || [],
         direct_sow_months: plantData.direct_sow_months || [],
-        source: 'Egen',
+        source: plantData.source || 'knopp',
         ...plantData
       };
 
@@ -276,8 +276,8 @@ function App() {
     seedling_months: plant.sowing_months || [],
     // Använd direct_sow_months för direktsås ute
     sowing_months: plant.direct_sow_months || [],
-    // Sätt source till 'Egen' om det inte finns
-    source: plant.source || 'Egen'
+    // Behåll source som den är (knopp eller vald source)
+    source: plant.source || 'knopp'
   }));
 
   const allPlants = [

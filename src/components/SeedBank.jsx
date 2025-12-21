@@ -4,8 +4,9 @@ const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const MONTHS_LONG = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
 
 // Formulär för att skapa/redigera egna växter
-const CustomPlantForm = ({ plant, onSave, onCancel, generateId }) => {
+const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
   const [name, setName] = useState(plant?.name || '');
+  const [selectedSource, setSelectedSource] = useState(plant?.source === 'knopp' ? 'annan' : (plant?.source || 'annan'));
   const [sowingMonths, setSowingMonths] = useState(plant?.sowing_months || []);
   const [harvestMonths, setHarvestMonths] = useState(plant?.harvest_months || []);
   const [directSowMonths, setDirectSowMonths] = useState(plant?.direct_sow_months || []);
@@ -25,9 +26,13 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId }) => {
       return;
     }
 
+    // Om "annan" är valt, sätt source till "knopp", annars använd vald source
+    const source = selectedSource === 'annan' ? 'knopp' : selectedSource;
+
     onSave({
       id: plant?.id || generateId(),
       name: name.trim(),
+      source: source,
       sowing_months: sowingMonths.sort((a, b) => a - b),
       harvest_months: harvestMonths.sort((a, b) => a - b),
       direct_sow_months: directSowMonths.sort((a, b) => a - b)
@@ -52,6 +57,22 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId }) => {
             className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
             required
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-earth-700 mb-2">
+            Källa
+          </label>
+          <select
+            value={selectedSource}
+            onChange={(e) => setSelectedSource(e.target.value)}
+            className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
+          >
+            <option value="annan">Annan (knopp)</option>
+            {sources && sources.map(source => (
+              <option key={source} value={source}>{source}</option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -194,7 +215,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
   };
 
   // Hämta unika sources
-  const sources = [...new Set(plants.map(p => p.source))].sort();
+  const sources = [...new Set(plants.map(p => p.source).filter(s => s))].sort();
   
   const MONTHS_LONG = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
   const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
@@ -436,6 +457,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
             setEditingCustomPlant(null);
           }}
           generateId={generateCustomPlantId}
+          sources={sources}
         />
       )}
 
