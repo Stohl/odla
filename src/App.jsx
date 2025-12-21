@@ -233,6 +233,7 @@ function App() {
     setMyPlants(prev => {
       const customPlants = { ...prev.customPlants };
       const plantId = plantData.id || generateCustomPlantId();
+      const plants = prev.plants || [];
       
       customPlants[plantId] = {
         id: plantId,
@@ -244,8 +245,12 @@ function App() {
         ...plantData
       };
 
+      // Lägg automatiskt till i "mina växter" om den inte redan finns där
+      const updatedPlants = plants.includes(plantId) ? plants : [...plants, plantId];
+
       return {
         ...prev,
+        plants: updatedPlants,
         customPlants
       };
     });

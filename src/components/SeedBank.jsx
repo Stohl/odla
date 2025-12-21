@@ -68,8 +68,8 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
             onChange={(e) => setSelectedSource(e.target.value)}
             className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
           >
-            <option value="annan">Annan (knopp)</option>
-            {sources && sources.map(source => (
+            <option value="annan">Annan</option>
+            {sources && sources.filter(s => s !== 'Egen').map(source => (
               <option key={source} value={source}>{source}</option>
             ))}
           </select>
