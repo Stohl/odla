@@ -362,7 +362,7 @@ const CalendarView = ({
         .pdf-cal-table tr { page-break-inside: avoid; border-bottom: 1px solid #e5e7eb; height: 28px; }
         .pdf-cal-table tbody tr:nth-child(even) { background: #f9fafb; }
         .pdf-table-header { background: #f3f4f6; color: #374151; font-weight: 600; text-align: center; border-right: 1px solid #d1d5db; }
-        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 4px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pdf-plant-name { background: #ffffff; text-align: left; font-weight: 600; min-width: 120px; max-width: 120px; width: 120px; padding: 4px 8px; border-right: 2px solid #9ca3af; color: #1f2937; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2; }
       </style>
       <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; padding: 5px; background: #ffffff;">
         <!-- Modern rubrik -->
@@ -373,7 +373,7 @@ const CalendarView = ({
               <h1 style="margin: 0; font-size: 22px; font-weight: 700; color: #166534; letter-spacing: -0.5px; line-height: 1.2;">Knopp - Odlingskalender</h1>
             </div>
           </div>
-          <div style="padding-top: 10px; border-top: 2px solid #22c55e; font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <div style="padding-top: 10px; border-top: 1px solid rgba(34, 197, 94, 0.2); font-size: 11px; color: #6b7280; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span>📅</span>
             <span>Utskriven: ${currentDate}</span>
             ${selectedYearPlan && selectedYearPlan !== 'all' ? `
@@ -413,7 +413,7 @@ const CalendarView = ({
               <tbody>
                 ${groupPlants.map((plant, plantIdx) => `
                 <tr style="background: ${plantIdx % 2 === 0 ? '#ffffff' : '#f9fafb'}; height: 28px;">
-                  <td class="pdf-plant-name" style="vertical-align: middle; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${plant.name || plant.id}</td>
+                  <td class="pdf-plant-name" style="vertical-align: middle; border-bottom: 1px solid #e5e7eb; height: 28px; overflow: hidden; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2;">${plant.name || plant.id}</td>
                   ${MONTHS.map((month, index) => {
                     const monthNum = index + 1;
                     const isSeedling = plant.seedling_months?.includes(monthNum);
