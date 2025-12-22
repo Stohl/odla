@@ -42,7 +42,7 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
   return (
     <div className="bg-white rounded-xl shadow-md p-6 mb-6">
       <h2 className="text-2xl font-bold text-earth-800 mb-4">
-        {plant ? 'Redigera egen växt' : 'Skapa egen växt'}
+        {plant ? 'Redigera växt' : 'Lägg till växt'}
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -57,6 +57,20 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
             className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
             required
           />
+          {/* Ikoner för grönsaker */}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {['🍅', '🥕', '🥬', '🥒', '🌶️', '🧄', '🧅', '🥔', '🌽', '🥦', '🥑', '🍆', '🌿', '🥜', '🫛', '🫒'].map((icon) => (
+              <button
+                key={icon}
+                type="button"
+                onClick={() => setName(prev => prev + icon)}
+                className="text-2xl hover:scale-110 transition-transform cursor-pointer"
+                title={`Lägg till ${icon} i slutet av namnet`}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -307,7 +321,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
             }}
             className="px-4 py-2 bg-plant-500 text-white rounded-lg font-semibold hover:bg-plant-600 transition-colors"
           >
-            + Skapa egen växt
+            + Lägg till växt
           </button>
         </div>
       </div>
@@ -667,7 +681,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (confirm(`Är du säker på att du vill ta bort "${plant.name}"?`)) {
+                                      if (confirm(`Är du säker på att du vill ta bort "${plant.name}" helt från Knopp?\n\nVäxten kommer att tas bort från alla dina listor och kan inte återställas.`)) {
                                         onDeleteCustomPlant(plant.id);
                                         if (isExpanded) setSelectedPlant(null);
                                       }
