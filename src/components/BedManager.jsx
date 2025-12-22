@@ -200,9 +200,9 @@ const BedManager = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
                       {bed.type === 'pot' ? (
-                        <span className="text-2xl">🪴</span>
+                        <div className="w-10 h-10 bg-gradient-to-br from-plant-400 to-plant-600 rounded-full border-2 border-plant-700 flex-shrink-0 shadow-md"></div>
                       ) : (
-                        <div className="w-8 h-6 bg-gradient-to-b from-amber-700 to-amber-900 rounded-sm border-2 border-amber-800 flex-shrink-0"></div>
+                        <div className="w-10 h-7 bg-gradient-to-br from-plant-400 to-plant-600 rounded-md border-2 border-plant-700 flex-shrink-0 shadow-md"></div>
                       )}
                       <div className="flex-1">
                         <div className="font-semibold text-earth-800 text-lg">{bed.name}</div>
@@ -299,9 +299,7 @@ const BedManager = () => {
                         : 'border-earth-200 hover:border-earth-300'
                     }`}
                   >
-                    <span className="w-6 h-6 border-2 border-earth-500 rounded-sm flex items-center justify-center">
-                      <span className="w-3/4 h-3/4 bg-earth-500"></span>
-                    </span>
+                    <div className="w-8 h-6 bg-gradient-to-br from-plant-400 to-plant-600 rounded-md border-2 border-plant-700 flex-shrink-0 shadow-sm"></div>
                     <span className="font-semibold text-earth-800 text-sm">Odlingsbädd</span>
                   </button>
                   <button
@@ -313,9 +311,7 @@ const BedManager = () => {
                         : 'border-earth-200 hover:border-earth-300'
                     }`}
                   >
-                    <span className="w-6 h-6 border-2 border-earth-500 rounded-full flex items-center justify-center">
-                      <span className="w-3/4 h-3/4 bg-earth-500 rounded-full"></span>
-                    </span>
+                    <div className="w-8 h-8 bg-gradient-to-br from-plant-400 to-plant-600 rounded-full border-2 border-plant-700 flex-shrink-0 shadow-sm"></div>
                     <span className="font-semibold text-earth-800 text-sm">Kruka</span>
                   </button>
                 </div>
