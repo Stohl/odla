@@ -219,12 +219,9 @@ const YearPlanner = ({ myPlants, plants }) => {
   };
 
   // Hämta plants-arrayen från myPlants-objektet
+  // plants innehåller redan customPlants från App.jsx, så vi behöver inte lägga till dem igen
   const plantIds = myPlants.plants || [];
-  const allPlantsWithCustom = [
-    ...plants,
-    ...Object.values(myPlants.customPlants || {})
-  ];
-  const myPlantsList = allPlantsWithCustom.filter(p => plantIds.includes(p.id));
+  const myPlantsList = plants.filter(p => plantIds.includes(p.id));
 
   // Sortera växter baserat på sortType
   // myPlantsList är nu en array av plant-objekt, inte ID:n

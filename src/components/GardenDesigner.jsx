@@ -164,6 +164,24 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
           const key = String(plant.id);
           map[key] = plant.name || key;
         });
+
+        // Lägg till customPlants från localStorage
+        try {
+          const savedMyPlants = localStorage.getItem('myPlants');
+          if (savedMyPlants) {
+            const myPlants = JSON.parse(savedMyPlants);
+            const customPlants = myPlants.customPlants || {};
+            Object.values(customPlants).forEach((plant) => {
+              if (plant?.id && plant?.name) {
+                const key = String(plant.id);
+                map[key] = plant.name;
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Kunde inte ladda customPlants:', e);
+        }
+
         setPlantLookup(map);
       } catch (error) {
         console.error('Kunde inte ladda växtnamn för export:', error);
