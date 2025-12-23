@@ -148,7 +148,7 @@ const BedManager = () => {
           Odlingsplatser
         </h1>
         <p className="text-earth-600">
-          Hantera dina odlingsbäddar, krukor och andra odlingsplatser
+          Hantera dina odlingsplatser
         </p>
       </div>
 
@@ -287,7 +287,7 @@ const BedManager = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-earth-700 mb-2">
-                  Typ av odlingsplats (formfaktor)
+                  Typ av odlingsplats (rektangel eller cirkel)
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -325,7 +325,7 @@ const BedManager = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder={formData.type === 'pot' ? 'T.ex. Stor kruka vid verandan...' : 'T.ex. Tomat-bädd, Rotfrukter...'}
+                  placeholder={formData.type === 'pot' ? 'T.ex. Stor kruka vid verandan...' : 'T.ex. Tomat-bädd, Växthuset, Frilandet...'}
                   className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
                 />
                 {/* Ikoner för odlingsplatser */}

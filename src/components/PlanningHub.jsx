@@ -38,7 +38,7 @@ const PlanningHub = ({ myPlants, plants }) => {
               🌿 Odlingsplatser
             </button>
             <p className="text-sm text-earth-600">
-              Skapa alla odlingsbäddar och krukor som du vill använda i trädgården.
+              Skapa alla odlingsplatser som du vill använda i trädgården.
             </p>
           </div>
 
@@ -73,7 +73,7 @@ const PlanningHub = ({ myPlants, plants }) => {
                   : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
               }`}
             >
-              🪴 Visuella designer
+              🪴 Visuella designern
             </button>
             <p className="text-sm text-earth-600">
               Bygg en visuell layout, exportera som bild eller PDF och skriv ut din plan.
