@@ -148,7 +148,7 @@ const BedManager = () => {
           Odlingsplatser
         </h1>
         <p className="text-earth-600">
-          Hantera dina odlingsplatser
+          Hantera dina odlingsplatser. (Här väljer du inte vad du ska plantera i dem)
         </p>
       </div>
 

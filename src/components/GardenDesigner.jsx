@@ -805,6 +805,51 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
             </div>
           </div>
 
+          {/* Textinställningar */}
+          <div className="mt-4 pt-4 border-t border-plant-200">
+            <div className="flex items-center gap-4 flex-wrap">
+              <label className="flex items-center gap-2 text-sm font-semibold text-earth-700">
+                <input
+                  type="checkbox"
+                  checked={selectedBed.showText !== false}
+                  onChange={(e) => {
+                    setBeds((prev) =>
+                      prev.map((b) => {
+                        if (b.id !== selected) return b;
+                        return { ...b, showText: e.target.checked };
+                      })
+                    );
+                  }}
+                  className="w-4 h-4"
+                />
+                <span>Visa text</span>
+              </label>
+              {selectedBed.showText !== false && (
+                <label className="flex items-center gap-2 text-sm font-semibold text-earth-700">
+                  <span>Textposition:</span>
+                  <select
+                    value={selectedBed.textPosition || 'center'}
+                    onChange={(e) => {
+                      setBeds((prev) =>
+                        prev.map((b) => {
+                          if (b.id !== selected) return b;
+                          return { ...b, textPosition: e.target.value };
+                        })
+                      );
+                    }}
+                    className="px-3 py-1 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
+                  >
+                    <option value="center">Centrerad</option>
+                    <option value="left">Vänster</option>
+                    <option value="right">Höger</option>
+                    <option value="top">Överst</option>
+                    <option value="bottom">Underst</option>
+                  </select>
+                </label>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-earth-700">
             {selectedBed.type === 'shape' && (
               <label className="flex flex-col">
@@ -982,23 +1027,136 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                       />
                     )}
                     
-                    <Text
-                      x={isPot ? bed.x + radius : bed.x + 8}
-                      y={isPot ? bed.y + radius - 8 : bed.y + 8}
-                      text={bed.name}
-                      fontSize={16}
-                      fontStyle="bold"
-                      fill={
-                        isPot
-                          ? '#8b4513'
-                          : isDesignShape
-                          ? '#92400e'
-                          : '#1b4332'
-                      }
-                      listening={false}
-                      align={isPot ? 'center' : 'left'}
-                      offsetX={isPot ? radius - 8 : 0}
-                    />
+                    {bed.showText !== false && (
+                      <Text
+                        x={(() => {
+                          const textPosition = bed.textPosition || 'center';
+                          if (isPot) {
+                            switch (textPosition) {
+                              case 'left': return bed.x + 8;
+                              case 'right': return bed.x + radius * 2 - 8;
+                              case 'top': 
+                              case 'bottom': 
+                              case 'center': 
+                              default: return bed.x + radius; // center horisontellt
+                            }
+                          } else {
+                            switch (textPosition) {
+                              case 'left': return bed.x + 8;
+                              case 'right': return bed.x + bed.width - 8;
+                              case 'top': 
+                              case 'bottom': 
+                              case 'center': 
+                              default: return bed.x + bed.width / 2; // center horisontellt
+                            }
+                          }
+                        })()}
+                        y={(() => {
+                          const textPosition = bed.textPosition || 'center';
+                          if (isPot) {
+                            switch (textPosition) {
+                              case 'top': return bed.y + 8;
+                              case 'bottom': return bed.y + radius * 2 - 8;
+                              case 'left': 
+                              case 'right': 
+                              case 'center': 
+                              default: return bed.y + radius; // center vertikalt
+                            }
+                          } else {
+                            switch (textPosition) {
+                              case 'top': return bed.y + 8;
+                              case 'bottom': return bed.y + bed.height - 8;
+                              case 'left': 
+                              case 'right': 
+                              case 'center': 
+                              default: return bed.y + bed.height / 2; // center vertikalt
+                            }
+                          }
+                        })()}
+                        text={bed.name}
+                        fontSize={16}
+                        fontStyle="bold"
+                        fill={
+                          isPot
+                            ? '#8b4513'
+                            : isDesignShape
+                            ? '#92400e'
+                            : '#1b4332'
+                        }
+                        listening={false}
+                        align={(() => {
+                          const textPosition = bed.textPosition || 'center';
+                          if (isPot) {
+                            switch (textPosition) {
+                              case 'left': return 'left';
+                              case 'right': return 'right';
+                              case 'top': return 'center';
+                              case 'bottom': return 'center';
+                              default: return 'center';
+                            }
+                          } else {
+                            switch (textPosition) {
+                              case 'left': return 'left';
+                              case 'right': return 'right';
+                              case 'top': return 'center';
+                              case 'bottom': return 'center';
+                              default: return 'center';
+                            }
+                          }
+                        })()}
+                        verticalAlign={(() => {
+                          const textPosition = bed.textPosition || 'center';
+                          switch (textPosition) {
+                            case 'top': return 'top';
+                            case 'bottom': return 'bottom';
+                            default: return 'middle';
+                          }
+                        })()}
+                        offsetX={(() => {
+                          const textPosition = bed.textPosition || 'center';
+                          // För centrerad text behöver vi mäta textens bredd och centrera
+                          // Men eftersom vi inte har tillgång till textens faktiska bredd här,
+                          // använder vi en approximation baserat på fontsize och textlängd
+                          if (isPot) {
+                            switch (textPosition) {
+                              case 'left': return 0;
+                              case 'right': return 0;
+                              case 'top': 
+                              case 'bottom': 
+                              case 'center': 
+                                // För cirkel: centrera horisontellt
+                                return 0; // align='center' hanterar detta
+                              default: return 0;
+                            }
+                          } else {
+                            switch (textPosition) {
+                              case 'left': return 0;
+                              case 'right': return 0;
+                              case 'top': 
+                              case 'bottom': 
+                              case 'center': 
+                                // För rektangel: centrera horisontellt
+                                return 0; // align='center' hanterar detta
+                              default: return 0;
+                            }
+                          }
+                        })()}
+                        offsetY={(() => {
+                          const textPosition = bed.textPosition || 'center';
+                          // För centrerad text behöver vi mäta textens höjd och centrera
+                          switch (textPosition) {
+                            case 'top': return 0;
+                            case 'bottom': return 0;
+                            case 'center':
+                            case 'left':
+                            case 'right':
+                              // verticalAlign='middle' hanterar detta
+                              return 0;
+                            default: return 0;
+                          }
+                        })()}
+                      />
+                    )}
                     
                     {/* Visa mått om vald */}
                     {selected === bed.id && (

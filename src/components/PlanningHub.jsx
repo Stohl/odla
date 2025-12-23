@@ -73,7 +73,7 @@ const PlanningHub = ({ myPlants, plants }) => {
                   : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
               }`}
             >
-              🪴 Visuella designern
+              🪴 Visuell design
             </button>
             <p className="text-sm text-earth-600">
               Bygg en visuell layout, exportera som bild eller PDF och skriv ut din plan.
