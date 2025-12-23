@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const MONTHS_LONG = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
@@ -10,6 +10,24 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
   const [sowingMonths, setSowingMonths] = useState(plant?.sowing_months || []);
   const [harvestMonths, setHarvestMonths] = useState(plant?.harvest_months || []);
   const [directSowMonths, setDirectSowMonths] = useState(plant?.direct_sow_months || []);
+
+  // Uppdatera state när plant ändras (t.ex. när man klickar på "Skapa en växt-kopia" medan formuläret redan är öppet)
+  useEffect(() => {
+    if (plant) {
+      setName(plant.name || '');
+      setSelectedSource(plant.source || 'knopp');
+      setSowingMonths(plant.sowing_months || []);
+      setHarvestMonths(plant.harvest_months || []);
+      setDirectSowMonths(plant.direct_sow_months || []);
+    } else {
+      // Om plant är null, återställ till tomma värden
+      setName('');
+      setSelectedSource('knopp');
+      setSowingMonths([]);
+      setHarvestMonths([]);
+      setDirectSowMonths([]);
+    }
+  }, [plant]);
 
   const toggleMonth = (monthNum, setter, currentMonths) => {
     setter(
