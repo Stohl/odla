@@ -59,17 +59,65 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
           />
           {/* Ikoner för grönsaker */}
           <div className="mt-2 flex flex-wrap gap-2">
-            {['🍅', '🥕', '🥬', '🥒', '🌶️', '🧄', '🧅', '🥔', '🌽', '🥦', '🥑', '🍆', '🌿', '🥜', '🫛', '🫒'].map((icon) => (
-              <button
-                key={icon}
-                type="button"
-                onClick={() => setName(prev => prev + icon)}
-                className="text-2xl hover:scale-110 transition-transform cursor-pointer"
-                title={`Lägg till ${icon} i slutet av namnet`}
-              >
-                {icon}
-              </button>
-            ))}
+            {[
+              { icon: '🍅', name: 'Tomat' },
+              { icon: '🥕', name: 'Morot' },
+              { icon: '🥬', name: 'Sallad' },
+              { icon: '🥒', name: 'Gurka' },
+              { icon: '🌶️', name: 'Chili' },
+              { icon: '🧄', name: 'Vitlök' },
+              { icon: '🧅', name: 'Lök' },
+              { icon: '🥔', name: 'Potatis' },
+              { icon: '🌽', name: 'Majs' },
+              { icon: '🥦', name: 'Broccoli' },
+              { icon: '🥑', name: 'Avokado' },
+              { icon: '🍆', name: 'Aubergine' },
+              { icon: '🌿', name: 'Örter' },
+              { icon: '🥜', name: 'Nötter' },
+              { icon: '🫛', name: 'Ärtor' },
+              { icon: '🫒', name: 'Oliver' },
+              { icon: '🍓', name: 'Jordgubbar' },
+              { icon: '🫐', name: 'Blåbär' },
+              { icon: '🍇', name: 'Vindruvor' },
+              { icon: '🍊', name: 'Apelsin' },
+              { icon: '🍋', name: 'Citron' },
+              { icon: '🍌', name: 'Banan' },
+              { icon: '🍎', name: 'Äpple' },
+              { icon: '🍑', name: 'Persika' },
+              { icon: '🥝', name: 'Kiwi' },
+              { icon: '🍒', name: 'Körsbär' },
+              { icon: '🌰', name: 'Kastanj' },
+              { icon: '🫘', name: 'Bönor' },
+              { icon: '🌾', name: 'Spannmål' },
+              { icon: '🌻', name: 'Solros' },
+              { icon: '🌺', name: 'Blommor' },
+              { icon: '🌷', name: 'Tulpan' },
+              { icon: '🌹', name: 'Ros' },
+              { icon: '🫑', name: 'Paprika' },
+            ].map(({ icon, name: iconName }) => {
+              // Kontrollera om ikonens namn (t.ex. "tomat") eller något av orden i namnet finns i input-fältet
+              const inputLower = name.toLowerCase();
+              const iconNameLower = iconName.toLowerCase();
+              const words = iconNameLower.split(' ');
+              // Markera om hela namnet eller något av orden finns i input
+              const shouldMark = inputLower.includes(iconNameLower) || words.some(word => word.length > 2 && inputLower.includes(word));
+              
+              return (
+                <button
+                  key={icon}
+                  type="button"
+                  onClick={() => setName(prev => prev + icon)}
+                  className={`text-2xl hover:scale-110 transition-all cursor-pointer rounded-lg p-1 ${
+                    shouldMark 
+                      ? 'bg-plant-200 border-2 border-plant-500 shadow-md' 
+                      : 'hover:bg-earth-100'
+                  }`}
+                  title={iconName}
+                >
+                  {icon}
+                </button>
+              );
+            })}
           </div>
         </div>
 
