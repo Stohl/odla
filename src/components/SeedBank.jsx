@@ -61,46 +61,56 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
           <div className="mt-2 flex flex-wrap gap-2">
             {[
               { icon: '🍅', name: 'Tomat' },
-              { icon: '🥕', name: 'Morot' },
-              { icon: '🥬', name: 'Sallad' },
+              { icon: '🥕', name: 'Morot / Palsternacka' },
+              { icon: '🥔', name: 'Potatis' },
+              { icon: '🍠', name: 'Sötpotatis' },
+              { icon: '🥬', name: 'Sallad / Spenat / Mangold' },
+              { icon: '🥦', name: 'Broccoli' },
               { icon: '🥒', name: 'Gurka' },
+              { icon: '🥒', name: 'Zucchini / Squash' },
+              { icon: '🍆', name: 'Aubergine' },
+              { icon: '🫑', name: 'Paprika' },
               { icon: '🌶️', name: 'Chili' },
+              { icon: '🎃', name: 'Pumpa' },
+              { icon: '🌽', name: 'Majs' },
               { icon: '🧄', name: 'Vitlök' },
               { icon: '🧅', name: 'Lök' },
-              { icon: '🥔', name: 'Potatis' },
-              { icon: '🌽', name: 'Majs' },
-              { icon: '🥦', name: 'Broccoli' },
-              { icon: '🥑', name: 'Avokado' },
-              { icon: '🍆', name: 'Aubergine' },
-              { icon: '🌿', name: 'Örter' },
-              { icon: '🥜', name: 'Nötter' },
-              { icon: '🫛', name: 'Ärtor' },
-              { icon: '🫒', name: 'Oliver' },
+              { icon: '🥗', name: 'Bladgrönt' },
+              { icon: '🍄', name: 'Svamp' },
+              { icon: '🫘', name: 'Linser / Bönor' },
+              { icon: '🫛', name: 'Ärtor / Sockerärtor' },
+              { icon: '🫘', name: 'Bönor' },
+              { icon: '🥜', name: 'Jordnötter' },
+              { icon: '🌰', name: 'Nöt / Frö' },
+              { icon: '🌱', name: 'Groddar' },
+              { icon: '🌿', name: 'Örter (Basilika, Persilja, Timjan, Oregano, Koriander)' },
+              { icon: '🍃', name: 'Blad' },
+              { icon: '🪴', name: 'Krukodlat' },
+              { icon: '🌱', name: 'Småplantor' },
               { icon: '🍓', name: 'Jordgubbar' },
               { icon: '🫐', name: 'Blåbär' },
-              { icon: '🍇', name: 'Vindruvor' },
-              { icon: '🍊', name: 'Apelsin' },
-              { icon: '🍋', name: 'Citron' },
-              { icon: '🍌', name: 'Banan' },
-              { icon: '🍎', name: 'Äpple' },
-              { icon: '🍑', name: 'Persika' },
-              { icon: '🥝', name: 'Kiwi' },
               { icon: '🍒', name: 'Körsbär' },
-              { icon: '🌰', name: 'Kastanj' },
-              { icon: '🫘', name: 'Bönor' },
-              { icon: '🌾', name: 'Spannmål' },
+              { icon: '🍎', name: 'Äpple' },
+              { icon: '🍐', name: 'Päron' },
+              { icon: '🍇', name: 'Vindruvor' },
+              { icon: '🍉', name: 'Melon' },
+              { icon: '🍋', name: 'Citron' },
+              { icon: '🍊', name: 'Apelsin' },
+              { icon: '🥑', name: 'Avokado' },
+              { icon: '🫒', name: 'Oliv' },
               { icon: '🌻', name: 'Solros' },
-              { icon: '🌺', name: 'Blommor' },
-              { icon: '🌷', name: 'Tulpan' },
-              { icon: '🌹', name: 'Ros' },
-              { icon: '🫑', name: 'Paprika' },
+              { icon: '🌼', name: 'Blomma' },
+              { icon: '🌸', name: 'Blommande gröda' },
+              { icon: '🌾', name: 'Spannmål' },
+              { icon: '🍀', name: 'Klöver' },
             ].map(({ icon, name: iconName }) => {
               // Kontrollera om ikonens namn (t.ex. "tomat") eller något av orden i namnet finns i input-fältet
               const inputLower = name.toLowerCase();
               const iconNameLower = iconName.toLowerCase();
-              const words = iconNameLower.split(' ');
+              // Dela upp på både mellanslag och "/" för att hantera "Morot / Palsternacka" etc.
+              const words = iconNameLower.split(/[\s\/]+/).filter(word => word.length > 2);
               // Markera om hela namnet eller något av orden finns i input
-              const shouldMark = inputLower.includes(iconNameLower) || words.some(word => word.length > 2 && inputLower.includes(word));
+              const shouldMark = inputLower.includes(iconNameLower) || words.some(word => inputLower.includes(word));
               
               return (
                 <button
