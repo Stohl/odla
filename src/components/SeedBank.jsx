@@ -723,6 +723,35 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
                               >
                                 {isInMyList ? '− Ta bort från min lista' : '+ Lägg till i min lista'}
                               </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Skapa en kopia av växten utan id så att en ny skapas
+                                  // För vanliga växter: seedling_months = förkultivering, sowing_months = direktsås
+                                  // För custom plants: sowing_months = förkultivering, direct_sow_months = direktsås
+                                  const isCustomPlant = plant.id && plant.id.startsWith('k');
+                                  const plantCopy = {
+                                    name: plant.name || '',
+                                    source: plant.source === 'knopp' ? 'annan' : (plant.source || 'annan'),
+                                    // Om det är en custom plant, använd dess fält direkt
+                                    // Annars mappa från vanlig växt: seedling_months -> sowing_months, sowing_months -> direct_sow_months
+                                    sowing_months: isCustomPlant 
+                                      ? (plant.sowing_months || [])
+                                      : (plant.seedling_months || []),
+                                    harvest_months: plant.harvest_months || [],
+                                    direct_sow_months: isCustomPlant
+                                      ? (plant.direct_sow_months || [])
+                                      : (plant.sowing_months || []),
+                                  };
+                                  setEditingCustomPlant(plantCopy);
+                                  setShowCustomPlantForm(true);
+                                  // Stäng den expanderade vyn
+                                  if (isExpanded) setSelectedPlant(null);
+                                }}
+                                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-semibold"
+                              >
+                                📋 Skapa en växt-kopia
+                              </button>
 
                               {isCustomPlant && (
                                 <>
