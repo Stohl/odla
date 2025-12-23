@@ -328,6 +328,19 @@ const BedManager = () => {
                   placeholder={formData.type === 'pot' ? 'T.ex. Stor kruka vid verandan...' : 'T.ex. Tomat-bädd, Rotfrukter...'}
                   className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
                 />
+                {/* Ikoner för odlingsplatser */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {['💧', '☀️', '🌧️', '🐝', '🪱', '🧺', '✂️', '♻️'].map((icon) => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, name: formData.name + icon })}
+                      className="text-2xl hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
