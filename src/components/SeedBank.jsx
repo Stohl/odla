@@ -6,7 +6,7 @@ const MONTHS_LONG = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Jul
 // Formulär för att skapa/redigera egna växter
 const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
   const [name, setName] = useState(plant?.name || '');
-  const [selectedSource, setSelectedSource] = useState(plant?.source === 'knopp' ? 'annan' : (plant?.source || 'annan'));
+  const [selectedSource, setSelectedSource] = useState(plant?.source || 'knopp');
   const [sowingMonths, setSowingMonths] = useState(plant?.sowing_months || []);
   const [harvestMonths, setHarvestMonths] = useState(plant?.harvest_months || []);
   const [directSowMonths, setDirectSowMonths] = useState(plant?.direct_sow_months || []);
@@ -26,8 +26,8 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
       return;
     }
 
-    // Om "annan" är valt, sätt source till "knopp", annars använd vald source
-    const source = selectedSource === 'annan' ? 'knopp' : selectedSource;
+    // Använd vald source direkt
+    const source = selectedSource;
 
     onSave({
       id: plant?.id || generateId(),
@@ -140,7 +140,6 @@ const CustomPlantForm = ({ plant, onSave, onCancel, generateId, sources }) => {
             onChange={(e) => setSelectedSource(e.target.value)}
             className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
           >
-            <option value="annan">Annan</option>
             {sources && sources.filter(s => s !== 'Egen').map(source => (
               <option key={source} value={source}>{source}</option>
             ))}
@@ -448,7 +447,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
                   className="w-full px-4 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 bg-white"
                 >
                   <option value="">Alla</option>
-                  {sources.map(source => (
+                  {sources.filter(s => s !== 'Egen').map(source => (
                     <option key={source} value={source}>{source || 'Okänd källa'}</option>
                   ))}
                 </select>
@@ -732,7 +731,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
                                   const isCustomPlant = plant.id && plant.id.startsWith('k');
                                   const plantCopy = {
                                     name: plant.name || '',
-                                    source: plant.source === 'knopp' ? 'annan' : (plant.source || 'annan'),
+                                    source: plant.source || 'knopp',
                                     // Om det är en custom plant, använd dess fält direkt
                                     // Annars mappa från vanlig växt: seedling_months -> sowing_months, sowing_months -> direct_sow_months
                                     sowing_months: isCustomPlant 
