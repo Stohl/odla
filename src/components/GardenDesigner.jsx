@@ -281,7 +281,12 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
   const handleSelectedNumericChange = (field) => (event) => {
     if (!selected) return;
     const rawValue = event.target.value;
-    if (rawValue === '') return;
+    
+    // Tillåt tomma värden så att användaren kan rensa fältet för att skriva in nytt värde
+    // Om värdet är tomt, gör ingenting (låt användaren fortsätta skriva)
+    if (rawValue === '' || rawValue === '-') {
+      return;
+    }
 
     const numericValue = Number(rawValue);
     if (!Number.isFinite(numericValue)) return;
@@ -314,6 +319,47 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
             return { ...b, width: diameter, height: diameter, radius };
           }
           return { ...b, height: numericValue };
+        }
+
+        return b;
+      })
+    );
+  };
+
+  // Hantera ändringar i meter-input
+  const handleSelectedMeterChange = (field) => (event) => {
+    if (!selected) return;
+    const rawValue = event.target.value;
+    
+    // Tillåt tomma värden så att användaren kan rensa fältet
+    if (rawValue === '') return;
+    
+    const meterValue = Number(rawValue);
+    if (!Number.isFinite(meterValue) || meterValue <= 0) return;
+    
+    // Konvertera meter till pixlar
+    const pixelValue = meterValue * pixelsPerMeter;
+
+    setBeds((prev) =>
+      prev.map((b) => {
+        if (b.id !== selected) return b;
+
+        if (field === 'width') {
+          if (b.type === 'pot') {
+            const diameter = pixelValue;
+            const radius = diameter / 2;
+            return { ...b, width: diameter, height: diameter, radius };
+          }
+          return { ...b, width: pixelValue };
+        }
+
+        if (field === 'height') {
+          if (b.type === 'pot') {
+            const diameter = pixelValue;
+            const radius = diameter / 2;
+            return { ...b, width: diameter, height: diameter, radius };
+          }
+          return { ...b, height: pixelValue };
         }
 
         return b;
@@ -850,7 +896,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-earth-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-earth-700">
             {selectedBed.type === 'shape' && (
               <label className="flex flex-col">
                 <span className="font-semibold text-earth-800">Namn</span>
@@ -886,36 +932,88 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                 {formatMeters(pixelsToMeters(selectedBedY))}
               </span>
             </label>
-            <label className="flex flex-col">
+            <div className="flex flex-col gap-2">
               <span className="font-semibold text-earth-800">
                 {selectedBed.type === 'pot' ? 'Diameter' : 'Bredd'}
               </span>
-              <input
-                type="number"
-                min="1"
-                value={Number.isFinite(selectedBedWidth) ? selectedBedWidth : 0}
-                onChange={handleSelectedNumericChange('width')}
-                className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
-              />
-              <span className="text-xs text-earth-500 mt-1">
-                {formatMeters(pixelsToMeters(selectedBedWidth))}
-              </span>
-            </label>
-            <label className="flex flex-col">
+              <div className="flex gap-2">
+                <label className="flex-1 flex flex-col">
+                  <span className="text-xs text-earth-600 mb-1">Pixlar</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={Number.isFinite(selectedBedWidth) ? selectedBedWidth : ''}
+                    onChange={handleSelectedNumericChange('width')}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || Number(e.target.value) <= 0) {
+                        e.target.value = selectedBedWidth || '';
+                      }
+                    }}
+                    className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+                    placeholder="0"
+                  />
+                </label>
+                <label className="flex-1 flex flex-col">
+                  <span className="text-xs text-earth-600 mb-1">Meter</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={Number.isFinite(selectedBedWidth) ? pixelsToMeters(selectedBedWidth).toFixed(2) : ''}
+                    onChange={handleSelectedMeterChange('width')}
+                    onBlur={(e) => {
+                      const meterVal = Number(e.target.value);
+                      if (e.target.value === '' || !Number.isFinite(meterVal) || meterVal <= 0) {
+                        e.target.value = Number.isFinite(selectedBedWidth) ? pixelsToMeters(selectedBedWidth).toFixed(2) : '';
+                      }
+                    }}
+                    className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+                    placeholder="0.00"
+                  />
+                </label>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
               <span className="font-semibold text-earth-800">
                 {selectedBed.type === 'pot' ? 'Diameter' : 'Höjd'}
               </span>
-              <input
-                type="number"
-                min="1"
-                value={Number.isFinite(selectedBedHeight) ? selectedBedHeight : 0}
-                onChange={handleSelectedNumericChange('height')}
-                className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
-              />
-              <span className="text-xs text-earth-500 mt-1">
-                {formatMeters(pixelsToMeters(selectedBedHeight))}
-              </span>
-            </label>
+              <div className="flex gap-2">
+                <label className="flex-1 flex flex-col">
+                  <span className="text-xs text-earth-600 mb-1">Pixlar</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={Number.isFinite(selectedBedHeight) ? selectedBedHeight : ''}
+                    onChange={handleSelectedNumericChange('height')}
+                    onBlur={(e) => {
+                      if (e.target.value === '' || Number(e.target.value) <= 0) {
+                        e.target.value = selectedBedHeight || '';
+                      }
+                    }}
+                    className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+                    placeholder="0"
+                  />
+                </label>
+                <label className="flex-1 flex flex-col">
+                  <span className="text-xs text-earth-600 mb-1">Meter</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    value={Number.isFinite(selectedBedHeight) ? pixelsToMeters(selectedBedHeight).toFixed(2) : ''}
+                    onChange={handleSelectedMeterChange('height')}
+                    onBlur={(e) => {
+                      const meterVal = Number(e.target.value);
+                      if (e.target.value === '' || !Number.isFinite(meterVal) || meterVal <= 0) {
+                        e.target.value = Number.isFinite(selectedBedHeight) ? pixelsToMeters(selectedBedHeight).toFixed(2) : '';
+                      }
+                    }}
+                    className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
+                    placeholder="0.00"
+                  />
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       )}
