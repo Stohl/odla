@@ -19,6 +19,28 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
     heightM: ''
   });
 
+  // Använd props för skala och bakgrundsfärg (sparas per design)
+  const pixelsPerMeter = scale ?? 20;
+  const canvasBgColor = bgColor ?? '#cce8b5';
+
+  const getDefaultColor = (type) => {
+    if (type === 'pot') return '#f4a261';
+    if (type === 'shape') return '#fde68a';
+    return '#d8f3dc';
+  };
+
+  const getDefaultStrokeColor = (type) => {
+    if (type === 'pot') return '#e76f51';
+    if (type === 'shape') return '#b45309';
+    return '#2d6a4f';
+  };
+
+  // Konvertera pixlar till meter
+  const pixelsToMeters = (pixels) => {
+    if (!pixelsPerMeter || pixelsPerMeter <= 0) return 0;
+    return pixels / pixelsPerMeter;
+  };
+
   // Synka inputValues när selected ändras
   useEffect(() => {
     const bed = beds.find((b) => b.id === selected);
@@ -45,28 +67,6 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
       });
     }
   }, [selected, beds, pixelsPerMeter]);
-
-  // Använd props för skala och bakgrundsfärg (sparas per design)
-  const pixelsPerMeter = scale ?? 20;
-  const canvasBgColor = bgColor ?? '#cce8b5';
-
-  const getDefaultColor = (type) => {
-    if (type === 'pot') return '#f4a261';
-    if (type === 'shape') return '#fde68a';
-    return '#d8f3dc';
-  };
-
-  const getDefaultStrokeColor = (type) => {
-    if (type === 'pot') return '#e76f51';
-    if (type === 'shape') return '#b45309';
-    return '#2d6a4f';
-  };
-
-  // Konvertera pixlar till meter
-  const pixelsToMeters = (pixels) => {
-    if (!pixelsPerMeter || pixelsPerMeter <= 0) return 0;
-    return pixels / pixelsPerMeter;
-  };
 
   // Formatera meter med 2 decimaler
   const formatMeters = (meters) => {
