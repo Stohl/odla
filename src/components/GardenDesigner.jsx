@@ -77,7 +77,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
 
   // Normalisera textPosition (hantera bakåtkompatibilitet)
   const normalizeTextPosition = (textPosition) => {
-    const pos = textPosition || 'middle-center';
+    if (!textPosition) return 'middle-center';
     // Mappa gamla värden till nya
     const oldToNew = {
       'center': 'middle-center',
@@ -86,7 +86,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
       'top': 'top-center',
       'bottom': 'bottom-center'
     };
-    return oldToNew[pos] || pos;
+    return oldToNew[textPosition] || textPosition;
   };
 
   // Hämta horizontal och vertical delar av textPosition
@@ -960,7 +960,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                 <label className="flex items-center gap-2 text-sm font-semibold text-earth-700">
                   <span>Textposition:</span>
                   <select
-                    value={selectedBed.textPosition || 'middle-center'}
+                    value={normalizeTextPosition(selectedBed.textPosition)}
                     onChange={(e) => {
                       setBeds((prev) =>
                         prev.map((b) => {
