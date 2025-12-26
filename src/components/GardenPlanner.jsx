@@ -47,7 +47,6 @@ const GardenPlanner = () => {
         [activeDesign]: {
           ...prev[activeDesign],
           beds: newBeds,
-          updatedAt: new Date().toISOString(),
         },
       };
     });
@@ -61,7 +60,6 @@ const GardenPlanner = () => {
       [activeDesign]: {
         ...prev[activeDesign],
         scale,
-        updatedAt: new Date().toISOString(),
       },
     }));
   };
@@ -74,7 +72,6 @@ const GardenPlanner = () => {
       [activeDesign]: {
         ...prev[activeDesign],
         bgColor,
-        updatedAt: new Date().toISOString(),
       },
     }));
   };

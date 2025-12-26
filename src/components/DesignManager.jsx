@@ -21,8 +21,6 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, sca
       orientation: 'portrait', // 'portrait' or 'landscape'
       scale: 20, // Standard: 20 px = 1 m
       bgColor: '#cce8b5', // Standard: ljusgrön
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     setDesigns({ ...designs, [newDesignName]: newDesign });
@@ -40,7 +38,6 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, sca
       [activeDesign]: {
         ...prev[activeDesign],
         orientation: prev[activeDesign].orientation === 'portrait' ? 'landscape' : 'portrait',
-        updatedAt: new Date().toISOString(),
       }
     }));
   };
@@ -64,8 +61,6 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, sca
     const copyDesign = {
       ...designs[activeDesign],
       beds: JSON.parse(JSON.stringify(designs[activeDesign].beds)),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     setDesigns({ ...designs, [name]: copyDesign });
@@ -221,16 +216,6 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, sca
               <div>
                 <span className="font-semibold">Bäddar:</span> {designs[activeDesign].beds?.filter(b => b.type !== 'shape').length || 0}
               </div>
-              <div>
-                <span className="font-semibold">Skapad:</span>{' '}
-                {new Date(designs[activeDesign].createdAt).toLocaleDateString('sv-SE')}
-              </div>
-              {designs[activeDesign].updatedAt && (
-                <div>
-                  <span className="font-semibold">Uppdaterad:</span>{' '}
-                  {new Date(designs[activeDesign].updatedAt).toLocaleDateString('sv-SE')}
-                </div>
-              )}
             </div>
 
             {/* Höger kolumn: Inställningar */}

@@ -71,7 +71,7 @@ const BedManager = () => {
       // Uppdatera befintlig
       setBeds(beds.map(b => 
         b.id === editingBed.id 
-          ? { ...editingBed, ...formData, updatedAt: new Date().toISOString() }
+          ? { ...editingBed, ...formData }
           : b
       ));
     } else {
@@ -79,8 +79,6 @@ const BedManager = () => {
       const newBed = {
         id: Date.now(),
         ...formData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
       setBeds([...beds, newBed]);
     }
@@ -239,12 +237,6 @@ const BedManager = () => {
                         </p>
                       </div>
 
-                      <div className="text-xs text-earth-500 mb-4">
-                        Skapad: {new Date(bed.createdAt).toLocaleDateString('sv-SE')}
-                        {bed.updatedAt && (
-                          <> • Uppdaterad: {new Date(bed.updatedAt).toLocaleDateString('sv-SE')}</>
-                        )}
-                      </div>
 
                       {/* Knappar */}
                       <div className="flex gap-2">
