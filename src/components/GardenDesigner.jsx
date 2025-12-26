@@ -1198,7 +1198,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
         <div className="mt-6">
           <h3 className="text-lg font-bold text-earth-800 mb-3">Dina odlingsplatser</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {beds.map((bed) => {
+            {[...beds].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'sv')).map((bed) => {
               const isPot = bed.type === 'pot';
               const isDesignShape = bed.type === 'shape';
               const icon = isPot ? '🪴' : isDesignShape ? '⬛' : '▭';
