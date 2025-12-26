@@ -160,11 +160,14 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, sca
             {designNames.length === 0 ? (
               <option value="">Ingen design ännu</option>
             ) : (
-              designNames.map((name) => (
-                <option key={name} value={name}>
-                  {name} ({designs[name].beds?.length || 0} bäddar)
-                </option>
-              ))
+              designNames.map((name) => {
+                const bedCount = designs[name].beds?.filter(b => b.type !== 'shape').length || 0;
+                return (
+                  <option key={name} value={name}>
+                    {name} ({bedCount} bäddar)
+                  </option>
+                );
+              })
             )}
           </select>
         </div>
@@ -216,7 +219,7 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, sca
                 {designs[activeDesign].orientation === 'portrait' ? 'Stående (800×1100)' : 'Liggande (1100×800)'}
               </div>
               <div>
-                <span className="font-semibold">Bäddar:</span> {designs[activeDesign].beds?.length || 0}
+                <span className="font-semibold">Bäddar:</span> {designs[activeDesign].beds?.filter(b => b.type !== 'shape').length || 0}
               </div>
               <div>
                 <span className="font-semibold">Skapad:</span>{' '}

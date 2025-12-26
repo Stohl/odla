@@ -10,6 +10,41 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
   const [selectedPlan, setSelectedPlan] = useState('');
   const [plantLookup, setPlantLookup] = useState({});
   const stageRef = useRef(null);
+  
+  // Lokal state för input-värden för att tillåta rensning
+  const [inputValues, setInputValues] = useState({
+    widthPx: '',
+    widthM: '',
+    heightPx: '',
+    heightM: ''
+  });
+
+  // Synka inputValues när selected ändras
+  useEffect(() => {
+    const bed = beds.find((b) => b.id === selected);
+    if (bed) {
+      const width = bed.type === 'pot' 
+        ? (bed.radius != null ? bed.radius * 2 : bed.width ?? 0)
+        : (bed.width ?? 0);
+      const height = bed.type === 'pot'
+        ? (bed.radius != null ? bed.radius * 2 : bed.height ?? bed.width ?? 0)
+        : (bed.height ?? 0);
+      
+      setInputValues({
+        widthPx: Number.isFinite(width) ? width.toString() : '',
+        widthM: Number.isFinite(width) ? pixelsToMeters(width).toFixed(2) : '',
+        heightPx: Number.isFinite(height) ? height.toString() : '',
+        heightM: Number.isFinite(height) ? pixelsToMeters(height).toFixed(2) : ''
+      });
+    } else {
+      setInputValues({
+        widthPx: '',
+        widthM: '',
+        heightPx: '',
+        heightM: ''
+      });
+    }
+  }, [selected, beds, pixelsPerMeter]);
 
   // Använd props för skala och bakgrundsfärg (sparas per design)
   const pixelsPerMeter = scale ?? 20;
@@ -282,14 +317,26 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
     if (!selected) return;
     const rawValue = event.target.value;
     
-    // Tillåt tomma värden så att användaren kan rensa fältet för att skriva in nytt värde
-    // Om värdet är tomt, gör ingenting (låt användaren fortsätta skriva)
+    // Tillåt tomma värden temporärt så att användaren kan rensa fältet
     if (rawValue === '' || rawValue === '-') {
+      // Uppdatera lokal state för att visa tomt värde
+      if (field === 'width') {
+        setInputValues(prev => ({ ...prev, widthPx: '' }));
+      } else if (field === 'height') {
+        setInputValues(prev => ({ ...prev, heightPx: '' }));
+      }
       return;
     }
 
     const numericValue = Number(rawValue);
     if (!Number.isFinite(numericValue)) return;
+
+    // Uppdatera lokal state
+    if (field === 'width') {
+      setInputValues(prev => ({ ...prev, widthPx: rawValue, widthM: pixelsToMeters(numericValue).toFixed(2) }));
+    } else if (field === 'height') {
+      setInputValues(prev => ({ ...prev, heightPx: rawValue, heightM: pixelsToMeters(numericValue).toFixed(2) }));
+    }
 
     setBeds((prev) =>
       prev.map((b) => {
@@ -331,14 +378,29 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
     if (!selected) return;
     const rawValue = event.target.value;
     
-    // Tillåt tomma värden så att användaren kan rensa fältet
-    if (rawValue === '') return;
+    // Tillåt tomma värden temporärt så att användaren kan rensa fältet
+    if (rawValue === '' || rawValue === '-') {
+      // Uppdatera lokal state för att visa tomt värde
+      if (field === 'width') {
+        setInputValues(prev => ({ ...prev, widthM: '' }));
+      } else if (field === 'height') {
+        setInputValues(prev => ({ ...prev, heightM: '' }));
+      }
+      return;
+    }
     
     const meterValue = Number(rawValue);
     if (!Number.isFinite(meterValue) || meterValue <= 0) return;
     
     // Konvertera meter till pixlar
     const pixelValue = meterValue * pixelsPerMeter;
+
+    // Uppdatera lokal state
+    if (field === 'width') {
+      setInputValues(prev => ({ ...prev, widthM: rawValue, widthPx: Math.round(pixelValue).toString() }));
+    } else if (field === 'height') {
+      setInputValues(prev => ({ ...prev, heightM: rawValue, heightPx: Math.round(pixelValue).toString() }));
+    }
 
     setBeds((prev) =>
       prev.map((b) => {
@@ -897,17 +959,18 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-earth-700">
-            {selectedBed.type === 'shape' && (
-              <label className="flex flex-col">
-                <span className="font-semibold text-earth-800">Namn</span>
-                <input
-                  type="text"
-                  value={selectedBed.name}
-                  onChange={handleShapeNameChange}
-                  className="mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
-                />
-              </label>
-            )}
+            <label className="flex flex-col">
+              <span className="font-semibold text-earth-800">Namn</span>
+              <input
+                type="text"
+                value={selectedBed.name}
+                onChange={handleShapeNameChange}
+                disabled={selectedBed.type !== 'shape'}
+                className={`mt-1 px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400 ${
+                  selectedBed.type !== 'shape' ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+                }`}
+              />
+            </label>
             <label className="flex flex-col">
               <span className="font-semibold text-earth-800">X-position</span>
               <input
@@ -942,11 +1005,16 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                   <input
                     type="number"
                     min="1"
-                    value={Number.isFinite(selectedBedWidth) ? selectedBedWidth : ''}
+                    value={inputValues.widthPx}
                     onChange={handleSelectedNumericChange('width')}
                     onBlur={(e) => {
-                      if (e.target.value === '' || Number(e.target.value) <= 0) {
-                        e.target.value = selectedBedWidth || '';
+                      const val = Number(e.target.value);
+                      if (e.target.value === '' || !Number.isFinite(val) || val <= 0) {
+                        const bed = beds.find((b) => b.id === selected);
+                        const width = bed?.type === 'pot' 
+                          ? (bed.radius != null ? bed.radius * 2 : bed.width ?? 0)
+                          : (bed?.width ?? 0);
+                        setInputValues(prev => ({ ...prev, widthPx: Number.isFinite(width) ? width.toString() : '' }));
                       }
                     }}
                     className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
@@ -959,12 +1027,16 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                     type="number"
                     step="0.01"
                     min="0.01"
-                    value={Number.isFinite(selectedBedWidth) ? pixelsToMeters(selectedBedWidth).toFixed(2) : ''}
+                    value={inputValues.widthM}
                     onChange={handleSelectedMeterChange('width')}
                     onBlur={(e) => {
                       const meterVal = Number(e.target.value);
                       if (e.target.value === '' || !Number.isFinite(meterVal) || meterVal <= 0) {
-                        e.target.value = Number.isFinite(selectedBedWidth) ? pixelsToMeters(selectedBedWidth).toFixed(2) : '';
+                        const bed = beds.find((b) => b.id === selected);
+                        const width = bed?.type === 'pot' 
+                          ? (bed.radius != null ? bed.radius * 2 : bed.width ?? 0)
+                          : (bed?.width ?? 0);
+                        setInputValues(prev => ({ ...prev, widthM: Number.isFinite(width) ? pixelsToMeters(width).toFixed(2) : '' }));
                       }
                     }}
                     className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
@@ -983,11 +1055,16 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                   <input
                     type="number"
                     min="1"
-                    value={Number.isFinite(selectedBedHeight) ? selectedBedHeight : ''}
+                    value={inputValues.heightPx}
                     onChange={handleSelectedNumericChange('height')}
                     onBlur={(e) => {
-                      if (e.target.value === '' || Number(e.target.value) <= 0) {
-                        e.target.value = selectedBedHeight || '';
+                      const val = Number(e.target.value);
+                      if (e.target.value === '' || !Number.isFinite(val) || val <= 0) {
+                        const bed = beds.find((b) => b.id === selected);
+                        const height = bed?.type === 'pot'
+                          ? (bed.radius != null ? bed.radius * 2 : bed.height ?? bed.width ?? 0)
+                          : (bed?.height ?? 0);
+                        setInputValues(prev => ({ ...prev, heightPx: Number.isFinite(height) ? height.toString() : '' }));
                       }
                     }}
                     className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
@@ -1000,12 +1077,16 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                     type="number"
                     step="0.01"
                     min="0.01"
-                    value={Number.isFinite(selectedBedHeight) ? pixelsToMeters(selectedBedHeight).toFixed(2) : ''}
+                    value={inputValues.heightM}
                     onChange={handleSelectedMeterChange('height')}
                     onBlur={(e) => {
                       const meterVal = Number(e.target.value);
                       if (e.target.value === '' || !Number.isFinite(meterVal) || meterVal <= 0) {
-                        e.target.value = Number.isFinite(selectedBedHeight) ? pixelsToMeters(selectedBedHeight).toFixed(2) : '';
+                        const bed = beds.find((b) => b.id === selected);
+                        const height = bed?.type === 'pot'
+                          ? (bed.radius != null ? bed.radius * 2 : bed.height ?? bed.width ?? 0)
+                          : (bed?.height ?? 0);
+                        setInputValues(prev => ({ ...prev, heightM: Number.isFinite(height) ? pixelsToMeters(height).toFixed(2) : '' }));
                       }
                     }}
                     className="px-3 py-2 border-2 border-earth-200 rounded-lg focus:outline-none focus:border-plant-400"
