@@ -248,6 +248,19 @@ const DesignManager = ({ designs, setDesigns, activeDesign, setActiveDesign, sca
                     className="w-16 px-2 py-1.5 border-2 border-earth-200 rounded-lg bg-white focus:outline-none focus:border-plant-400 text-sm"
                   />
                   <span className="text-xs text-earth-600">px = 1 m</span>
+                  {(() => {
+                    const pixelsPerMeter = scale ?? 20;
+                    const orientation = designs[activeDesign]?.orientation || 'portrait';
+                    const canvasWidth = orientation === 'landscape' ? 1100 : 800;
+                    const canvasHeight = orientation === 'landscape' ? 800 : 1100;
+                    const widthMeters = (canvasWidth / pixelsPerMeter).toFixed(2);
+                    const heightMeters = (canvasHeight / pixelsPerMeter).toFixed(2);
+                    return (
+                      <span className="text-xs text-earth-500 ml-1">
+                        (Rityta: {widthMeters} × {heightMeters} m)
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
 
