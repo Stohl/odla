@@ -1282,42 +1282,19 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                       const textVerticalAlign = pos.vertical === 'top' ? 'top' :
                                                 pos.vertical === 'bottom' ? 'bottom' : 'middle';
                       
-                      // För Konva Text: när width och height är satt, så är x/y vänsterkant/överkant
-                      // align/verticalAlign centrerar texten inom width/height
-                      const textWidth = isPot ? radius * 2 : bed.width;
-                      const textHeight = isPot ? radius * 2 : bed.height;
-                      
-                      // Beräkna x och y för vänsterkant/överkant av textområdet
-                      let finalX;
-                      if (textAlign === 'center') {
-                        // Vi vill centrera, så sätt x till vänsterkant av området (mitten - halva bredden)
-                        finalX = textX - textWidth / 2;
-                      } else if (textAlign === 'left') {
-                        // x är redan på vänster sida
-                        finalX = textX;
-                      } else { // right
-                        // x är på höger sida, så vänsterkant är x - width
-                        finalX = textX - textWidth;
-                      }
-                      
-                      let finalY;
-                      if (textVerticalAlign === 'middle') {
-                        // Vi vill centrera vertikalt, så sätt y till överkant (mitten - halva höjden)
-                        finalY = textY - textHeight / 2;
-                      } else if (textVerticalAlign === 'top') {
-                        // y är redan på överkant
-                        finalY = textY;
-                      } else { // bottom
-                        // y är på underkant, så överkant är y - height
-                        finalY = textY - textHeight;
-                      }
+                      // För Konva Text: när width och height INTE är satta, så är x/y positionen:
+                      // - align="left": x är vänsterkant
+                      // - align="center": x är mitten
+                      // - align="right": x är högerkant
+                      // - verticalAlign="top": y är överkant
+                      // - verticalAlign="middle": y är mitten
+                      // - verticalAlign="bottom": y är underkant
+                      // Vi vill inte sätta width/height så att texten kan vara större än bädden
                       
                       return (
                         <Text
-                          x={finalX}
-                          y={finalY}
-                          width={textWidth}
-                          height={textHeight}
+                          x={textX}
+                          y={textY}
                           text={bed.name}
                           fontSize={16}
                           fontStyle="bold"
