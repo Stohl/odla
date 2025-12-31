@@ -817,7 +817,7 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
           onClick={printDesign}
           className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors font-semibold"
         >
-          🖨️ Skriv ut
+          🌐 HTML
         </button>
 
         <span className="ml-auto text-earth-600 font-semibold">
