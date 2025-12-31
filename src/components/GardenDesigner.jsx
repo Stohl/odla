@@ -681,12 +681,15 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
       </div>
     `;
 
-    // Skapa legenda med alla odlingsplatser - grid för bättre sidbrytning
-    const legendItems = beds.map((bed, idx) => {
+    // Separera bäddar och rektanglar
+    const bedsOnly = beds.filter(b => b.type !== 'shape');
+    const shapesOnly = beds.filter(b => b.type === 'shape');
+
+    // Skapa legenda med odlingsplatser (exkluderar shapes)
+    const legendItems = bedsOnly.map((bed, idx) => {
       const isPot = bed.type === 'pot';
-      const isShape = bed.type === 'shape';
-      const icon = isPot ? '🪴' : isShape ? '⬛' : '🌱';
-      const typeLabel = isPot ? 'Kruka' : isShape ? 'Rektangel' : 'Odlingsbädd';
+      const icon = isPot ? '🪴' : '🌱';
+      const typeLabel = isPot ? 'Kruka' : 'Odlingsbädd';
       const sizeInMeters = isPot 
         ? formatMeters(pixelsToMeters((bed.radius || 50) * 2))
         : `${formatMeters(pixelsToMeters(bed.width))} × ${formatMeters(pixelsToMeters(bed.height))}`;
@@ -703,17 +706,49 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
       `;
     }).join('');
 
+    // Skapa legenda med rektanglar (Övrigt)
+    const shapesItems = shapesOnly.map((bed, idx) => {
+      const sizeInMeters = `${formatMeters(pixelsToMeters(bed.width))} × ${formatMeters(pixelsToMeters(bed.height))}`;
+      const fillColor = bed.color || getDefaultColor(bed.type);
+      return `
+        <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; break-inside: avoid;">
+          <span style="font-size: 18px;">⬛</span>
+          <div style="width: 20px; height: 20px; border-radius: 4px; background: ${fillColor}; border: 2px solid ${bed.strokeColor || getDefaultStrokeColor(bed.type)}; flex-shrink: 0;"></div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 600; color: #1f2937; font-size: 12px;">${escapeHtml(bed.name)}</div>
+            <div style="color: #6b7280; font-size: 10px;">Rektangel • ${sizeInMeters}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
     // Sida 2: Odlingsplatser
-    const legendPage = beds.length > 0 ? `
+    const legendPage = bedsOnly.length > 0 ? `
       <div class="page-break">
         ${miniHeader('Odlingsplatser', '📋')}
         <div style="padding: 0 32px 32px 32px;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 12px 16px; background: linear-gradient(90deg, #faf5ff, #f3e8ff); border-radius: 10px; border: 1px solid #e9d5ff;">
             <span style="font-size: 16px;">🗺️</span>
-            <span style="font-size: 12px; color: #7c3aed; font-weight: 600;">Totalt ${beds.length} odlingsplatser i designen</span>
+            <span style="font-size: 12px; color: #7c3aed; font-weight: 600;">Totalt ${bedsOnly.length} odlingsplatser i designen</span>
           </div>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
             ${legendItems}
+          </div>
+        </div>
+      </div>
+    ` : '';
+
+    // Sida för Övrigt (rektanglar)
+    const shapesPage = shapesOnly.length > 0 ? `
+      <div class="page-break">
+        ${miniHeader('Övrigt', '⬛')}
+        <div style="padding: 0 32px 32px 32px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 12px 16px; background: linear-gradient(90deg, #fef3c7, #fde68a); border-radius: 10px; border: 1px solid #fcd34d;">
+            <span style="font-size: 16px;">📐</span>
+            <span style="font-size: 12px; color: #92400e; font-weight: 600;">Totalt ${shapesOnly.length} rektanglar i designen</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            ${shapesItems}
           </div>
         </div>
       </div>
@@ -786,12 +821,13 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                 <span style="font-size: 14px;">🌿</span>
                 <span style="font-size: 11px; color: #6b7280; font-weight: 500;">Skapad med Odlingskalendern</span>
               </div>
-              <div style="font-size: 10px; color: #9ca3af;">Sida 1${beds.length > 0 ? ` av ${plan && bedsOrder.length > 0 ? '3' : '2'}` : ''}</div>
+              <div style="font-size: 10px; color: #9ca3af;">Sida 1${bedsOnly.length > 0 || shapesOnly.length > 0 || (plan && bedsOrder.length > 0) ? ` av ${(bedsOnly.length > 0 ? 1 : 0) + (shapesOnly.length > 0 ? 1 : 0) + (plan && bedsOrder.length > 0 ? 1 : 0) + 1}` : ''}</div>
             </div>
           </div>
         </div>
 
         ${legendPage}
+        ${shapesPage}
         ${plantTablePage}
       </div>
     `;
@@ -1373,15 +1409,14 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
         </div>
       </div>
 
-      {/* Lista över odlingsplatser */}
-      {beds.length > 0 && (
+      {/* Lista över odlingsplatser (exkluderar shapes) */}
+      {beds.filter(b => b.type !== 'shape').length > 0 && (
         <div className="mt-6">
           <h3 className="text-lg font-bold text-earth-800 mb-3">Dina odlingsplatser</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[...beds].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'sv')).map((bed) => {
+            {[...beds].filter(b => b.type !== 'shape').sort((a, b) => (a.name || '').localeCompare(b.name || '', 'sv')).map((bed) => {
               const isPot = bed.type === 'pot';
-              const isDesignShape = bed.type === 'shape';
-              const icon = isPot ? '🪴' : isDesignShape ? '⬛' : '▭';
+              const icon = isPot ? '🪴' : '▭';
               const sizeText = isPot
                 ? `Radie: ${bed.radius || 50}px`
                 : `${bed.width}×${bed.height}px`;
@@ -1403,6 +1438,48 @@ const GardenDesigner = ({ beds, setBeds, designName, orientation, scale, setScal
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{icon}</span>
+                    <div className="font-semibold text-earth-800">{bed.name}</div>
+                    <span
+                      className="w-4 h-4 rounded-full border"
+                      style={{ backgroundColor: fillColor, borderColor }}
+                    />
+                  </div>
+                  <div className="text-xs text-earth-600 mt-1">
+                    Position: ({Math.round(bed.x)}, {Math.round(bed.y)}) • {sizeText}
+                  </div>
+                  <div className="text-xs text-earth-500 mt-0.5">
+                    Storlek: {sizeMeters}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Lista över rektanglar (Övrigt) */}
+      {beds.filter(b => b.type === 'shape').length > 0 && (
+        <div className="mt-6">
+          <h3 className="text-lg font-bold text-earth-800 mb-3">Övrigt</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[...beds].filter(b => b.type === 'shape').sort((a, b) => (a.name || '').localeCompare(b.name || '', 'sv')).map((bed) => {
+              const sizeText = `${bed.width}×${bed.height}px`;
+              const sizeMeters = `${formatMeters(pixelsToMeters(bed.width))} × ${formatMeters(pixelsToMeters(bed.height))}`;
+              const fillColor = bed.color || getDefaultColor(bed.type);
+              const borderColor = bed.strokeColor || getDefaultStrokeColor(bed.type);
+
+              return (
+                <div
+                  key={bed.id}
+                  onClick={() => selectBed(bed.id)}
+                  className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                    selected === bed.id
+                      ? 'border-plant-500 bg-plant-50'
+                      : 'border-earth-200 hover:border-plant-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">⬛</span>
                     <div className="font-semibold text-earth-800">{bed.name}</div>
                     <span
                       className="w-4 h-4 rounded-full border"
