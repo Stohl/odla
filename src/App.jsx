@@ -35,8 +35,11 @@ function App() {
         return response.json();
       })
       .then(data => {
+        // Filter out plants without name (required field)
+        const validData = data.filter(plant => plant.name && plant.name.trim());
+        
         // Process data to ensure correct structure
-        const processedData = data.map(plant => ({
+        const processedData = validData.map(plant => ({
           ...plant,
           // Use sowing_months for förkultivering (indoor sowing)
           seedling_months: plant.sowing_months || [],
@@ -315,7 +318,7 @@ function App() {
     // Search filter
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      plant.name.toLowerCase().includes(searchLower) ||
+      (plant.name || '').toLowerCase().includes(searchLower) ||
       (plant.source || '').toLowerCase().includes(searchLower);
     
     // Source filter

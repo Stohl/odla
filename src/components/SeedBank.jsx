@@ -344,7 +344,7 @@ const SeedBank = ({ plants, myPlants, onTogglePlant, onSaveCustomPlant, onDelete
     const searchLower = searchTerm.toLowerCase();
     let matchesSearch = false;
     
-    if (plant.name.toLowerCase().includes(searchLower)) {
+    if (plant.name?.toLowerCase()?.includes(searchLower)) {
       matchesSearch = true;
     } else if (plant.id?.toLowerCase()?.includes(searchLower)) {
       matchesSearch = true;
